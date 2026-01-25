@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
 import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike } from "lucide-react";
+import { buscarCidadesIBGE } from "../services/ibge.service";
+import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
+import { TILE_LAYERS } from "../config/API_ENDPOINTS";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Registrar Denúncia - Ciclista Denuncie" }];
 }
 
 export async function loader() {
-  const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
-  const data = await response.json();
-  return { cidades: data
-    .filter((m: any) => m.microrregiao?.mesorregiao?.UF?.sigla)
-    .map((m: any) => `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`) };
+  const cidades = await buscarCidadesIBGE();
+  return { cidades };
 }
 
 export default function Denunciar({ loaderData }: Route.ComponentProps) {
@@ -28,6 +28,9 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   const [miniMapCenter, setMiniMapCenter] = useState<[number, number]>([-14.235, -51.925]);
   const [MiniMapComponent, setMiniMapComponent] = useState<any>(null);
   const [errors, setErrors] = useState<{tipo?: string; descricaoOutro?: string; placa?: string}>({});
+  const tipoRef = useRef<HTMLDivElement>(null);
+  const descricaoOutroRef = useRef<HTMLInputElement>(null);
+  const placaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const routeLocation = useLocation();
 
@@ -47,29 +50,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           };
           setLocation(pos);
           setMiniMapCenter([pos.lat, pos.lng]);
-          
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
-            );
-            const data = await response.json();
-            const addr = data.address;
-            const rua = addr.road || addr.pedestrian || addr.footway || '';
-            const numero = addr.house_number || '';
-            const bairro = addr.suburb || addr.neighbourhood || '';
-            const cidade = addr.city || addr.town || addr.municipality || '';
-            const estado = addr.state || '';
-            
-            const partes = [];
-            if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
-            if (bairro) partes.push(bairro);
-            if (cidade) partes.push(cidade);
-            if (estado) partes.push(estado);
-            
-            setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-          } catch {
-            setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-          }
+          const endereco = await buscarEnderecoPorCoordenadas(pos);
+          setEnderecoAtual(endereco);
         },
         (error) => console.log('Localização não permitida:', error)
       );
@@ -95,6 +77,19 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      
+      setTimeout(() => {
+        if (newErrors.tipo && tipoRef.current) {
+          tipoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (newErrors.descricaoOutro && descricaoOutroRef.current) {
+          descricaoOutroRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          descricaoOutroRef.current.focus();
+        } else if (newErrors.placa && placaRef.current) {
+          placaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          placaRef.current.focus();
+        }
+      }, 100);
+      
       return;
     }
     
@@ -135,29 +130,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               const center = map.getCenter();
               const pos = { lat: center.lat, lng: center.lng };
               setLocation(pos);
-              
-              try {
-                const response = await fetch(
-                  `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
-                );
-                const data = await response.json();
-                const addr = data.address;
-                const rua = addr.road || addr.pedestrian || addr.footway || '';
-                const numero = addr.house_number || '';
-                const bairro = addr.suburb || addr.neighbourhood || '';
-                const cidade = addr.city || addr.town || addr.municipality || '';
-                const estado = addr.state || '';
-                
-                const partes = [];
-                if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
-                if (bairro) partes.push(bairro);
-                if (cidade) partes.push(cidade);
-                if (estado) partes.push(estado);
-                
-                setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-              } catch {
-                setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-              }
+              const endereco = await buscarEnderecoPorCoordenadas(pos);
+              setEnderecoAtual(endereco);
             }
           });
           return null;
@@ -172,7 +146,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               zoomControl={true}
             >
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url={TILE_LAYERS.STREET}
                 attribution='&copy; OpenStreetMap'
               />
               <MapEvents />
@@ -181,23 +155,14 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               position: 'absolute',
               top: '50%',
               left: '50%',
-              transform: 'translate(-50%, -50%)',
+              transform: 'translate(-50%, -100%)',
               pointerEvents: 'none',
               zIndex: 1000
             }}>
-              <div style={{
-                backgroundColor: '#dc2626',
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                border: '2px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '20px'
-              }}>×</div>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="#dc2626" stroke="white" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3" fill="white"></circle>
+              </svg>
             </div>
           </div>
         ));
@@ -214,29 +179,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
             lng: position.coords.longitude
           };
           setLocation(pos);
-          
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
-            );
-            const data = await response.json();
-            const addr = data.address;
-            const rua = addr.road || addr.pedestrian || addr.footway || '';
-            const numero = addr.house_number || '';
-            const bairro = addr.suburb || addr.neighbourhood || '';
-            const cidade = addr.city || addr.town || addr.municipality || '';
-            const estado = addr.state || '';
-            
-            const partes = [];
-            if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
-            if (bairro) partes.push(bairro);
-            if (cidade) partes.push(cidade);
-            if (estado) partes.push(estado);
-            
-            setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-          } catch {
-            setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-          }
+          const endereco = await buscarEnderecoPorCoordenadas(pos);
+          setEnderecoAtual(endereco);
         },
         (error) => {
           if (error.code === 1) {
@@ -274,7 +218,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
         <h1 className="text-4xl font-bold mb-8">Registrar Denúncia</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
+          <div className="relative" ref={tipoRef}>
             <label className="block mb-2 font-semibold">Tipo *</label>
             <button
               type="button"
@@ -316,6 +260,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
             <div>
               <label className="block mb-2 font-semibold">Descreva o tipo *</label>
               <input
+                ref={descricaoOutroRef}
                 type="text"
                 value={descricaoOutro}
                 onChange={(e) => setDescricaoOutro(e.target.value)}
@@ -347,6 +292,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
             {mostrarPlaca && (
               <div>
                 <input
+                  ref={placaRef}
                   type="text"
                   name="placa"
                   placeholder="Placa"
