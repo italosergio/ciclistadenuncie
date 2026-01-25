@@ -6,8 +6,23 @@ import { db } from "../lib/firebase";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Ciclista Denuncie" },
-    { name: "description", content: "Plataforma Nacional de Denúncia do Ciclista" },
+    { title: "Ciclista Denuncie - Plataforma Nacional de Denúncia do Ciclista" },
+    { name: "description", content: "Registre e visualize denúncias de violência no trânsito, infraestrutura precária e incidentes contra ciclistas. Dê visibilidade ao que você vive nas ruas." },
+    { name: "keywords", content: "ciclista, denúncia, mobilidade urbana, bicicleta, trânsito, segurança viária, infraestrutura cicloviária" },
+    
+    // Open Graph
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: "Ciclista Denuncie 🚲" },
+    { property: "og:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
+    { property: "og:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
+    { property: "og:url", content: "https://ciclistadenuncie.com.br" },
+    { property: "og:locale", content: "pt_BR" },
+    
+    // Twitter Card
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Ciclista Denuncie 🚲" },
+    { name: "twitter:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
+    { name: "twitter:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
   ];
 }
 
