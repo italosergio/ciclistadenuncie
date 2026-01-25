@@ -1,52 +1,242 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { ref, set } from "firebase/database";
-import { db } from "../lib/firebase";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
+import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Registrar Denúncia - Ciclista Denuncie" }];
 }
 
-export default function Denunciar() {
+export async function loader() {
+  const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
+  const data = await response.json();
+  return { cidades: data
+    .filter((m: any) => m.microrregiao?.mesorregiao?.UF?.sigla)
+    .map((m: any) => `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`) };
+}
+
+export default function Denunciar({ loaderData }: Route.ComponentProps) {
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [mostrarPlaca, setMostrarPlaca] = useState(false);
+  const [tipo, setTipo] = useState("");
+  const [showTipoDropdown, setShowTipoDropdown] = useState(false);
+  const [descricaoOutro, setDescricaoOutro] = useState("");
+  const [enderecoAtual, setEnderecoAtual] = useState("");
+  const [showMiniMap, setShowMiniMap] = useState(false);
+  const [miniMapCenter, setMiniMapCenter] = useState<[number, number]>([-14.235, -51.925]);
+  const [MiniMapComponent, setMiniMapComponent] = useState<any>(null);
+  const [errors, setErrors] = useState<{tipo?: string; descricaoOutro?: string; placa?: string}>({});
   const navigate = useNavigate();
+  const routeLocation = useLocation();
+
+  useEffect(() => {
+    if (routeLocation.state?.localizacao) {
+      setLocation(routeLocation.state.localizacao);
+    }
+  }, [routeLocation]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setLocation(pos);
+          setMiniMapCenter([pos.lat, pos.lng]);
+          
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+            );
+            const data = await response.json();
+            const addr = data.address;
+            const rua = addr.road || addr.pedestrian || addr.footway || '';
+            const numero = addr.house_number || '';
+            const bairro = addr.suburb || addr.neighbourhood || '';
+            const cidade = addr.city || addr.town || addr.municipality || '';
+            const estado = addr.state || '';
+            
+            const partes = [];
+            if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+            if (bairro) partes.push(bairro);
+            if (cidade) partes.push(cidade);
+            if (estado) partes.push(estado);
+            
+            setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+          } catch {
+            setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+          }
+        },
+        (error) => console.log('Localização não permitida:', error)
+      );
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const newErrors: {tipo?: string; descricaoOutro?: string; placa?: string} = {};
+    
+    if (!tipo) {
+      newErrors.tipo = "Selecione o tipo";
+    }
+    if (tipo === "outro" && !descricaoOutro.trim()) {
+      newErrors.descricaoOutro = "Descreva o tipo";
+    }
+    if (mostrarPlaca) {
+      const placaValue = new FormData(e.currentTarget).get("placa") as string;
+      if (placaValue && placaValue.length !== 7) {
+        newErrors.placa = "A placa deve ter exatamente 7 caracteres";
+      }
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    setErrors({});
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const createdAt = new Date().toISOString();
-    const id = createdAt.replace(/[:.]/g, '-');
-    const data = {
-      cidade: formData.get("cidade"),
-      rua: formData.get("rua"),
-      relato: formData.get("relato"),
-      localizacao: location,
-      createdAt,
-    };
 
     try {
-      await set(ref(db, `denuncias/${id}`), data);
+      await salvarDenuncia({
+        endereco: enderecoAtual || "",
+        relato: formData.get("relato") as string || "",
+        tipo: tipo === "outro" ? descricaoOutro : tipo,
+        placa: mostrarPlaca ? (formData.get("placa") as string) : undefined,
+        localizacao: location,
+      });
       navigate("/sucesso");
     } catch (error) {
+      console.error('Erro completo:', error);
       alert("Erro ao registrar denúncia");
-      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
+  useEffect(() => {
+    if (showMiniMap) {
+      import("leaflet/dist/leaflet.css");
+      Promise.all([
+        import("react-leaflet"),
+        import("leaflet")
+      ]).then(([reactLeaflet, L]) => {
+        const { MapContainer, TileLayer, useMapEvents } = reactLeaflet;
+
+        const MapEvents = () => {
+          const map = reactLeaflet.useMapEvents({
+            moveend: async () => {
+              const center = map.getCenter();
+              const pos = { lat: center.lat, lng: center.lng };
+              setLocation(pos);
+              
+              try {
+                const response = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+                );
+                const data = await response.json();
+                const addr = data.address;
+                const rua = addr.road || addr.pedestrian || addr.footway || '';
+                const numero = addr.house_number || '';
+                const bairro = addr.suburb || addr.neighbourhood || '';
+                const cidade = addr.city || addr.town || addr.municipality || '';
+                const estado = addr.state || '';
+                
+                const partes = [];
+                if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+                if (bairro) partes.push(bairro);
+                if (cidade) partes.push(cidade);
+                if (estado) partes.push(estado);
+                
+                setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+              } catch {
+                setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+              }
+            }
+          });
+          return null;
+        };
+
+        setMiniMapComponent(() => () => (
+          <div style={{ position: 'relative' }}>
+            <MapContainer 
+              center={miniMapCenter} 
+              zoom={16} 
+              style={{ height: '300px', width: '100%' }}
+              zoomControl={true}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; OpenStreetMap'
+              />
+              <MapEvents />
+            </MapContainer>
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              zIndex: 1000
+            }}>
+              <div style={{
+                backgroundColor: '#dc2626',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                border: '2px solid white',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '20px'
+              }}>×</div>
+            </div>
+          </div>
+        ));
+      });
+    }
+  }, [showMiniMap, miniMapCenter]);
+
   function getLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
+        async (position) => {
+          const pos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
+          };
+          setLocation(pos);
+          
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+            );
+            const data = await response.json();
+            const addr = data.address;
+            const rua = addr.road || addr.pedestrian || addr.footway || '';
+            const numero = addr.house_number || '';
+            const bairro = addr.suburb || addr.neighbourhood || '';
+            const cidade = addr.city || addr.town || addr.municipality || '';
+            const estado = addr.state || '';
+            
+            const partes = [];
+            if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+            if (bairro) partes.push(bairro);
+            if (cidade) partes.push(cidade);
+            if (estado) partes.push(estado);
+            
+            setEnderecoAtual(partes.join(' - ') || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+          } catch {
+            setEnderecoAtual(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+          }
         },
         (error) => {
           if (error.code === 1) {
@@ -60,37 +250,87 @@ export default function Denunciar() {
     }
   }
 
+  const tipos = [
+    { value: "fina", label: "Fina", icon: Wind },
+    { value: "ameaca", label: "Ameaça", icon: Megaphone },
+    { value: "assedio", label: "Assédio", icon: Hand },
+    { value: "agressao-verbal", label: "Agressão Verbal", icon: MessageSquareWarning },
+    { value: "agressao-fisica", label: "Atropelamento", icon: Car },
+    { value: "invasao-ciclovia", label: "Invasão de Ciclovia/Ciclofaixa", icon: Construction },
+    { value: "buraco-via", label: "Buraco na Via", icon: AlertTriangle },
+    { value: "falta-sinalizacao", label: "Falta de Sinalização", icon: CircleSlash },
+    { value: "trecho-perigoso", label: "Trecho Perigoso", icon: AlertTriangle },
+    { value: "ciclovia-obstruida", label: "Ciclovia Obstruída", icon: Construction },
+    { value: "falta-iluminacao", label: "Falta de Iluminação", icon: Lightbulb },
+    { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car },
+    { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench },
+    { value: "falta-ciclovia", label: "Falta de Ciclovia", icon: Bike },
+    { value: "outro", label: "Outro", icon: MoreHorizontal },
+  ];
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Registrar Denúncia</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block mb-2 font-semibold">Cidade *</label>
-            <input
-              type="text"
-              name="cidade"
-              required
-              className="w-full p-3 border rounded-lg dark:bg-gray-800"
-            />
+          <div className="relative">
+            <label className="block mb-2 font-semibold">Tipo *</label>
+            <button
+              type="button"
+              onClick={() => setShowTipoDropdown(!showTipoDropdown)}
+              className={`w-full p-3 border rounded-lg dark:bg-gray-800 text-left flex items-center gap-2 ${errors.tipo ? 'border-red-500' : ''}`}
+            >
+              {tipo ? (
+                <>
+                  {tipos.find(t => t.value === tipo)?.icon && (() => {
+                    const Icon = tipos.find(t => t.value === tipo)!.icon;
+                    return <Icon size={18} />;
+                  })()}
+                  {tipos.find(t => t.value === tipo)?.label}
+                </>
+              ) : "Selecione o tipo"}
+            </button>
+            {showTipoDropdown && (
+              <div className="absolute z-10 w-full bg-white dark:bg-gray-800 border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+                {tipos.map(t => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => {
+                      setTipo(t.value);
+                      setShowTipoDropdown(false);
+                    }}
+                    className="w-full p-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left flex items-center gap-2"
+                  >
+                    <t.icon size={18} />
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {errors.tipo && <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>}
           </div>
 
-          <div>
-            <label className="block mb-2 font-semibold">Rua *</label>
-            <input
-              type="text"
-              name="rua"
-              required
-              className="w-full p-3 border rounded-lg dark:bg-gray-800"
-            />
-          </div>
+          {tipo === "outro" && (
+            <div>
+              <label className="block mb-2 font-semibold">Descreva o tipo *</label>
+              <input
+                type="text"
+                value={descricaoOutro}
+                onChange={(e) => setDescricaoOutro(e.target.value)}
+                placeholder="Ex: Buraco na ciclovia, falta de sinalização..."
+                className={`w-full p-3 border rounded-lg dark:bg-gray-800 ${errors.descricaoOutro ? 'border-red-500' : ''}`}
+                required
+              />
+              {errors.descricaoOutro && <p className="text-red-500 text-sm mt-1">{errors.descricaoOutro}</p>}
+            </div>
+          )}
 
           <div>
-            <label className="block mb-2 font-semibold">Relato *</label>
+            <label className="block mb-2 font-semibold">Relato</label>
             <textarea
               name="relato"
-              required
               rows={6}
               className="w-full p-3 border rounded-lg dark:bg-gray-800"
             />
@@ -99,11 +339,53 @@ export default function Denunciar() {
           <div>
             <button
               type="button"
-              onClick={getLocation}
-              className="w-full p-3 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => setMostrarPlaca(!mostrarPlaca)}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
             >
-              {location ? `📍 Localização capturada (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})` : "📍 Capturar Localização"}
+              ~ pegou a placa? ~
             </button>
+            {mostrarPlaca && (
+              <div>
+                <input
+                  type="text"
+                  name="placa"
+                  placeholder="Placa"
+                  maxLength={7}
+                  className={`w-full p-3 border rounded-lg dark:bg-gray-800 mt-2 uppercase ${errors.placa ? 'border-red-500' : ''}`}
+                />
+                {errors.placa && <p className="text-red-500 text-sm mt-1">{errors.placa}</p>}
+              </div>
+            )}
+          </div>
+
+          <div>
+            {enderecoAtual && (
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <MapPin className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" size={20} />
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">Localização Atual</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">{enderecoAtual}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowMiniMap(!showMiniMap)}
+              className="w-full p-3 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
+            >
+              <MapPin size={20} />
+              {showMiniMap ? 'Fechar Mapa' : 'Ajustar Localização no Mapa'}
+            </button>
+            {showMiniMap && MiniMapComponent && (
+              <div className="mt-4 border rounded-lg overflow-hidden">
+                <MiniMapComponent />
+                <p className="text-xs text-gray-600 dark:text-gray-400 p-2 bg-gray-50 dark:bg-gray-800">
+                  Mova o mapa para ajustar o ponto central da denúncia
+                </p>
+              </div>
+            )}
           </div>
 
           <button
