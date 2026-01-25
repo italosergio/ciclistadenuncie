@@ -32,11 +32,15 @@ export default function Mapa() {
 
   useEffect(() => {
     import("leaflet/dist/leaflet.css");
+    import("react-leaflet-cluster/dist/assets/MarkerCluster.css");
+    import("react-leaflet-cluster/dist/assets/MarkerCluster.Default.css");
     Promise.all([
       import("react-leaflet"),
-      import("leaflet")
-    ]).then(([reactLeaflet, L]) => {
+      import("leaflet"),
+      import("react-leaflet-cluster")
+    ]).then(([reactLeaflet, L, cluster]) => {
       const { MapContainer, TileLayer, Marker, Popup } = reactLeaflet;
+      const MarkerClusterGroup = cluster.default;
       
       const icon = L.default.icon({
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -52,19 +56,27 @@ export default function Mapa() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-          {denuncias.map(([id, denuncia]) => (
-            <Marker
-              key={id}
-              position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
-              icon={icon}
-            >
-              <Popup>
-                <strong>{denuncia.cidade}</strong><br />
-                {denuncia.rua}<br />
-                <small>{denuncia.relato}</small>
-              </Popup>
-            </Marker>
-          ))}
+          <MarkerClusterGroup
+            chunkedLoading
+            maxClusterRadius={80}
+            spiderfyOnMaxZoom={true}
+            showCoverageOnHover={false}
+            zoomToBoundsOnClick={true}
+          >
+            {denuncias.map(([id, denuncia]) => (
+              <Marker
+                key={id}
+                position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
+                icon={icon}
+              >
+                <Popup>
+                  <strong>{denuncia.cidade}</strong><br />
+                  {denuncia.rua}<br />
+                  <small>{denuncia.relato}</small>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
         </MapContainer>
       ));
     });
