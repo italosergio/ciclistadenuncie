@@ -1,26 +1,211 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ref, onValue } from "firebase/database";
 import { db } from "../lib/firebase";
+import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
+import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike } from "lucide-react";
+import { renderToString } from "react-dom/server";
+import { useNavigate } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Mapa de Denúncias - Ciclista Denuncie" }];
 }
 
+export async function loader() {
+  const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
+  const data = await response.json();
+  return { cidades: data
+    .filter((m: any) => m.microrregiao?.mesorregiao?.UF?.sigla)
+    .map((m: any) => `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`) };
+}
+
 interface Denuncia {
-  cidade: string;
-  rua: string;
+  endereco: string;
   relato: string;
+  tipo?: string;
+  placa?: string;
   localizacao?: { lat: number; lng: number };
   createdAt: string;
 }
 
-export default function Mapa() {
+export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [denuncias, setDenuncias] = useState<Record<string, Denuncia>>({});
   const [MapComponent, setMapComponent] = useState<any>(null);
   const [cidade, setCidade] = useState("");
+  const [sugestoes, setSugestoes] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [center, setCenter] = useState<[number, number]>([-14.235, -51.925]);
   const [zoom, setZoom] = useState(4);
+  const [tracking, setTracking] = useState(false);
+  const [route, setRoute] = useState<{lat: number, lng: number, timestamp: number}[]>([]);
+  const [watchId, setWatchId] = useState<number | null>(null);
+  const [CountUpComponent, setCountUpComponent] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [markingMode, setMarkingMode] = useState(false);
+  const [tempMarker, setTempMarker] = useState<{lat: number, lng: number} | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [endereco, setEndereco] = useState("");
+  const [relato, setRelato] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [placa, setPlaca] = useState("");
+  const [mostrarPlaca, setMostrarPlaca] = useState(false);
+  const [descricaoOutro, setDescricaoOutro] = useState("");
+  const [denunciasVisiveis, setDenunciasVisiveis] = useState<number | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [mapType, setMapType] = useState<'street' | 'satellite' | 'light' | 'dark'>('street');
+  const [showMapSelector, setShowMapSelector] = useState(false);
+  const [tipoFiltro, setTipoFiltro] = useState<string>('todos');
+  const [showTipoDropdown, setShowTipoDropdown] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [errorModal, setErrorModal] = useState<string>("");
+  const navigate = useNavigate();
+
+  const tipos = [
+    { value: "fina", label: "Fina", icon: Wind, color: "#dc2626" },
+    { value: "ameaca", label: "Ameaça", icon: Megaphone, color: "#dc2626" },
+    { value: "assedio", label: "Assédio", icon: Hand, color: "#dc2626" },
+    { value: "agressao-verbal", label: "Agressão Verbal", icon: MessageSquareWarning, color: "#dc2626" },
+    { value: "agressao-fisica", label: "Atropelamento", icon: Car, color: "#dc2626" },
+    { value: "invasao-ciclovia", label: "Invasão de Ciclovia/Ciclofaixa", icon: Construction, color: "#dc2626" },
+    { value: "buraco-via", label: "Buraco na Via", icon: AlertTriangle, color: "#dc2626" },
+    { value: "falta-sinalizacao", label: "Falta de Sinalização", icon: CircleSlash, color: "#dc2626" },
+    { value: "trecho-perigoso", label: "Trecho Perigoso", icon: AlertTriangle, color: "#dc2626" },
+    { value: "ciclovia-obstruida", label: "Ciclovia Obstruída", icon: Construction, color: "#dc2626" },
+    { value: "falta-iluminacao", label: "Falta de Iluminação", icon: Lightbulb, color: "#dc2626" },
+    { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car, color: "#dc2626" },
+    { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench, color: "#dc2626" },
+    { value: "falta-ciclovia", label: "Falta de Ciclovia", icon: Bike, color: "#dc2626" },
+    { value: "outro", label: "Outro", icon: MoreHorizontal, color: "#dc2626" },
+  ];
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
+  useEffect(() => {
+    import('react-countup').then(module => {
+      setCountUpComponent(() => module.default);
+    });
+  }, []);
+
+  function buscarCidades(termo: string) {
+    if (!termo || termo.length < 2) {
+      setSugestoes([]);
+      setSelectedIndex(-1);
+      return;
+    }
+    const filtradas = loaderData.cidades
+      .filter((nome: string) => nome.toLowerCase().includes(termo.toLowerCase()))
+      .slice(0, 5);
+    setSugestoes(filtradas);
+    setSelectedIndex(-1);
+  }
+
+  function iniciarRastreamento() {
+    if (!navigator.geolocation) {
+      alert("Geolocalização não suportada");
+      return;
+    }
+
+    const id = navigator.geolocation.watchPosition(
+      (position) => {
+        const ponto = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          timestamp: Date.now()
+        };
+        setRoute(prev => {
+          const novaRota = [...prev, ponto];
+          localStorage.setItem('rota_cache', JSON.stringify(novaRota));
+          return novaRota;
+        });
+        setCenter([ponto.lat, ponto.lng]);
+        setZoom(16);
+      },
+      (error) => console.error(error),
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+    );
+
+    setWatchId(id);
+    setTracking(true);
+  }
+
+  function pararRastreamento() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      setWatchId(null);
+    }
+    setTracking(false);
+  }
+
+  async function salvarRota() {
+    if (route.length === 0) {
+      alert("Nenhuma rota para salvar");
+      return;
+    }
+
+    const rotaId = Date.now().toString();
+    const agora = new Date();
+    const horarioBrasilia = new Date(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    
+    const rotaData = {
+      id: rotaId,
+      pontos: route.map(p => ({ lat: p.lat, lng: p.lng, timestamp: p.timestamp })),
+      createdAt: horarioBrasilia.toISOString(),
+      distancia: parseFloat(calcularDistancia(route)),
+      totalPontos: route.length
+    };
+
+    // Salvar localmente
+    const rotasSalvas = JSON.parse(localStorage.getItem('rotas_salvas') || '[]');
+    rotasSalvas.push(rotaData);
+    localStorage.setItem('rotas_salvas', JSON.stringify(rotasSalvas));
+    localStorage.removeItem('rota_cache');
+    setRoute([]);
+    
+    // Tentar enviar ao Firebase
+    try {
+      await set(ref(db, `rotas/${rotaId}`), rotaData);
+      alert(`Rota salva! ${rotaData.totalPontos} pontos, ${rotaData.distancia} km`);
+    } catch (error: any) {
+      console.log('Firebase indisponível, rota salva localmente');
+      alert(`Rota salva localmente! ${rotaData.totalPontos} pontos, ${rotaData.distancia} km\n(Será enviada ao servidor quando possível)`);
+    }
+  }
+
+  function calcularDistancia(pontos: {lat: number, lng: number}[]) {
+    let dist = 0;
+    for (let i = 1; i < pontos.length; i++) {
+      const R = 6371;
+      const dLat = (pontos[i].lat - pontos[i-1].lat) * Math.PI / 180;
+      const dLon = (pontos[i].lng - pontos[i-1].lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(pontos[i-1].lat * Math.PI / 180) * Math.cos(pontos[i].lat * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      dist += R * c;
+    }
+    return dist.toFixed(2);
+  }
+
+  useEffect(() => {
+    const rotaCache = localStorage.getItem('rota_cache');
+    if (rotaCache) {
+      setRoute(JSON.parse(rotaCache));
+    }
+
+    // Solicitar localização apenas no mobile
+    if (isMobile && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter([position.coords.latitude, position.coords.longitude]);
+          setZoom(13);
+        },
+        (error) => console.log('Localização não permitida:', error),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const denunciasRef = ref(db, "denuncias");
@@ -31,6 +216,51 @@ export default function Mapa() {
   }, []);
 
   useEffect(() => {
+    const removeTabIndex = () => {
+      const links = document.querySelectorAll('.leaflet-control-attribution a');
+      links.forEach(link => {
+        link.setAttribute('tabindex', '-1');
+      });
+    };
+    
+    const timer = setInterval(removeTabIndex, 500);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (showModal && modalRef.current) {
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      const handleTab = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              e.preventDefault();
+              lastElement?.focus();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              e.preventDefault();
+              firstElement?.focus();
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleTab);
+      firstElement?.focus();
+
+      return () => {
+        document.removeEventListener('keydown', handleTab);
+      };
+    }
+  }, [showModal]);
+
+  useEffect(() => {
     import("leaflet/dist/leaflet.css");
     import("react-leaflet-cluster/dist/assets/MarkerCluster.css");
     import("react-leaflet-cluster/dist/assets/MarkerCluster.Default.css");
@@ -39,43 +269,422 @@ export default function Mapa() {
       import("leaflet"),
       import("react-leaflet-cluster")
     ]).then(([reactLeaflet, L, cluster]) => {
-      const { MapContainer, TileLayer, Marker, Popup } = reactLeaflet;
+      const { MapContainer, TileLayer, Marker, Popup, Tooltip } = reactLeaflet;
       const MarkerClusterGroup = cluster.default;
       
-      const icon = L.default.icon({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
+      const icon = L.default.divIcon({
+        html: `<div style="background-color: #dc2626; width: 21px; height: 21px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        className: 'custom-marker',
+        iconSize: [21, 21],
+        iconAnchor: [10.5, 10.5],
       });
 
-      setMapComponent(() => ({ denuncias, center, zoom }: { denuncias: [string, Denuncia][], center: [number, number], zoom: number }) => (
-        <MapContainer center={center} zoom={zoom} style={{ flex: 1 }} key={`${center[0]}-${center[1]}-${zoom}`}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          />
+      const createColoredIcon = (color: string, IconComponent: any) => {
+        return L.default.divIcon({
+          html: `<div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">${renderToString(<IconComponent size={16} color="white" />)}</div>`,
+          className: 'custom-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+      };
+
+      const tempIcon = L.default.divIcon({
+        html: renderToString(<MapPin color="#dc2626" fill="#dc2626" size={40} />),
+        className: 'custom-marker',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+      });
+
+      const MouseFollower = ({ isMarking }: { isMarking: boolean }) => {
+        const map = reactLeaflet.useMap();
+        
+        useEffect(() => {
+          if (!isMarking) return;
+          
+          const container = map.getContainer();
+          const follower = L.default.marker([0, 0], { 
+            icon: tempIcon,
+            interactive: false,
+            keyboard: false
+          }).addTo(map);
+          
+          const onMouseMove = (e: any) => {
+            const latlng = map.mouseEventToLatLng(e);
+            follower.setLatLng(latlng);
+          };
+          
+          container.addEventListener('mousemove', onMouseMove);
+          
+          return () => {
+            container.removeEventListener('mousemove', onMouseMove);
+            map.removeLayer(follower);
+          };
+        }, [map, isMarking]);
+        
+        return null;
+      };
+
+      const MapClickHandler = ({ isMarking, denuncias }: { isMarking: boolean, denuncias: [string, Denuncia][] }) => {
+        const map = reactLeaflet.useMap();
+        
+        useEffect(() => {
+          const updateVisible = () => {
+            const bounds = map.getBounds();
+            const visible = denuncias.filter(([_, d]) => {
+              const lat = d.localizacao!.lat;
+              const lng = d.localizacao!.lng;
+              return bounds.contains([lat, lng]);
+            });
+            setDenunciasVisiveis(visible.length);
+          };
+          
+          setTimeout(updateVisible, 100);
+        }, [map, denuncias]);
+        
+        reactLeaflet.useMapEvents({
+          moveend: () => {
+            const bounds = map.getBounds();
+            const visible = denuncias.filter(([_, d]) => {
+              const lat = d.localizacao!.lat;
+              const lng = d.localizacao!.lng;
+              return bounds.contains([lat, lng]);
+            });
+            setDenunciasVisiveis(visible.length);
+          },
+          zoomend: () => {
+            const bounds = map.getBounds();
+            const visible = denuncias.filter(([_, d]) => {
+              const lat = d.localizacao!.lat;
+              const lng = d.localizacao!.lng;
+              return bounds.contains([lat, lng]);
+            });
+            setDenunciasVisiveis(visible.length);
+          },
+          click: async (e: any) => {
+            if (isMarking) {
+              const pos = { lat: e.latlng.lat, lng: e.latlng.lng };
+              setTempMarker(pos);
+              
+              try {
+                const response = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+                );
+                const data = await response.json();
+                const addr = data.address;
+                const rua = addr.road || addr.pedestrian || addr.footway || '';
+                const numero = addr.house_number || '';
+                const bairro = addr.suburb || addr.neighbourhood || '';
+                const cidade = addr.city || addr.town || addr.municipality || '';
+                const estado = addr.state || '';
+                
+                const partes = [];
+                if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+                if (bairro) partes.push(bairro);
+                if (cidade) partes.push(cidade);
+                if (estado) partes.push(estado);
+                
+                const enderecoCompleto = partes.join(' - ');
+                setEndereco(enderecoCompleto || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+              } catch {
+                setEndereco(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+              }
+              
+              setShowModal(true);
+              setMarkingMode(false);
+            }
+          }
+        });
+        return null;
+      };
+
+      const LocationControl = () => {
+        const map = reactLeaflet.useMap();
+        
+        useEffect(() => {
+          const LocationButton = L.default.Control.extend({
+            onAdd: function() {
+              const btn = L.default.DomUtil.create('div', 'leaflet-bar');
+              btn.style.zIndex = '2000';
+              btn.innerHTML = `<a href="#" title="Minha localização" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: white; text-decoration: none;">${renderToString(<MapPin size={18} />)}</a>`;
+              btn.onclick = (e: any) => {
+                e.preventDefault();
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      setCenter([position.coords.latitude, position.coords.longitude]);
+                      setZoom(16);
+                    },
+                    () => alert('Não foi possível obter sua localização')
+                  );
+                }
+              };
+              return btn;
+            }
+          });
+          
+          const BrazilButton = L.default.Control.extend({
+            onAdd: function() {
+              const btn = L.default.DomUtil.create('div', 'leaflet-bar');
+              btn.style.marginTop = '10px';
+              btn.style.zIndex = '2000';
+              btn.innerHTML = `<a href="#" title="Voltar ao Brasil" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: white; text-decoration: none;">${renderToString(<Maximize2 size={18} />)}</a>`;
+              btn.onclick = (e: any) => {
+                e.preventDefault();
+                setCenter([-14.235, -51.925]);
+                setZoom(4);
+              };
+              return btn;
+            }
+          });
+
+          const MapTypeButton = L.default.Control.extend({
+            onAdd: function() {
+              const btn = L.default.DomUtil.create('div', 'leaflet-bar');
+              btn.style.marginTop = '10px';
+              btn.style.zIndex = '2000';
+              btn.innerHTML = `<a href="#" title="Tipo de mapa" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: white; text-decoration: none;">${renderToString(<Map size={18} />)}</a>`;
+              btn.onclick = (e: any) => {
+                e.preventDefault();
+                setShowMapSelector(prev => !prev);
+              };
+              return btn;
+            }
+          });
+          
+          const locationControl = new LocationButton({ position: 'topright' });
+          const brazilControl = new BrazilButton({ position: 'topright' });
+          const mapTypeControl = new MapTypeButton({ position: 'topright' });
+          
+          map.addControl(locationControl);
+          map.addControl(brazilControl);
+          map.addControl(mapTypeControl);
+          
+          return () => {
+            map.removeControl(locationControl);
+            map.removeControl(brazilControl);
+            map.removeControl(mapTypeControl);
+          };
+        }, [map]);
+        
+        return null;
+      };
+
+
+
+      setMapComponent(() => ({ denuncias, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' }) => (
+        <MapContainer 
+          center={center} 
+          zoom={zoom} 
+          style={{ height: '100%', width: '100%', cursor: isMarking ? 'none' : 'grab' }} 
+          key={`${center[0]}-${center[1]}-${zoom}`} 
+          zoomControl={false}
+          dragging={!isMarking}
+          className={isMarking ? 'marking-mode' : ''}
+        >
+          {mapType === 'street' && (
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
+          )}
+          {mapType === 'satellite' && (
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; Esri'
+            />
+          )}
+          {mapType === 'light' && (
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; CartoDB'
+            />
+          )}
+          {mapType === 'dark' && (
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; CartoDB'
+            />
+          )}
+          <reactLeaflet.ZoomControl position="topright" zoomInTitle="Aumentar zoom" zoomOutTitle="Diminuir zoom" />
+          <LocationControl />
+          <MouseFollower isMarking={isMarking} />
+          <MapClickHandler isMarking={isMarking} denuncias={denuncias} />
+          {tempMarker && (
+            <Marker
+              position={[tempMarker.lat, tempMarker.lng]}
+              icon={tempIcon}
+            />
+          )}
           <MarkerClusterGroup
             chunkedLoading
-            maxClusterRadius={80}
+            maxClusterRadius={20}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
-            zoomToBoundsOnClick={true}
+            zoomToBoundsOnClick={!isMarking}
+            disableClusteringAtZoom={15}
+            eventHandlers={{
+              click: async (e: any) => {
+                if (isMarking) {
+                  const latlng = e.layer.getLatLng();
+                  const pos = { lat: latlng.lat, lng: latlng.lng };
+                  setTempMarker(pos);
+                  
+                  try {
+                    const response = await fetch(
+                      `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+                    );
+                    const data = await response.json();
+                    const addr = data.address;
+                    const rua = addr.road || addr.pedestrian || addr.footway || '';
+                    const numero = addr.house_number || '';
+                    const bairro = addr.suburb || addr.neighbourhood || '';
+                    const cidade = addr.city || addr.town || addr.municipality || '';
+                    const estado = addr.state || '';
+                    
+                    const partes = [];
+                    if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+                    if (bairro) partes.push(bairro);
+                    if (cidade) partes.push(cidade);
+                    if (estado) partes.push(estado);
+                    
+                    const enderecoCompleto = partes.join(' - ');
+                    setEndereco(enderecoCompleto || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+                  } catch {
+                    setEndereco(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+                  }
+                  
+                  setShowModal(true);
+                  setMarkingMode(false);
+                  e.originalEvent.stopPropagation();
+                } else {
+                  e.originalEvent.stopPropagation();
+                }
+              }
+            }}
+            iconCreateFunction={(cluster: any) => {
+              return L.default.divIcon({
+                html: `<div style="background-color: #dc2626; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${cluster.getChildCount()}</div>`,
+                className: 'custom-cluster',
+                iconSize: [32, 32],
+              });
+            }}
           >
-            {denuncias.map(([id, denuncia]) => (
+            {denuncias.map(([id, denuncia]) => {
+              const tipoInfo = tipos.find(t => t.value === denuncia.tipo);
+              const markerIcon = tipoInfo ? createColoredIcon(tipoInfo.color, tipoInfo.icon) : icon;
+              
+              return (
               <Marker
                 key={id}
                 position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
-                icon={icon}
+                icon={markerIcon}
+                eventHandlers={{
+                  click: async (e: any) => {
+                    if (isMarking) {
+                      const pos = { lat: denuncia.localizacao!.lat, lng: denuncia.localizacao!.lng };
+                      setTempMarker(pos);
+                      
+                      try {
+                        const response = await fetch(
+                          `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
+                        );
+                        const data = await response.json();
+                        const addr = data.address;
+                        const rua = addr.road || addr.pedestrian || addr.footway || '';
+                        const numero = addr.house_number || '';
+                        const bairro = addr.suburb || addr.neighbourhood || '';
+                        const cidade = addr.city || addr.town || addr.municipality || '';
+                        const estado = addr.state || '';
+                        
+                        const partes = [];
+                        if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
+                        if (bairro) partes.push(bairro);
+                        if (cidade) partes.push(cidade);
+                        if (estado) partes.push(estado);
+                        
+                        const enderecoCompleto = partes.join(' - ');
+                        setEndereco(enderecoCompleto || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+                      } catch {
+                        setEndereco(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
+                      }
+                      
+                      setShowModal(true);
+                      setMarkingMode(false);
+                      e.originalEvent.stopPropagation();
+                    } else {
+                      e.originalEvent.stopPropagation();
+                    }
+                  }
+                }}
               >
-                <Popup>
-                  <strong>{denuncia.cidade}</strong><br />
-                  {denuncia.rua}<br />
-                  <small>{denuncia.relato}</small>
-                </Popup>
+                {!isMarking && (
+                  <>
+                    <Tooltip direction="top" offset={[0, -20]} opacity={1} className="custom-tooltip">
+                      <div style={{ minWidth: '200px', maxWidth: '300px' }}>
+                        <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
+                          {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                          {denuncia.endereco}
+                        </div>
+                        {denuncia.tipo && (
+                          <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
+                            {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
+                          </div>
+                        )}
+                        {denuncia.relato && (
+                          <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                            {denuncia.relato}
+                          </div>
+                        )}
+                        {denuncia.placa && (
+                          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
+                            Placa: {denuncia.placa}
+                          </div>
+                        )}
+                      </div>
+                    </Tooltip>
+                    <Popup autoPan={false} className="custom-popup">
+                      <div style={{ minWidth: '200px', maxWidth: '300px' }}>
+                        <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
+                          {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                          {denuncia.endereco}
+                        </div>
+                        {denuncia.tipo && (
+                          <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
+                            {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
+                          </div>
+                        )}
+                        {denuncia.relato && (
+                          <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                            {denuncia.relato}
+                          </div>
+                        )}
+                        {denuncia.placa && (
+                          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
+                            Placa: {denuncia.placa}
+                          </div>
+                        )}
+                      </div>
+                    </Popup>
+                  </>
+                )}
               </Marker>
-            ))}
+            )})}
           </MarkerClusterGroup>
         </MapContainer>
       ));
@@ -83,15 +692,17 @@ export default function Mapa() {
   }, []);
 
   const denunciasComLocalizacao = Object.entries(denuncias).filter(
-    ([_, d]) => d.localizacao
+    ([_, d]) => d.localizacao && (tipoFiltro === 'todos' || d.tipo === tipoFiltro)
   );
 
   async function buscarCidade() {
     if (!cidade.trim()) return;
     
+    const nomeCidade = cidade.split(' - ')[0];
+    
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cidade)}&country=Brazil&format=json&limit=1`
+        `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`
       );
       const data = await response.json();
       
@@ -106,34 +717,508 @@ export default function Mapa() {
     }
   }
 
+  async function salvarDenunciaModal() {
+    if (!tempMarker || !tipo) {
+      setErrorModal("Selecione o tipo");
+      return;
+    }
+
+    if (mostrarPlaca && placa && placa.length !== 7) {
+      setErrorModal("A placa deve ter exatamente 7 caracteres");
+      return;
+    }
+
+    setErrorModal("");
+    try {
+      await salvarDenuncia({
+        endereco: endereco,
+        relato,
+        tipo: tipo === "outro" ? descricaoOutro : tipo,
+        placa: mostrarPlaca && placa ? placa : undefined,
+        localizacao: tempMarker,
+      });
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Erro completo:', error);
+      setErrorModal("Erro ao salvar denúncia. Tente novamente.");
+    }
+  }
+
   return (
-    <div className="h-screen flex flex-col">
-      <div className="p-4 bg-black dark:bg-white text-white dark:text-black space-y-3">
-        <h1 className="text-2xl font-bold">Mapa de Denúncias</h1>
-        <p className="text-sm">{denunciasComLocalizacao.length} denúncias com localização</p>
-        <div className="flex gap-2">
+    <div className="h-screen relative">
+      <style>{`
+        .marking-mode * {
+          cursor: none !important;
+        }
+        .leaflet-control-attribution,
+        .leaflet-control-attribution a {
+          pointer-events: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+        }
+        .leaflet-control-attribution a {
+          tabindex: -1 !important;
+        }
+      `}</style>
+      {MapComponent ? (
+        <div className="absolute inset-0">
+          <MapComponent denuncias={denunciasComLocalizacao} center={center} zoom={zoom} isMarking={markingMode} tempMarker={tempMarker} mapType={mapType} />
+        </div>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p>Carregando mapa...</p>
+        </div>
+      )}
+      
+      <div className="absolute top-4 left-4 z-[400] hidden md:block">
+        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg mb-2">
+          <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2"><Map /> CICLISTA DENUNCIE - MAPA</h1>
+          <p className="text-xs md:text-sm mt-1">
+            {denunciasVisiveis !== null ? (
+              CountUpComponent ? (
+                <CountUpComponent 
+                  start={0}
+                  end={denunciasVisiveis} 
+                  duration={2.5}
+                  useEasing={true}
+                />
+              ) : denunciasVisiveis
+            ) : denunciasComLocalizacao.length} denúncias
+          </p>
+        </div>
+        <div className="relative w-80 mb-2">
           <input
             type="text"
-            placeholder="Buscar por cidade..."
+            placeholder="Buscar cidade..."
             value={cidade}
-            onChange={(e) => setCidade(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && buscarCidade()}
-            className="flex-1 p-2 rounded text-black"
+            autoFocus
+            onChange={(e) => {
+              const valor = e.target.value;
+              setCidade(valor);
+              buscarCidades(valor);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setSelectedIndex(prev => prev < sugestoes.length - 1 ? prev + 1 : prev);
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (selectedIndex >= 0 && sugestoes[selectedIndex]) {
+                  const cidadeSelecionada = sugestoes[selectedIndex];
+                  setCidade(cidadeSelecionada);
+                  setSugestoes([]);
+                  const nomeCidade = cidadeSelecionada.split(' - ')[0];
+                  fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`)
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data.length > 0) {
+                        setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+                        setZoom(12);
+                      }
+                    });
+                }
+              } else if (e.key === "Escape") {
+                setSugestoes([]);
+              }
+            }}
+            onBlur={() => setTimeout(() => setSugestoes([]), 200)}
+            className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none"
           />
+          {sugestoes.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 z-[1000] bg-white border rounded-lg mt-1 max-h-60 overflow-y-auto shadow-xl">
+              {sugestoes.map((s, i) => (
+                <li
+                  key={s}
+                  onClick={() => {
+                    setCidade(s);
+                    setSugestoes([]);
+                    const nomeCidade = s.split(' - ')[0];
+                    fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`)
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.length > 0) {
+                          setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+                          setZoom(12);
+                        }
+                      });
+                  }}
+                  className={`p-3 hover:bg-gray-100 cursor-pointer text-black ${i === selectedIndex ? 'bg-gray-200' : ''}`}
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="relative w-80">
           <button
-            onClick={buscarCidade}
-            className="px-4 py-2 bg-white dark:bg-black text-black dark:text-white rounded font-semibold"
+            type="button"
+            onClick={() => setShowTipoDropdown(!showTipoDropdown)}
+            className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none text-left flex items-center gap-2"
           >
-            Procurar
+            {tipoFiltro === 'todos' ? (
+              'Todos os tipos'
+            ) : (
+              <>
+                {tipos.find(t => t.value === tipoFiltro)?.icon && (() => {
+                  const Icon = tipos.find(t => t.value === tipoFiltro)!.icon;
+                  return <Icon size={18} />;
+                })()}
+                {tipos.find(t => t.value === tipoFiltro)?.label}
+              </>
+            )}
           </button>
+          {showTipoDropdown && (
+            <div className="absolute z-[1100] w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoFiltro('todos');
+                  setShowTipoDropdown(false);
+                }}
+                className="w-full p-3 hover:bg-gray-100 text-left text-black"
+              >
+                Todos os tipos
+              </button>
+              {tipos.map(t => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => {
+                    setTipoFiltro(t.value);
+                    setShowTipoDropdown(false);
+                  }}
+                  className="w-full p-3 hover:bg-gray-100 text-left flex items-center gap-2 text-black"
+                >
+                  <t.icon size={18} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      
-      {MapComponent ? (
-        <MapComponent denuncias={denunciasComLocalizacao} center={center} zoom={zoom} />
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p>Carregando mapa...</p>
+
+      <div className="absolute top-4 left-4 z-[400] flex flex-col items-start gap-2 md:hidden">
+        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg">
+          <h1 className="text-lg font-bold flex items-center gap-2"><Map size={20} /> CICLISTA DENUNCIE - MAPA</h1>
+          <p className="text-xs mt-1">
+            {denunciasVisiveis !== null ? (
+              CountUpComponent ? (
+                <CountUpComponent 
+                  start={0}
+                  end={denunciasVisiveis} 
+                  duration={2.5}
+                  useEasing={true}
+                />
+              ) : denunciasVisiveis
+            ) : denunciasComLocalizacao.length} denúncias
+          </p>
+        </div>
+        <div className="relative w-80">
+          <input
+            type="text"
+            placeholder="Buscar cidade..."
+            value={cidade}
+            onChange={(e) => {
+              const valor = e.target.value;
+              setCidade(valor);
+              buscarCidades(valor);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setSelectedIndex(prev => prev < sugestoes.length - 1 ? prev + 1 : prev);
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (selectedIndex >= 0 && sugestoes[selectedIndex]) {
+                  const cidadeSelecionada = sugestoes[selectedIndex];
+                  setCidade(cidadeSelecionada);
+                  setSugestoes([]);
+                  const nomeCidade = cidadeSelecionada.split(' - ')[0];
+                  fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`)
+                    .then(res => res.json())
+                    .then(data => {
+                      if (data.length > 0) {
+                        setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+                        setZoom(12);
+                      }
+                    });
+                }
+              } else if (e.key === "Escape") {
+                setSugestoes([]);
+              }
+            }}
+            onBlur={() => setTimeout(() => setSugestoes([]), 200)}
+            className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none"
+          />
+          {sugestoes.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 z-[1000] bg-white border rounded-lg mt-1 max-h-60 overflow-y-auto shadow-xl">
+              {sugestoes.map((s, i) => (
+                <li
+                  key={s}
+                  onClick={() => {
+                    setCidade(s);
+                    setSugestoes([]);
+                    const nomeCidade = s.split(' - ')[0];
+                    fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`)
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.length > 0) {
+                          setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+                          setZoom(12);
+                        }
+                      });
+                  }}
+                  className={`p-3 hover:bg-gray-100 cursor-pointer text-black ${i === selectedIndex ? 'bg-gray-200' : ''}`}
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="relative w-80">
+          <button
+            type="button"
+            onClick={() => setShowTipoDropdown(!showTipoDropdown)}
+            className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none text-left flex items-center gap-2"
+          >
+            {tipoFiltro === 'todos' ? (
+              'Todos os tipos'
+            ) : (
+              <>
+                {tipos.find(t => t.value === tipoFiltro)?.icon && (() => {
+                  const Icon = tipos.find(t => t.value === tipoFiltro)!.icon;
+                  return <Icon size={18} />;
+                })()}
+                {tipos.find(t => t.value === tipoFiltro)?.label}
+              </>
+            )}
+          </button>
+          {showTipoDropdown && (
+            <div className="absolute z-[1100] w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoFiltro('todos');
+                  setShowTipoDropdown(false);
+                }}
+                className="w-full p-3 hover:bg-gray-100 text-left text-black"
+              >
+                Todos os tipos
+              </button>
+              {tipos.map(t => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => {
+                    setTipoFiltro(t.value);
+                    setShowTipoDropdown(false);
+                  }}
+                  className="w-full p-3 hover:bg-gray-100 text-left flex items-center gap-2 text-black"
+                >
+                  <t.icon size={18} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="absolute top-4 left-0 right-0 z-[400] justify-center px-4 hidden md:flex flex-col items-center gap-2">
+      </div>
+
+      {showMapSelector && (
+        <div className="absolute top-32 right-4 z-[2100] bg-white rounded-xl shadow-2xl p-3 space-y-2 min-w-[180px]"
+             style={{
+               boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
+             }}>
+          <button
+            onClick={() => { setMapType('street'); setShowMapSelector(false); }}
+            className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'street' ? 'bg-gray-200 font-semibold' : ''}`}
+          >
+            <Map size={18} /> Mapa Padrão
+          </button>
+          <button
+            onClick={() => { setMapType('satellite'); setShowMapSelector(false); }}
+            className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'satellite' ? 'bg-gray-200 font-semibold' : ''}`}
+          >
+            <Satellite size={18} /> Satélite
+          </button>
+          <button
+            onClick={() => { setMapType('light'); setShowMapSelector(false); }}
+            className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'light' ? 'bg-gray-200 font-semibold' : ''}`}
+          >
+            <Layers size={18} /> Neutro
+          </button>
+          <button
+            onClick={() => { setMapType('dark'); setShowMapSelector(false); }}
+            className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'dark' ? 'bg-gray-200 font-semibold' : ''}`}
+          >
+            <Moon size={18} /> Escuro
+          </button>
+        </div>
+      )}
+
+      <div className="absolute bottom-4 left-0 right-0 z-[1000] flex justify-center gap-2">
+        {!markingMode ? (
+          <button
+            onClick={() => setMarkingMode(true)}
+            className="px-8 py-4 bg-red-600 text-white rounded-lg font-bold text-lg shadow-lg hover:bg-red-700"
+          >
+            Denunciar Ponto
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              setMarkingMode(false);
+              setTempMarker(null);
+            }}
+            className="px-8 py-4 bg-gray-600 text-white rounded-lg font-bold text-lg shadow-lg hover:bg-gray-700"
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowModal(false);
+            setTempMarker(null);
+            setRelato("");
+            setTipo("");
+            setPlaca("");
+            setMostrarPlaca(false);
+            setEndereco("");
+            setDescricaoOutro("");
+          }
+        }}>
+          <div ref={modalRef} className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            {!showSuccess ? (
+              <>
+                <h2 className="text-xl font-bold mb-4 text-black">Registrar Denúncia</h2>
+                <div className="text-sm text-gray-700 mb-4 space-y-1">
+                  <p><strong>Localização:</strong> {endereco}</p>
+                  <p><strong>Coordenadas:</strong> {tempMarker?.lat.toFixed(6)}, {tempMarker?.lng.toFixed(6)}</p>
+                </div>
+                <select
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  className="w-full p-3 border rounded-lg mb-4 text-black"
+                  size={6}
+                  style={{ height: '165px' }}
+                  required
+                >
+                  <option value="">Selecione o tipo *</option>
+                  <option value="fina">Fina</option>
+                  <option value="ameaca">Ameaça</option>
+                  <option value="assedio">Assédio</option>
+                  <option value="agressao-verbal">Agressão Verbal</option>
+                  <option value="agressao-fisica">Atropelamento</option>
+                  <option value="invasao-ciclovia">Invasão de Ciclovia/Ciclofaixa</option>
+                  <option value="buraco-via">Buraco na Via</option>
+                  <option value="falta-sinalizacao">Falta de Sinalização</option>
+                  <option value="trecho-perigoso">Trecho Perigoso</option>
+                  <option value="ciclovia-obstruida">Ciclovia Obstruída</option>
+                  <option value="falta-iluminacao">Falta de Iluminação</option>
+                  <option value="veiculo-estacionado">Veículo Estacionado na Ciclovia</option>
+                  <option value="ma-conservacao">Má Conservação da Via</option>
+                  <option value="falta-ciclovia">Falta de Ciclovia</option>
+                  <option value="outro">Outro</option>
+                </select>
+                {errorModal && <p className="text-red-500 text-sm mt-2">{errorModal}</p>}
+                {tipo === "outro" && (
+                  <input
+                    type="text"
+                    placeholder="Descreva o tipo *"
+                    value={descricaoOutro}
+                    onChange={(e) => setDescricaoOutro(e.target.value)}
+                    className="w-full p-3 border rounded-lg mb-4 text-black"
+                    required
+                  />
+                )}
+                <textarea
+                  placeholder="Relato"
+                  value={relato}
+                  onChange={(e) => setRelato(e.target.value)}
+                  className="w-full p-3 border rounded-lg mb-4 h-32 text-black"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPlaca(!mostrarPlaca)}
+                  className="text-sm text-gray-600 hover:text-black mb-4 underline"
+                >
+                  ~ pegou a placa? ~
+                </button>
+                {mostrarPlaca && (
+                  <input
+                    type="text"
+                    placeholder="Placa"
+                    value={placa}
+                    onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                    className="w-full p-3 border rounded-lg mb-4 text-black"
+                    maxLength={7}
+                  />
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={salvarDenunciaModal}
+                    className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
+                  >
+                    Enviar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setTempMarker(null);
+                      setRelato("");
+                      setTipo("");
+                      setPlaca("");
+                      setMostrarPlaca(false);
+                      setEndereco("");
+                      setDescricaoOutro("");
+                    }}
+                    className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-bold hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <div className="text-6xl mb-4">✅</div>
+                  <h2 className="text-2xl font-bold mb-2 text-black">Denúncia Registrada!</h2>
+                  <p className="text-gray-600 mb-6">Sua denúncia foi registrada com sucesso.</p>
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setShowSuccess(false);
+                      setTempMarker(null);
+                      setRelato("");
+                      setTipo("");
+                      setPlaca("");
+                      setMostrarPlaca(false);
+                      setEndereco("");
+                      setDescricaoOutro("");
+                    }}
+                    className="w-full px-4 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-800"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
