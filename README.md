@@ -1,87 +1,88 @@
-# Welcome to React Router!
+# Ciclista Denuncie 🚴
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Plataforma web para registro e visualização de denúncias relacionadas à mobilidade urbana por bicicleta.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+[![React Router](https://img.shields.io/badge/React%20Router-v7-red)](https://reactrouter.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-38bdf8)](https://tailwindcss.com/)
 
-## Features
+## 🎯 Sobre
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+Sistema que permite ciclistas reportarem problemas de infraestrutura, assédio, ameaças e outros incidentes relacionados à mobilidade por bicicleta. Inclui mapa interativo para visualização e registro geolocalizado de denúncias.
 
-## Getting Started
+## ✨ Funcionalidades
 
-### Installation
+- 📝 **Registro de Denúncias** - Formulário multi-etapas intuitivo
+- 🗺️ **Mapa Interativo** - Visualização geolocalizada com múltiplas camadas
+- 🔍 **Filtros Avançados** - Por tipo e período
+- 🔐 **Autenticação** - Login com Google
+- 📱 **Responsivo** - Funciona em desktop e mobile
+- 🌓 **Dark Mode** - Suporte a tema escuro
 
-Install the dependencies:
+## 🚀 Quick Start
 
 ```bash
+# Instalar dependências
 npm install
-```
 
-### Development
-
-Start the development server with HMR:
-
-```bash
+# Iniciar servidor de desenvolvimento
 npm run dev
-```
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
+# Build de produção
 npm run build
 ```
 
-## Deployment
+Acesse: `http://localhost:5173`
 
-### Docker Deployment
+## 📚 Documentação
 
-To build and run using Docker:
+Para documentação completa, incluindo arquitetura, APIs, estrutura de dados e guia de contribuição, consulte:
+
+**[📖 DOCUMENTATION.md](./DOCUMENTATION.md)**
+
+## 🛠️ Tecnologias
+
+- React Router v7 (SSR)
+- TypeScript
+- TailwindCSS
+- Leaflet (Mapas)
+- Firebase
+- Lucide React (Ícones)
+
+## 🐳 Docker
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+docker build -t ciclistadenuncie .
+docker run -p 3000:3000 ciclistadenuncie
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
+## 📦 Estrutura
 
 ```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+ciclistadenuncie/
+├── app/
+│   ├── routes/          # Páginas
+│   ├── components/      # Componentes
+│   ├── lib/            # Utilitários
+│   └── services/       # APIs externas
+├── public/             # Assets estáticos
+└── DOCUMENTATION.md    # Documentação completa
 ```
 
-## Styling
+## 🤝 Contribuindo
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+Contribuições são bem-vindas! Veja [DOCUMENTATION.md](./DOCUMENTATION.md) para detalhes sobre como contribuir.
+
+## 📄 Licença
+
+MIT License - veja [LICENSE](./LICENSE) para detalhes.
+
+## 🔗 Links
+
+- [Documentação Completa](./DOCUMENTATION.md)
+- [React Router Docs](https://reactrouter.com/)
+- [Repositório](https://github.com/italosergio/ciclistadenuncie)
 
 ---
 
-Built with ❤️ using React Router.
+Desenvolvido com ❤️ para melhorar a mobilidade urbana por bicicleta
