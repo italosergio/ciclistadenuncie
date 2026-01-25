@@ -15,6 +15,9 @@ export function meta({}: Route.MetaArgs) {
     { property: "og:title", content: "Ciclista Denuncie 🚲" },
     { property: "og:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
     { property: "og:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:type", content: "image/png" },
     { property: "og:url", content: "https://ciclistadenuncie.com.br" },
     { property: "og:locale", content: "pt_BR" },
     
@@ -23,6 +26,7 @@ export function meta({}: Route.MetaArgs) {
     { name: "twitter:title", content: "Ciclista Denuncie 🚲" },
     { name: "twitter:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
     { name: "twitter:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
+    { name: "twitter:image:alt", content: "Ciclista Denuncie - Plataforma de denúncias" },
   ];
 }
 
