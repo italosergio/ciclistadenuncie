@@ -6,17 +6,17 @@ import type { Route } from "./+types/mapa";
 import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike } from "lucide-react";
 import { renderToString } from "react-dom/server";
 import { useNavigate } from "react-router";
+import { buscarCidadesIBGE } from "../services/ibge.service";
+import { buscarEnderecoPorCoordenadas, buscarCidadePorNome } from "../services/geocoding.service";
+import { TILE_LAYERS } from "../config/API_ENDPOINTS";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Mapa de Denúncias - Ciclista Denuncie" }];
 }
 
 export async function loader() {
-  const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios');
-  const data = await response.json();
-  return { cidades: data
-    .filter((m: any) => m.microrregiao?.mesorregiao?.UF?.sigla)
-    .map((m: any) => `${m.nome} - ${m.microrregiao.mesorregiao.UF.sigla}`) };
+  const cidades = await buscarCidadesIBGE();
+  return { cidades };
 }
 
 interface Denuncia {
@@ -58,6 +58,9 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [showTipoDropdown, setShowTipoDropdown] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const [errorModal, setErrorModal] = useState<string>("");
+  const selectTipoRef = useRef<HTMLSelectElement>(null);
+  const inputOutroRef = useRef<HTMLInputElement>(null);
+  const inputPlacaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const tipos = [
@@ -483,25 +486,25 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         >
           {mapType === 'street' && (
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              url={TILE_LAYERS.STREET}
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
           )}
           {mapType === 'satellite' && (
             <TileLayer
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              url={TILE_LAYERS.SATELLITE}
               attribution='&copy; Esri'
             />
           )}
           {mapType === 'light' && (
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              url={TILE_LAYERS.LIGHT}
               attribution='&copy; CartoDB'
             />
           )}
           {mapType === 'dark' && (
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              url={TILE_LAYERS.DARK}
               attribution='&copy; CartoDB'
             />
           )}
@@ -697,15 +700,9 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
   async function buscarCidade() {
     if (!cidade.trim()) return;
-    
     const nomeCidade = cidade.split(' - ')[0];
-    
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(nomeCidade)}&country=Brazil&format=json&limit=1`
-      );
-      const data = await response.json();
-      
+      const data = await buscarCidadePorNome(nomeCidade);
       if (data.length > 0) {
         setCenter([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         setZoom(12);
@@ -720,11 +717,28 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   async function salvarDenunciaModal() {
     if (!tempMarker || !tipo) {
       setErrorModal("Selecione o tipo");
+      setTimeout(() => {
+        selectTipoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        selectTipoRef.current?.focus();
+      }, 100);
+      return;
+    }
+
+    if (tipo === "outro" && !descricaoOutro.trim()) {
+      setErrorModal("Descreva o tipo");
+      setTimeout(() => {
+        inputOutroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inputOutroRef.current?.focus();
+      }, 100);
       return;
     }
 
     if (mostrarPlaca && placa && placa.length !== 7) {
       setErrorModal("A placa deve ter exatamente 7 caracteres");
+      setTimeout(() => {
+        inputPlacaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inputPlacaRef.current?.focus();
+      }, 100);
       return;
     }
 
@@ -1111,9 +1125,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   <p><strong>Coordenadas:</strong> {tempMarker?.lat.toFixed(6)}, {tempMarker?.lng.toFixed(6)}</p>
                 </div>
                 <select
+                  ref={selectTipoRef}
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value)}
-                  className="w-full p-3 border rounded-lg mb-4 text-black"
+                  className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && !tipo ? 'border-red-500' : ''}`}
                   size={6}
                   style={{ height: '165px' }}
                   required
@@ -1138,11 +1153,12 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 {errorModal && <p className="text-red-500 text-sm mt-2">{errorModal}</p>}
                 {tipo === "outro" && (
                   <input
+                    ref={inputOutroRef}
                     type="text"
                     placeholder="Descreva o tipo *"
                     value={descricaoOutro}
                     onChange={(e) => setDescricaoOutro(e.target.value)}
-                    className="w-full p-3 border rounded-lg mb-4 text-black"
+                    className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && tipo === "outro" && !descricaoOutro.trim() ? 'border-red-500' : ''}`}
                     required
                   />
                 )}
@@ -1161,11 +1177,12 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 </button>
                 {mostrarPlaca && (
                   <input
+                    ref={inputPlacaRef}
                     type="text"
                     placeholder="Placa"
                     value={placa}
                     onChange={(e) => setPlaca(e.target.value.toUpperCase())}
-                    className="w-full p-3 border rounded-lg mb-4 text-black"
+                    className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && placa && placa.length !== 7 ? 'border-red-500' : ''}`}
                     maxLength={7}
                   />
                 )}
