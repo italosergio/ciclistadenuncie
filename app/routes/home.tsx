@@ -55,7 +55,7 @@ export default function Home() {
         <h1 className="text-5xl md:text-7xl font-bold">🚲</h1>
         
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Ciclista Denuncie
+          CICLISTA, DENUNCIE!
         </h2>
         
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -86,6 +86,36 @@ export default function Home() {
             className="inline-block bg-black dark:bg-white text-white dark:text-black px-7 py-3.5 text-lg font-semibold rounded-lg hover:opacity-90 transition"
           >
             Registrar Denúncia
+          </Link>
+        </div>
+        
+        <div className="pt-2 space-x-4">
+          <Link
+            to="/mapa"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+          >
+            Mapa
+          </Link>
+          <span className="text-gray-400">•</span>
+          <Link
+            to="/contato"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+          >
+            Contato
+          </Link>
+        </div>
+        
+        <div className="pt-8 pb-4 space-x-4 text-xs text-gray-400 dark:text-gray-500">
+          <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+            LGPD
+          </Link>
+          <span>•</span>
+          <Link to="/termo-responsabilidade-usuario" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+            Termo de Responsabilidade do Usuário
+          </Link>
+          <span>•</span>
+          <Link to="/termo-responsabilidade-plataforma" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+            Termo de Responsabilidade da Plataforma
           </Link>
         </div>
       </div>
