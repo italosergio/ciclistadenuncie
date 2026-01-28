@@ -3,7 +3,7 @@ import { ref, onValue, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
-import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake } from "lucide-react";
+import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft } from "lucide-react";
 import { renderToString } from "react-dom/server";
 import { useNavigate } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
@@ -63,6 +63,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [tipoFiltro, setTipoFiltro] = useState<string>('todos');
   const [showTipoDropdown, setShowTipoDropdown] = useState(false);
+  const [anoFiltro, setAnoFiltro] = useState<number | 'todos'>('todos');
+  const [showAnoDropdown, setShowAnoDropdown] = useState(false);
   const [useClusters, setUseClusters] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = document.cookie.split('; ').find(row => row.startsWith('useClusters='));
@@ -116,6 +118,33 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       document.cookie = `useClusters=; path=/; max-age=0`;
     }
   }, [useClusters, savePreferences]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (showOptionsMenu) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.options-menu') && !target.closest('.options-button')) {
+          setShowOptionsMenu(false);
+        }
+      }
+      if (showAnoDropdown) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.ano-dropdown') && !target.closest('.ano-button')) {
+          setShowAnoDropdown(false);
+        }
+      }
+    };
+    
+    if (showOptionsMenu || showAnoDropdown) {
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showOptionsMenu, showAnoDropdown]);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -249,7 +278,16 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   useEffect(() => {
     const denunciasRef = ref(db, "denuncias");
     const unsubscribe = onValue(denunciasRef, (snapshot) => {
-      setDenuncias(snapshot.val() || {});
+      const data = snapshot.val() || {};
+      setDenuncias(data);
+      
+      // Definir ano inicial como o último ano disponível
+      const anos = Object.values(data)
+        .filter((d: any) => d.localizacao)
+        .map((d: any) => new Date(d.createdAt).getFullYear());
+      if (anos.length > 0) {
+        setAnoFiltro(Math.max(...anos));
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -478,7 +516,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
           const MapTypeButton = L.default.Control.extend({
             onAdd: function() {
-              const btn = L.default.DomUtil.create('div', 'leaflet-bar');
+              const btn = L.default.DomUtil.create('div', 'leaflet-bar options-button');
               btn.style.marginTop = '10px';
               btn.style.zIndex = '2000';
               btn.innerHTML = `<a href="#" title="Opções" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: white; text-decoration: none;">${renderToString(<Layers size={18} />)}</a>`;
@@ -814,8 +852,24 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   }, []);
 
   const denunciasComLocalizacao = Object.entries(denuncias).filter(
-    ([_, d]) => d.localizacao && (tipoFiltro === 'todos' || d.tipo === tipoFiltro)
+    ([_, d]) => {
+      if (!d.localizacao) return false;
+      if (tipoFiltro !== 'todos' && d.tipo !== tipoFiltro) return false;
+      if (anoFiltro !== 'todos') {
+        const ano = new Date(d.createdAt).getFullYear();
+        if (ano !== anoFiltro) return false;
+      }
+      return true;
+    }
   );
+
+  const anosDisponiveis = Array.from(
+    new Set(
+      Object.values(denuncias)
+        .filter(d => d.localizacao)
+        .map(d => new Date(d.createdAt).getFullYear())
+    )
+  ).sort((a, b) => b - a);
 
   async function buscarCidade() {
     if (!cidade.trim()) return;
@@ -888,6 +942,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           pointer-events: none !important;
           -webkit-user-select: none !important;
           user-select: none !important;
+          opacity: 0.1 !important;
         }
         .leaflet-control-attribution a {
           tabindex: -1 !important;
@@ -904,20 +959,66 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       )}
       
       <div className="absolute top-4 left-4 z-[400] hidden md:block">
-        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg mb-2">
+        <button
+          onClick={() => navigate('/')}
+          className="text-white dark:text-black text-xs underline hover:opacity-70 transition-opacity mb-1 flex items-center gap-1"
+        >
+          <ArrowLeft size={12} /> voltar
+        </button>
+        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg mb-2 relative z-[500]">
           <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2"><Map /> CICLISTA DENUNCIE - MAPA</h1>
-          <p className="text-xs md:text-sm mt-1">
-            {denunciasVisiveis !== null ? (
-              CountUpComponent ? (
-                <CountUpComponent 
-                  start={0}
-                  end={denunciasVisiveis} 
-                  duration={2.5}
-                  useEasing={true}
-                />
-              ) : denunciasVisiveis
-            ) : denunciasComLocalizacao.length} denúncias
-          </p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs md:text-sm">
+              {denunciasVisiveis !== null ? (
+                CountUpComponent ? (
+                  <CountUpComponent 
+                    start={0}
+                    end={denunciasVisiveis} 
+                    duration={2.5}
+                    useEasing={true}
+                  />
+                ) : denunciasVisiveis
+              ) : denunciasComLocalizacao.length} denúncias
+            </p>
+            <div className="relative z-[600]">
+              <button
+                onClick={() => setShowAnoDropdown(!showAnoDropdown)}
+                className="text-xs md:text-sm flex items-center gap-1 hover:opacity-70 transition-opacity ano-button"
+              >
+                <Calendar size={14} />
+                {anoFiltro === 'todos' ? 'Todos' : anoFiltro}
+              </button>
+              {showAnoDropdown && (
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl min-w-[120px] overflow-hidden z-[700] ano-dropdown">
+                  <button
+                    onClick={() => {
+                      setAnoFiltro('todos');
+                      setShowAnoDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-100 text-black ${
+                      anoFiltro === 'todos' ? 'bg-gray-200 font-semibold' : ''
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {anosDisponiveis.map(ano => (
+                    <button
+                      key={ano}
+                      onClick={() => {
+                        setAnoFiltro(ano);
+                        setShowAnoDropdown(false);
+                      }}
+                      className={`w-full px-4 py-2 text-left hover:bg-gray-100 text-black ${
+                        anoFiltro === ano ? 'bg-gray-200 font-semibold' : ''
+                      }`}
+                    >
+                      {ano}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div className="relative w-80 mb-2">
           <input
@@ -1036,20 +1137,66 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       </div>
 
       <div className="absolute top-4 left-4 z-[400] flex flex-col items-start gap-2 md:hidden">
-        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg">
+        <button
+          onClick={() => navigate('/')}
+          className="text-white dark:text-black text-xs underline hover:opacity-70 transition-opacity flex items-center gap-1"
+        >
+          <ArrowLeft size={12} /> voltar
+        </button>
+        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg relative z-[500]">
           <h1 className="text-lg font-bold flex items-center gap-2"><Map size={20} /> CICLISTA DENUNCIE - MAPA</h1>
-          <p className="text-xs mt-1">
-            {denunciasVisiveis !== null ? (
-              CountUpComponent ? (
-                <CountUpComponent 
-                  start={0}
-                  end={denunciasVisiveis} 
-                  duration={2.5}
-                  useEasing={true}
-                />
-              ) : denunciasVisiveis
-            ) : denunciasComLocalizacao.length} denúncias
-          </p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs">
+              {denunciasVisiveis !== null ? (
+                CountUpComponent ? (
+                  <CountUpComponent 
+                    start={0}
+                    end={denunciasVisiveis} 
+                    duration={2.5}
+                    useEasing={true}
+                  />
+                ) : denunciasVisiveis
+              ) : denunciasComLocalizacao.length} denúncias
+            </p>
+            <div className="relative z-[600]">
+              <button
+                onClick={() => setShowAnoDropdown(!showAnoDropdown)}
+                className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity ano-button"
+              >
+                <Calendar size={12} />
+                {anoFiltro === 'todos' ? 'Todos' : anoFiltro}
+              </button>
+              {showAnoDropdown && (
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl min-w-[100px] overflow-hidden z-[700] ano-dropdown">
+                  <button
+                    onClick={() => {
+                      setAnoFiltro('todos');
+                      setShowAnoDropdown(false);
+                    }}
+                    className={`w-full px-3 py-2 text-left hover:bg-gray-100 text-black text-sm ${
+                      anoFiltro === 'todos' ? 'bg-gray-200 font-semibold' : ''
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {anosDisponiveis.map(ano => (
+                    <button
+                      key={ano}
+                      onClick={() => {
+                        setAnoFiltro(ano);
+                        setShowAnoDropdown(false);
+                      }}
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 text-black text-sm ${
+                        anoFiltro === ano ? 'bg-gray-200 font-semibold' : ''
+                      }`}
+                    >
+                      {ano}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div className="relative w-80">
           <input
@@ -1170,7 +1317,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       </div>
 
       {showOptionsMenu && (
-        <div className="absolute top-32 right-4 z-[2100] bg-white rounded-xl shadow-2xl p-3 space-y-2 min-w-[180px]"
+        <div className="absolute top-32 right-4 z-[2100] bg-white rounded-xl shadow-2xl p-3 space-y-2 min-w-[180px] options-menu"
              style={{
                boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
              }}>
@@ -1224,7 +1371,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         {!markingMode ? (
           <button
             onClick={() => setMarkingMode(true)}
-            className="px-8 py-4 bg-red-600 text-white rounded-lg font-bold text-lg shadow-lg hover:bg-red-700"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold text-sm shadow-lg hover:bg-red-700"
           >
             Denunciar Ponto
           </button>
@@ -1234,7 +1381,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
               setMarkingMode(false);
               setTempMarker(null);
             }}
-            className="px-8 py-4 bg-gray-600 text-white rounded-lg font-bold text-lg shadow-lg hover:bg-gray-700"
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold text-sm shadow-lg hover:bg-gray-700"
           >
             Cancelar
           </button>
