@@ -3,6 +3,8 @@ import type { Route } from "./+types/home";
 import { Link } from "react-router";
 import { ref, onValue } from "firebase/database";
 import { db } from "../lib/firebase";
+import Logo from "../components/Logo";
+import BikeFireAnimation from "../components/BikeFireAnimation";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,10 +16,7 @@ export function meta({}: Route.MetaArgs) {
     { property: "og:type", content: "website" },
     { property: "og:title", content: "Ciclista Denuncie 🚲" },
     { property: "og:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
-    { property: "og:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
-    { property: "og:image:width", content: "1200" },
-    { property: "og:image:height", content: "630" },
-    { property: "og:image:type", content: "image/png" },
+    { property: "og:image", content: "https://ciclistadenuncie.com.br/logo-ciclistadenuncie.png" },
     { property: "og:url", content: "https://ciclistadenuncie.com.br" },
     { property: "og:locale", content: "pt_BR" },
     
@@ -25,14 +24,14 @@ export function meta({}: Route.MetaArgs) {
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: "Ciclista Denuncie 🚲" },
     { name: "twitter:description", content: "Violência no trânsito não começa no atropelamento. Registre denúncias e dê visibilidade aos problemas enfrentados por ciclistas." },
-    { name: "twitter:image", content: "https://ciclistadenuncie.com.br/og-image.png" },
-    { name: "twitter:image:alt", content: "Ciclista Denuncie - Plataforma de denúncias" },
+    { name: "twitter:image", content: "https://ciclistadenuncie.com.br/logo-ciclistadenuncie.png" },
   ];
 }
 
 export default function Home() {
   const [total, setTotal] = useState(0);
   const [CountUpComponent, setCountUpComponent] = useState<any>(null);
+  const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
     import('react-countup').then(module => {
@@ -50,9 +49,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="max-w-6xl text-center space-y-5">
-        <h1 className="text-5xl md:text-7xl font-bold">🚲</h1>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" onClick={() => showAnimation && setShowAnimation(false)}>
+      {showAnimation && <BikeFireAnimation />}
+      <div className="max-w-6xl text-center space-y-5" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-center">
+          <Logo onTripleClick={() => setShowAnimation(!showAnimation)} />
+        </div>
         
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
           CICLISTA, DENUNCIE!
@@ -60,7 +62,7 @@ export default function Home() {
         
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Violência no trânsito não começa no atropelamento.
-          <br />É hora de dar visibilidade ao que você vive nas ruas.
+          <br />É hora de dar <Link to="/mapa" className="text-red-600 dark:text-red-500 font-bold underline hover:opacity-80 transition">visibilidade</Link> ao que você vive nas ruas.
         </p>
         
         <Link to="/mapa" className="block py-5 hover:opacity-80 transition">
@@ -83,7 +85,7 @@ export default function Home() {
         <div className="pt-3 pb-4">
           <Link
             to="/denunciar"
-            className="inline-block bg-black dark:bg-white text-white dark:text-black px-7 py-3.5 text-lg font-semibold rounded-lg hover:opacity-90 transition"
+            className="inline-block bg-black dark:bg-white text-white dark:text-black px-7 py-3.5 text-lg font-semibold rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-white active:scale-95 transition-all"
           >
             Registrar Denúncia
           </Link>
@@ -105,18 +107,20 @@ export default function Home() {
           </Link>
         </div>
         
-        <div className="pt-8 pb-4 space-x-4 text-xs text-gray-400 dark:text-gray-500">
-          <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-            LGPD
-          </Link>
-          <span>•</span>
-          <Link to="/termo-responsabilidade-usuario" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-            Termo de Responsabilidade do Usuário
-          </Link>
-          <span>•</span>
-          <Link to="/termo-responsabilidade-plataforma" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-            Termo de Responsabilidade da Plataforma
-          </Link>
+        <div className="pt-8 pb-4 text-xs text-gray-400 dark:text-gray-500 space-y-2">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+              Proteção de Dados
+            </Link>
+            <span className="hidden sm:inline">•</span>
+            <Link to="/termo-responsabilidade-usuario" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+              Termo de Responsabilidade do Usuário
+            </Link>
+            <span className="hidden sm:inline">•</span>
+            <Link to="/termo-responsabilidade-plataforma" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
+              Termo de Responsabilidade da Plataforma
+            </Link>
+          </div>
         </div>
       </div>
     </div>
