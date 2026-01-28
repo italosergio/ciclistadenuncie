@@ -6,6 +6,7 @@ import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHor
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
+import { useAuth } from "../lib/AuthContext";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Registrar Denúncia - Ciclista Denuncie" }];
@@ -17,25 +18,64 @@ export async function loader() {
 }
 
 export default function Denunciar({ loaderData }: Route.ComponentProps) {
-  const [etapaAtual, setEtapaAtual] = useState(0);
+  const [etapaAtual, setEtapaAtual] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('denuncia_etapa');
+      return saved ? parseInt(saved) : 0;
+    }
+    return 0;
+  });
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [location, setLocation] = useState<{lat: number, lng: number} | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('denuncia_location');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
   const [mostrarPlaca, setMostrarPlaca] = useState(false);
-  const [tipo, setTipo] = useState("");
+  const [tipo, setTipo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('denuncia_tipo') || '';
+    }
+    return '';
+  });
   const [showTipoDropdown, setShowTipoDropdown] = useState(false);
-  const [descricaoOutro, setDescricaoOutro] = useState("");
-  const [relato, setRelato] = useState("");
-  const [placa, setPlaca] = useState("");
-  const [enderecoAtual, setEnderecoAtual] = useState("");
+  const [descricaoOutro, setDescricaoOutro] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('denuncia_descricaoOutro') || '';
+    }
+    return '';
+  });
+  const [relato, setRelato] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('denuncia_relato') || '';
+    }
+    return '';
+  });
+  const [placa, setPlaca] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('denuncia_placa') || '';
+    }
+    return '';
+  });
+  const [enderecoAtual, setEnderecoAtual] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('denuncia_endereco') || '';
+    }
+    return '';
+  });
   const [showMiniMap, setShowMiniMap] = useState(false);
   const [miniMapCenter, setMiniMapCenter] = useState<[number, number]>([-14.235, -51.925]);
+  const [miniMapZoom, setMiniMapZoom] = useState(4);
   const [MiniMapComponent, setMiniMapComponent] = useState<any>(null);
-  const [errors, setErrors] = useState<{tipo?: string; descricaoOutro?: string; placa?: string}>({});
+  const [errors, setErrors] = useState<{tipo?: string; descricaoOutro?: string; placa?: string; localizacao?: string}>({});
   const tipoRef = useRef<HTMLDivElement>(null);
   const descricaoOutroRef = useRef<HTMLInputElement>(null);
   const placaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const routeLocation = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (routeLocation.state?.localizacao) {
@@ -53,8 +93,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           };
           setLocation(pos);
           setMiniMapCenter([pos.lat, pos.lng]);
+          setMiniMapZoom(16);
           const endereco = await buscarEnderecoPorCoordenadas(pos);
           setEnderecoAtual(endereco);
+          setErrors(prev => ({ ...prev, localizacao: undefined }));
         },
         (error) => console.log('Localização não permitida:', error)
       );
@@ -73,16 +115,28 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     }
     if (etapaAtual < 2) {
       setErrors({});
-      setEtapaAtual(etapaAtual + 1);
+      const novaEtapa = etapaAtual + 1;
+      setEtapaAtual(novaEtapa);
+      localStorage.setItem('denuncia_etapa', novaEtapa.toString());
     }
   };
 
   const voltarEtapa = () => {
-    if (etapaAtual > 0) setEtapaAtual(etapaAtual - 1);
+    if (etapaAtual > 0) {
+      const novaEtapa = etapaAtual - 1;
+      setEtapaAtual(novaEtapa);
+      localStorage.setItem('denuncia_etapa', novaEtapa.toString());
+    }
   };
 
   const handleFinalSubmit = async () => {
+    if (!location) {
+      setErrors({ localizacao: "Por favor, marque a localização no mapa ou permita o acesso à sua localização" });
+      return;
+    }
+    
     setLoading(true);
+    setErrors({});
 
     try {
       await salvarDenuncia({
@@ -91,11 +145,23 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
         tipo: tipo === "outro" ? descricaoOutro : tipo,
         placa: mostrarPlaca ? placa : undefined,
         localizacao: location,
+        userId: user?.uid,
+        username: user?.username,
       });
-      navigate("/sucesso");
+      
+      // Limpa localStorage após envio bem-sucedido
+      localStorage.removeItem('denuncia_tipo');
+      localStorage.removeItem('denuncia_descricaoOutro');
+      localStorage.removeItem('denuncia_relato');
+      localStorage.removeItem('denuncia_placa');
+      localStorage.removeItem('denuncia_endereco');
+      localStorage.removeItem('denuncia_location');
+      localStorage.removeItem('denuncia_etapa');
+      
+      navigate("/sucesso", { state: { location } });
     } catch (error) {
       console.error('Erro completo:', error);
-      alert("Erro ao registrar denúncia");
+      setErrors({ localizacao: "Erro ao registrar denúncia. Tente novamente." });
     } finally {
       setLoading(false);
     }
@@ -118,6 +184,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               setLocation(pos);
               const endereco = await buscarEnderecoPorCoordenadas(pos);
               setEnderecoAtual(endereco);
+              setErrors(prev => ({ ...prev, localizacao: undefined }));
             }
           });
           return null;
@@ -127,7 +194,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           <div style={{ position: 'relative' }}>
             <MapContainer 
               center={miniMapCenter} 
-              zoom={16} 
+              zoom={miniMapZoom} 
               style={{ height: '300px', width: '100%' }}
               zoomControl={true}
             >
@@ -165,8 +232,11 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
             lng: position.coords.longitude
           };
           setLocation(pos);
+          setMiniMapCenter([pos.lat, pos.lng]);
+          setMiniMapZoom(16);
           const endereco = await buscarEnderecoPorCoordenadas(pos);
           setEnderecoAtual(endereco);
+          setErrors(prev => ({ ...prev, localizacao: undefined }));
         },
         (error) => {
           if (error.code === 1) {
@@ -216,7 +286,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               <div className="flex flex-col items-center">
                 <button
                   type="button"
-                  onClick={() => setEtapaAtual(index)}
+                  onClick={() => {
+                    setEtapaAtual(index);
+                    localStorage.setItem('denuncia_etapa', index.toString());
+                  }}
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors cursor-pointer ${
                     index === etapaAtual 
                       ? 'bg-black dark:bg-white text-white dark:text-black' 
@@ -275,6 +348,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         type="button"
                         onClick={() => {
                           setTipo(t.value);
+                          localStorage.setItem('denuncia_tipo', t.value);
                           setShowTipoDropdown(false);
                         }}
                         className="w-full p-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left flex items-center gap-2"
@@ -295,7 +369,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                     ref={descricaoOutroRef}
                     type="text"
                     value={descricaoOutro}
-                    onChange={(e) => setDescricaoOutro(e.target.value)}
+                    onChange={(e) => {
+                      setDescricaoOutro(e.target.value);
+                      localStorage.setItem('denuncia_descricaoOutro', e.target.value);
+                    }}
                     placeholder="Ex: Buraco na ciclovia, falta de sinalização..."
                     className={`w-full p-3 border rounded-lg dark:bg-gray-900 ${errors.descricaoOutro ? 'border-red-500' : ''}`}
                   />
@@ -313,7 +390,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               
               <textarea
                 value={relato}
-                onChange={(e) => setRelato(e.target.value)}
+                onChange={(e) => {
+                  setRelato(e.target.value);
+                  localStorage.setItem('denuncia_relato', e.target.value);
+                }}
                 rows={6}
                 placeholder="Descreva o que aconteceu..."
                 className="w-full p-3 border rounded-lg dark:bg-gray-900"
@@ -342,7 +422,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                     ref={placaRef}
                     type="text"
                     value={placa}
-                    onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setPlaca(e.target.value.toUpperCase());
+                      localStorage.setItem('denuncia_placa', e.target.value.toUpperCase());
+                    }}
                     placeholder="Placa"
                     maxLength={7}
                     className="w-full p-3 border rounded-lg dark:bg-gray-900 uppercase"
@@ -366,6 +449,12 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                       <p className="text-sm text-blue-700 dark:text-blue-300">{enderecoAtual}</p>
                     </div>
                   </div>
+                </div>
+              )}
+              
+              {errors.localizacao && (
+                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.localizacao}</p>
                 </div>
               )}
               

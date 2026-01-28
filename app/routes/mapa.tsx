@@ -3,12 +3,13 @@ import { ref, onValue, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
-import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft } from "lucide-react";
+import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield } from "lucide-react";
 import { renderToString } from "react-dom/server";
-import { useNavigate } from "react-router";
+import { useNavigate, Link, useLocation } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas, buscarCidadePorNome } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
+import { useAuth } from "../lib/AuthContext";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Mapa de Denúncias - Ciclista Denuncie" }];
@@ -21,7 +22,7 @@ export async function loader() {
 
 interface Denuncia {
   endereco: string;
-  relato: string;
+  relato: string | Array<{ texto: string; editadoEm: string }> | Array<string>;
   tipo?: string;
   placa?: string;
   localizacao?: { lat: number; lng: number };
@@ -34,8 +35,19 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [cidade, setCidade] = useState("");
   const [sugestoes, setSugestoes] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [center, setCenter] = useState<[number, number]>([-14.235, -51.925]);
-  const [zoom, setZoom] = useState(4);
+  const routeLocation = useLocation();
+  const [center, setCenter] = useState<[number, number]>(() => {
+    if (routeLocation.state?.center) {
+      return routeLocation.state.center;
+    }
+    return [-14.235, -51.925];
+  });
+  const [zoom, setZoom] = useState(() => {
+    if (routeLocation.state?.zoom) {
+      return routeLocation.state.zoom;
+    }
+    return 4;
+  });
   const [tracking, setTracking] = useState(false);
   const [route, setRoute] = useState<{lat: number, lng: number, timestamp: number}[]>([]);
   const [watchId, setWatchId] = useState<number | null>(null);
@@ -84,6 +96,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const inputOutroRef = useRef<HTMLInputElement>(null);
   const inputPlacaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const tipos = [
     { value: "fina", label: "Fina", icon: Wind, color: "#dc2626" },
@@ -731,7 +745,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                         )}
                         {denuncia.relato && (
                           <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                            {denuncia.relato}
+                            {getRelatoTexto(denuncia.relato)}
                           </div>
                         )}
                         {denuncia.placa && (
@@ -831,7 +845,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                           )}
                           {denuncia.relato && (
                             <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                              {denuncia.relato}
+                              {getRelatoTexto(denuncia.relato)}
                             </div>
                           )}
                           {denuncia.placa && (
@@ -862,6 +876,15 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       return true;
     }
   );
+
+  const getRelatoTexto = (relato: string | Array<{ texto: string; editadoEm: string }> | Array<string>): string => {
+    if (typeof relato === 'string') return relato;
+    if (Array.isArray(relato) && relato.length > 0) {
+      const ultimo = relato[relato.length - 1];
+      return typeof ultimo === 'string' ? ultimo : ultimo?.texto || '';
+    }
+    return '';
+  };
 
   const anosDisponiveis = Array.from(
     new Set(
@@ -923,6 +946,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         tipo: tipo === "outro" ? descricaoOutro : tipo,
         placa: mostrarPlaca && placa ? placa : undefined,
         localizacao: tempMarker,
+        userId: user?.uid,
+        username: user?.username,
       });
       setShowSuccess(true);
     } catch (error) {
@@ -933,6 +958,59 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="h-screen relative">
+      {/* Link Bem-vindo no topo centro */}
+      {user ? (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500]">
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white underline text-sm bg-white/95 dark:bg-gray-800/95 px-4 py-2 rounded-lg shadow-lg flex items-center gap-1 font-medium"
+            >
+              Bem-vindo, <span className="text-red-600 dark:text-red-500">{user.username}</span>!
+              <ChevronDown size={14} />
+            </button>
+            {showUserMenu && (
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl min-w-[180px] overflow-hidden">
+                <Link
+                  to={`/usuario/${user.username}`}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  <BarChart3 size={16} /> Minhas Contribuições
+                </Link>
+                {(user.role === 'administrador' || user.role === 'moderador') && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <Shield size={16} /> Painel ADM
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowUserMenu(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <LogOut size={16} /> Sair
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500]">
+          <Link
+            to="/login"
+            className="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white underline text-sm bg-white/95 dark:bg-gray-800/95 px-4 py-2 rounded-lg shadow-lg font-medium"
+          >
+            Entrar ou Registrar
+          </Link>
+        </div>
+      )}
+      
       <style>{`
         .marking-mode * {
           cursor: none !important;

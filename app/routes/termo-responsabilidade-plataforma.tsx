@@ -129,7 +129,47 @@ export default function TermoResponsabilidadePlataforma() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">7. Cooperação com Autoridades</h2>
+            <h2 className="text-2xl font-bold mb-4">7. Segurança e Privacidade dos Dados</h2>
+            <p className="mb-4">
+              <strong>Sistema de Autenticação:</strong> Utilizamos Firebase Authentication, um sistema de autenticação seguro fornecido pelo Google, que garante:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Criptografia de senhas com algoritmos modernos</li>
+              <li>Proteção contra ataques de força bruta</li>
+              <li>Tokens de sessão seguros e temporários</li>
+              <li>Comunicação criptografada (HTTPS)</li>
+            </ul>
+            <p className="mb-4 mt-4">
+              <strong>Privacidade do Usuário:</strong> Seus dados de login são protegidos e:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Seu nome de usuário NÃO aparece publicamente nas denúncias</li>
+              <li>Apenas você pode ver suas próprias contribuições na página "Minhas Contribuições"</li>
+              <li>O cruzamento usuário-denúncia é usado APENAS para dar a você o poder de editar ou excluir seus próprios pontos</li>
+              <li>Administradores podem ver o autor das denúncias apenas para fins de moderação</li>
+            </ul>
+            <p className="mb-4 mt-4">
+              <strong>Autonomia do Usuário:</strong> Ao fazer login, você tem total controle sobre suas denúncias:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Editar o relato de suas denúncias a qualquer momento</li>
+              <li>Excluir denúncias que você criou</li>
+              <li>Visualizar histórico de edições (quando aplicável)</li>
+              <li>Acessar todas as suas contribuições em um só lugar</li>
+            </ul>
+            <p className="mb-4 mt-4">
+              <strong>Histórico de Edições:</strong> Quando você edita uma denúncia:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>O relato original é preservado</li>
+              <li>Cada edição é registrada com data e hora</li>
+              <li>Uma tag "~editado" aparece discretamente na denúncia</li>
+              <li>O relato mais recente é sempre exibido publicamente</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold mb-4">8. Cooperação com Autoridades</h2>
             <p className="mb-4">
               A plataforma cooperará integralmente com autoridades competentes em investigações, fornecendo dados mediante ordem judicial, conforme previsto no Marco Civil da Internet.
             </p>

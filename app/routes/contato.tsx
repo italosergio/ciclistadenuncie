@@ -4,12 +4,15 @@ import type { Route } from "./+types/contato";
 import { Lightbulb, Bug, MessageCircle, HelpCircle, FileQuestion, AlertCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, set } from "firebase/database";
+import { useAuth } from "../lib/AuthContext";
+import { registrarEvento } from "../lib/historico";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Contato - Ciclista Denuncie" }];
 }
 
 export default function Contato() {
+  const { user } = useAuth();
   const [etapaAtual, setEtapaAtual] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tipoContato, setTipoContato] = useState("");
@@ -64,42 +67,26 @@ export default function Contato() {
 
     try {
       const agora = new Date();
+      const isoTimestamp = agora.toISOString().replace(/[:.]/g, '-');
       
-      const dataHoraBR = agora.toLocaleString('pt-BR', { 
-        timeZone: 'America/Sao_Paulo',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-
-      const partesBR = agora.toLocaleString('en-US', { 
-        timeZone: 'America/Sao_Paulo',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      }).match(/(\d+)\/(\d+)\/(\d+),\s(\d+):(\d+):(\d+)/);
-      
-      if (!partesBR) throw new Error('Erro ao formatar data');
-      
-      const [, mes, dia, ano, hora, minuto, segundo] = partesBR;
-      const ms = String(agora.getMilliseconds()).padStart(3, '0');
-      
-      const isoId = `${ano}-${mes}-${dia}T${hora}-${minuto}-${segundo}-${ms}Z`;
-      const contatosRef = ref(db, `contatos/${isoId}`);
+      const contatosRef = ref(db, `contatos/${isoTimestamp}`);
       await set(contatosRef, {
         tipo: tipoContato,
         mensagem,
-        usuario: contato.trim() || "Anônimo",
-        data: dataHoraBR,
+        usuario: user?.username || contato.trim() || "Anônimo",
+        data: agora.toISOString(),
         lida: false,
         pinada: false
+      });
+
+      // Registra evento de envio de contato
+      await registrarEvento({
+        tipo: 'enviar_contato',
+        usuario: user?.username || contato.trim() || 'Anônimo',
+        detalhes: {
+          contatoId: isoTimestamp,
+          tipo: tipoContato,
+        },
       });
 
       navigate("/sucesso-contato");
