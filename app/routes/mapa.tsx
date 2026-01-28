@@ -619,7 +619,21 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
                 icon={markerIcon}
                 eventHandlers={{
+                  mouseover: (e: any) => {
+                    if (!isMarking) {
+                      e.target.openPopup();
+                    }
+                  },
+                  mouseout: (e: any) => {
+                    if (!isMarking && !e.target.isPopupOpen()) {
+                      e.target.closePopup();
+                    }
+                  },
                   click: async (e: any) => {
+                    if (!isMarking) {
+                      e.target.openPopup();
+                      return;
+                    }
                     if (isMarking) {
                       const pos = { lat: denuncia.localizacao!.lat, lng: denuncia.localizacao!.lng };
                       setTempMarker(pos);
@@ -658,39 +672,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 }}
               >
                 {!isMarking && (
-                  <>
-                    <Tooltip direction="top" offset={[0, -20]} opacity={1} className="custom-tooltip">
-                      <div style={{ minWidth: '200px', maxWidth: '300px' }}>
-                        <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
-                          {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
-                            day: '2-digit', 
-                            month: '2-digit', 
-                            year: 'numeric', 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-                          {denuncia.endereco}
-                        </div>
-                        {denuncia.tipo && (
-                          <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
-                            {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
-                          </div>
-                        )}
-                        {denuncia.relato && (
-                          <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                            {denuncia.relato}
-                          </div>
-                        )}
-                        {denuncia.placa && (
-                          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
-                            Placa: {denuncia.placa}
-                          </div>
-                        )}
-                      </div>
-                    </Tooltip>
-                    <Popup autoPan={false} className="custom-popup">
+                    <Popup className="custom-popup">
                       <div style={{ minWidth: '200px', maxWidth: '300px' }}>
                         <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
                           {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
@@ -721,7 +703,6 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                         )}
                       </div>
                     </Popup>
-                  </>
                 )}
               </Marker>
             )})}
@@ -738,7 +719,21 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
                   icon={markerIcon}
                   eventHandlers={{
+                    mouseover: (e: any) => {
+                      if (!isMarking) {
+                        e.target.openPopup();
+                      }
+                    },
+                    mouseout: (e: any) => {
+                      if (!isMarking && !e.target.isPopupOpen()) {
+                        e.target.closePopup();
+                      }
+                    },
                     click: async (e: any) => {
+                      if (!isMarking) {
+                        e.target.openPopup();
+                        return;
+                      }
                       if (isMarking) {
                         const pos = { lat: denuncia.localizacao!.lat, lng: denuncia.localizacao!.lng };
                         setTempMarker(pos);
@@ -777,39 +772,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   }}
                 >
                   {!isMarking && (
-                    <>
-                      <Tooltip direction="top" offset={[0, -20]} opacity={1} className="custom-tooltip">
-                        <div style={{ minWidth: '200px', maxWidth: '300px' }}>
-                          <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
-                            {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
-                              day: '2-digit', 
-                              month: '2-digit', 
-                              year: 'numeric', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-                            {denuncia.endereco}
-                          </div>
-                          {denuncia.tipo && (
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
-                              {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
-                            </div>
-                          )}
-                          {denuncia.relato && (
-                            <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                              {denuncia.relato}
-                            </div>
-                          )}
-                          {denuncia.placa && (
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
-                              Placa: {denuncia.placa}
-                            </div>
-                          )}
-                        </div>
-                      </Tooltip>
-                      <Popup autoPan={false} className="custom-popup">
+                      <Popup className="custom-popup">
                         <div style={{ minWidth: '200px', maxWidth: '300px' }}>
                           <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
                             {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
@@ -840,7 +803,6 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                           )}
                         </div>
                       </Popup>
-                    </>
                   )}
                 </Marker>
               )})}
