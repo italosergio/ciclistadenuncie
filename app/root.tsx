@@ -10,6 +10,7 @@ import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import { initConsoleEasterEgg } from "./lib/console-easter-egg";
+import { AuthProvider } from "./lib/AuthContext";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -50,7 +51,11 @@ export default function App() {
     initConsoleEasterEgg();
   }, []);
 
-  return <Outlet />;
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
