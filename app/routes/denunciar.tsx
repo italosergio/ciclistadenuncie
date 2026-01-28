@@ -44,7 +44,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   }, [routeLocation]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (etapaAtual === 2 && !location && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const pos = {
@@ -59,7 +59,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
         (error) => console.log('Localização não permitida:', error)
       );
     }
-  }, []);
+  }, [etapaAtual, location]);
 
   const proximaEtapa = () => {
     if (etapaAtual === 0) {
@@ -308,8 +308,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           {/* Etapa 2: Relato */}
           {etapaAtual === 1 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-2">Conte o que aconteceu</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Importante e recomendado</p>
+              <h2 className="text-2xl font-bold mb-2">Conte o que aconteceu (opcional)</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Seu relato ajuda a dar mais contexto e força à denúncia</p>
               
               <textarea
                 value={relato}
@@ -319,7 +319,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 className="w-full p-3 border rounded-lg dark:bg-gray-900"
               />
 
-              <div className="mt-4">
+              <div className="mt-4 flex justify-between items-center">
                 <button
                   type="button"
                   onClick={() => setMostrarPlaca(!mostrarPlaca)}
@@ -327,20 +327,28 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 >
                   ~ pegou a placa? ~
                 </button>
-                {mostrarPlaca && (
-                  <div className="mt-2">
-                    <input
-                      ref={placaRef}
-                      type="text"
-                      value={placa}
-                      onChange={(e) => setPlaca(e.target.value.toUpperCase())}
-                      placeholder="Placa"
-                      maxLength={7}
-                      className="w-full p-3 border rounded-lg dark:bg-gray-900 uppercase"
-                    />
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={proximaEtapa}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
+                >
+                  ~ pular ~
+                </button>
               </div>
+              
+              {mostrarPlaca && (
+                <div className="mt-2">
+                  <input
+                    ref={placaRef}
+                    type="text"
+                    value={placa}
+                    onChange={(e) => setPlaca(e.target.value.toUpperCase())}
+                    placeholder="Placa"
+                    maxLength={7}
+                    className="w-full p-3 border rounded-lg dark:bg-gray-900 uppercase"
+                  />
+                </div>
+              )}
             </div>
           )}
 
