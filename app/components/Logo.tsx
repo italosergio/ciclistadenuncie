@@ -25,7 +25,7 @@ export default function Logo({ onTripleClick }: { onTripleClick?: () => void }) 
 
   return (
     <div 
-      className={`w-32 h-32 md:w-20 md:h-20 overflow-hidden cursor-pointer ${shake ? 'animate-shake' : ''}`}
+      className={`w-32 h-32 md:w-16 md:h-16 overflow-hidden cursor-pointer ${shake ? 'animate-shake' : ''}`}
       onClick={handleClick}
     >
       <img src="/logo-ciclistadenuncie.png" alt="Ciclista Denuncie" className="w-full h-full object-cover scale-120" />
