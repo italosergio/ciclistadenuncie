@@ -960,14 +960,14 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     <div className="h-screen relative">
       {/* Link Bem-vindo no topo centro */}
       {user ? (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500]">
+        <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-[500]">
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white underline text-sm bg-white/95 dark:bg-gray-800/95 px-4 py-2 rounded-lg shadow-lg flex items-center gap-1 font-medium"
+              className="text-gray-700 hover:text-gray-900 underline text-[10px] md:text-xs bg-white/95 md:bg-transparent px-2 py-1 md:px-0 md:py-0 rounded-lg md:rounded-none shadow-lg md:shadow-none flex items-center gap-1 font-medium whitespace-nowrap md:text-black dark:md:text-black"
             >
               Bem-vindo, <span className="text-red-600 dark:text-red-500">{user.username}</span>!
-              <ChevronDown size={14} />
+              <ChevronDown size={10} className="md:w-3 md:h-3" />
             </button>
             {showUserMenu && (
               <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl min-w-[180px] overflow-hidden">
@@ -1001,10 +1001,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       ) : (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500]">
+        <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-[500]">
           <Link
             to="/login"
-            className="text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white underline text-sm bg-white/95 dark:bg-gray-800/95 px-4 py-2 rounded-lg shadow-lg font-medium"
+            className="text-gray-700 hover:text-gray-900 underline text-xs md:text-sm bg-white/95 md:bg-transparent px-3 py-1.5 md:px-0 md:py-0 rounded-lg md:rounded-none shadow-lg md:shadow-none font-medium md:text-black dark:md:text-black"
           >
             Entrar ou Registrar
           </Link>
@@ -1214,15 +1214,15 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         </div>
       </div>
 
-      <div className="absolute top-4 left-4 z-[400] flex flex-col items-start gap-2 md:hidden">
+      <div className="absolute top-10 left-4 z-[400] flex flex-col items-start gap-2 md:hidden">
         <button
           onClick={() => navigate('/')}
           className="text-white dark:text-black text-xs underline hover:opacity-70 transition-opacity flex items-center gap-1"
         >
           <ArrowLeft size={12} /> voltar
         </button>
-        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg relative z-[500]">
-          <h1 className="text-lg font-bold flex items-center gap-2"><Map size={20} /> CICLISTA DENUNCIE - MAPA</h1>
+        <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-3 py-1.5 rounded-lg relative z-[500]">
+          <h1 className="text-sm font-bold flex items-center gap-1.5"><Map size={16} /> CICLISTA DENUNCIE - MAPA</h1>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs">
               {denunciasVisiveis !== null ? (

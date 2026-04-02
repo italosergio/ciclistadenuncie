@@ -1,22 +1,26 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Logo({ onTripleClick }: { onTripleClick?: () => void }) {
   const [clicks, setClicks] = useState(0);
   const [shake, setShake] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClick = () => {
     setShake(true);
     setTimeout(() => setShake(false), 200);
     
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
     const newClicks = clicks + 1;
     setClicks(newClicks);
     
-    if (newClicks === 3) {
+    if (newClicks >= 3) {
       onTripleClick?.();
       setClicks(0);
+      return;
     }
     
-    setTimeout(() => setClicks(0), 1000);
+    timeoutRef.current = setTimeout(() => setClicks(0), 2000);
   };
 
   return (

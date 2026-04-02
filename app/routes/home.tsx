@@ -34,6 +34,7 @@ export default function Home() {
   const [total, setTotal] = useState(0);
   const [CountUpComponent, setCountUpComponent] = useState<any>(null);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [countUpDone, setCountUpDone] = useState(false);
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -53,22 +54,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" onClick={() => showAnimation && setShowAnimation(false)}>
-      {showAnimation && <BikeFireAnimation />}
+    <div className="min-h-screen flex items-center justify-center px-4 pt-14 md:pt-8 pb-8" onClick={() => showAnimation && setShowAnimation(false)}>
+      {(showAnimation || countUpDone) && <BikeFireAnimation />}
       
       {/* Links de autenticação no topo direito */}
-      <div className="absolute top-4 right-4 space-x-4">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-4 space-x-4 z-50">
         {user ? (
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm flex items-center gap-1"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-[10px] md:text-xs flex items-center gap-1"
             >
               Bem-vindo, <span className="text-red-600 dark:text-red-500">{user.username}</span>!
-              <ChevronDown size={14} />
+              <ChevronDown size={12} />
             </button>
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl min-w-[180px] overflow-hidden z-10">
+              <div className="absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl min-w-[180px] overflow-hidden z-10">
                 <Link
                   to={`/usuario/${user.username}`}
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
@@ -89,7 +90,7 @@ export default function Home() {
                     className="block px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 font-semibold"
                     onClick={() => setShowUserMenu(false)}
                   >
-                    <Shield size={16} /> Admin
+                    <Shield size={16} /> Painel ADM
                   </Link>
                 )}
                 <button
@@ -123,7 +124,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className="max-w-6xl text-center space-y-5" onClick={(e) => e.stopPropagation()}>
+      <div className="max-w-6xl text-center space-y-5 relative z-10" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center">
           <Logo onTripleClick={() => setShowAnimation(!showAnimation)} />
         </div>
@@ -132,7 +133,7 @@ export default function Home() {
           CICLISTA, DENUNCIE!
         </h2>
         
-        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <p className="text-sm md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Violência no trânsito não começa no atropelamento.
           <br />É hora de dar <Link to="/mapa" className="text-red-600 dark:text-red-500 font-bold underline hover:opacity-80 transition">visibilidade</Link> ao que você vive nas ruas.
         </p>
@@ -146,6 +147,7 @@ export default function Home() {
                 duration={2.5}
                 useEasing={true}
                 separator="."
+                onEnd={() => setCountUpDone(true)}
               />
             ) : total.toLocaleString('pt-BR')}
           </div>
@@ -194,6 +196,13 @@ export default function Home() {
             </Link>
           </div>
         </div>
+
+        <p className="pt-6 text-[11px] font-light italic font-raleway text-gray-400 dark:text-gray-600 tracking-wide">
+          Criadores{" "}
+          <a href="https://heblisamello.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 underline">Heblisa Mello</a>
+          {" "}&{" "}
+          <a href="https://italosergio.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 underline">Ítalo Sérgio</a>
+        </p>
       </div>
     </div>
   );

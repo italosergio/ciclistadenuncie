@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
-import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft } from "lucide-react";
+import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft, ArrowLeft } from "lucide-react";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
@@ -275,9 +275,15 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   ];
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">Registrar Denúncia</h1>
+    <div className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center md:justify-start relative">
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm underline flex items-center gap-1"
+      >
+        <ArrowLeft size={14} /> voltar
+      </button>
+      <div className="max-w-2xl mx-auto w-full">
+        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">Registrar Denúncia</h1>
 
         {/* Indicador de Etapas */}
         <div className="flex items-center justify-center mb-8 gap-2">

@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;1,300&display=swap');
+
 @theme {
   --font-sans: "Bungee", ui-sans-serif, system-ui, sans-serif;
   --font-bungee: "Bungee", sans-serif;
+  --font-raleway: "Raleway", sans-serif;
 }
 
 html,

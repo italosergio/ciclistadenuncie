@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/contato";
-import { Lightbulb, Bug, MessageCircle, HelpCircle, FileQuestion, AlertCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { Lightbulb, Bug, MessageCircle, HelpCircle, FileQuestion, AlertCircle, ChevronRight, ChevronLeft, ArrowLeft } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, set } from "firebase/database";
 import { useAuth } from "../lib/AuthContext";
@@ -99,9 +99,15 @@ export default function Contato() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">Contato</h1>
+    <div className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center md:justify-start relative">
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm underline flex items-center gap-1"
+      >
+        <ArrowLeft size={14} /> voltar
+      </button>
+      <div className="max-w-2xl mx-auto w-full">
+        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">Contato</h1>
 
         {/* Indicador de Etapas */}
         <div className="flex items-center justify-center mb-8 gap-2">
