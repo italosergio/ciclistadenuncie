@@ -181,22 +181,6 @@ export default function Home() {
           </Link>
         </div>
         
-        <div className="pt-4 pb-1 md:pt-4 md:pb-2 text-[10px] md:text-xs text-gray-400 dark:text-gray-500 space-y-1 md:space-y-2">
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-            <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-              Proteção de Dados
-            </Link>
-            <span className="hidden sm:inline">•</span>
-            <Link to="/termo-responsabilidade-usuario" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-              Termo de Responsabilidade do Usuário
-            </Link>
-            <span className="hidden sm:inline">•</span>
-            <Link to="/termo-responsabilidade-plataforma" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
-              Termo de Responsabilidade da Plataforma
-            </Link>
-          </div>
-        </div>
-
         <div className="pt-2 pb-1">
           <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">Apoiadores</p>
           <div className="flex flex-wrap justify-center items-center gap-4">
@@ -213,6 +197,16 @@ export default function Home() {
           {" "}&{" "}
           <a href="https://italosergio.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 underline">Ítalo Sérgio</a>
         </p>
+
+        <div className="pb-2 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500">
+          <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
+            <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">Proteção de Dados</Link>
+            <span>•</span>
+            <Link to="/termo-responsabilidade-usuario" className="hover:text-gray-600 dark:hover:text-gray-400 underline">Termo de Responsabilidade do Usuário</Link>
+            <span>•</span>
+            <Link to="/termo-responsabilidade-plataforma" className="hover:text-gray-600 dark:hover:text-gray-400 underline">Termo de Responsabilidade da Plataforma</Link>
+          </div>
+        </div>
       </div>
     </div>
   );
