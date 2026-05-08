@@ -1,16 +1,16 @@
 import { ref, set, get } from "firebase/database";
 import { db, auth } from "./firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
-import bcrypt from "bcryptjs";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail, fetchSignInMethodsForEmail } from "firebase/auth";
 import { registrarEvento } from "./historico";
 
-export async function registerUser(username: string, password: string) {
-  // Cria usuário no Firebase Auth (email fake baseado no username)
-  const email = `${username}@ciclistadenuncie.local`;
+export async function registerUser(username: string, password: string, email: string) {
+  // Verifica se email já está em uso
+  const methods = await fetchSignInMethodsForEmail(auth, email);
+  if (methods.length > 0) throw { code: 'auth/email-already-in-use' };
+
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const uid = userCredential.user.uid;
   
-  // Salva dados adicionais no Realtime Database
   const userRef = ref(db, `usuarios/${uid}`);
   await set(userRef, {
     username,
@@ -19,47 +19,49 @@ export async function registerUser(username: string, password: string) {
     createdAt: new Date().toISOString(),
   });
   
-  // Registra evento
-  await registrarEvento({
-    tipo: 'criar_conta',
-    usuario: username,
-  });
-  
-  // Faz logout após criar conta para forçar novo login
+  await registrarEvento({ tipo: 'criar_conta', usuario: username });
   await signOut(auth);
   
   return { uid, username, role: "usuario" };
 }
 
+export async function resetPassword(email: string) {
+  await sendPasswordResetEmail(auth, email);
+}
+
 export async function loginUser(username: string, password: string) {
-  // Login com Firebase Auth
-  const email = `${username}@ciclistadenuncie.local`;
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const uid = userCredential.user.uid;
+  // Busca email real pelo username
+  const usuariosRef = ref(db, 'usuarios');
+  const snapshot = await get(usuariosRef);
   
-  // Busca role do usuário
-  const userRef = ref(db, `usuarios/${uid}`);
-  const snapshot = await get(userRef);
+  if (!snapshot.exists()) throw { code: 'auth/user-not-found' };
   
-  if (!snapshot.exists()) {
-    throw new Error("Dados do usuário não encontrados");
-  }
-  
-  const userData = snapshot.val();
-  
-  // Registra evento
-  await registrarEvento({
-    tipo: 'login',
-    usuario: userData.username,
+  let email: string | null = null;
+  let userData: any = null;
+  let uid: string | null = null;
+
+  snapshot.forEach((child) => {
+    const data = child.val();
+    if (data.username === username) {
+      email = data.email;
+      userData = data;
+      uid = child.key;
+    }
   });
+
+  if (!email) throw { code: 'auth/user-not-found' };
+
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
   
-  // Retorna token JWT (gerado automaticamente pelo Firebase)
+  await registrarEvento({ tipo: 'login', usuario: userData.username });
+  
   const token = await userCredential.user.getIdToken();
   
   return { 
-    uid,
+    uid: userCredential.user.uid,
     username: userData.username, 
     role: userData.role || "usuario",
+    email,
     token 
   };
 }
@@ -114,8 +116,26 @@ export async function getCurrentUser() {
     uid: currentUser.uid,
     username: userData.username,
     role: userData.role || "usuario",
+    email: userData.email || null,
     token
   };
+}
+
+export async function updateUserEmail(newEmail: string, password: string) {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error("Usuário não autenticado");
+
+  // Reautentica com email atual
+  const { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail } = await import('firebase/auth');
+  const credential = EmailAuthProvider.credential(currentUser.email!, password);
+  await reauthenticateWithCredential(currentUser, credential);
+
+  // Atualiza email no Firebase Auth (envia verificação)
+  await verifyBeforeUpdateEmail(currentUser, newEmail);
+
+  // Atualiza no banco
+  const userRef = ref(db, `usuarios/${currentUser.uid}`);
+  await import('firebase/database').then(({ update }) => update(userRef, { email: newEmail }));
 }
 
 export async function getUserData(uid: string) {

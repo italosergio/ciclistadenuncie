@@ -6,7 +6,7 @@ import { db } from "../lib/firebase";
 import Logo from "../components/Logo";
 import BikeFireAnimation from "../components/BikeFireAnimation";
 import { useAuth } from "../lib/AuthContext";
-import { ChevronDown, BarChart3, LogOut, User, Shield } from "lucide-react";
+import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -53,9 +53,24 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
+  const [showEmailBanner, setShowEmailBanner] = useState(false);
+
+  useEffect(() => {
+    if (user && (!user.email || user.email.endsWith('@ciclistadenuncie.local'))) {
+      setShowEmailBanner(true);
+    }
+  }, [user]);
+
   return (
     <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => showAnimation && setShowAnimation(false)}>
       {(showAnimation || countUpDone) && <BikeFireAnimation />}
+
+      {showEmailBanner && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-600 text-black px-4 py-2 flex items-center justify-between text-sm">
+          <span>⚠️ Sua conta não tem e-mail cadastrado. <Link to="/conta" className="underline font-semibold">Adicione agora</Link> para poder recuperar sua senha.</span>
+          <button onClick={() => setShowEmailBanner(false)}><X size={16} /></button>
+        </div>
+      )}
       
       {/* Links de autenticação no topo direito */}
       <div className="absolute top-4 right-4 z-50">

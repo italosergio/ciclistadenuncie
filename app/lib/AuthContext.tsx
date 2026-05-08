@@ -6,9 +6,9 @@ import { ref, onValue } from "firebase/database";
 import { registrarEvento } from "./historico";
 
 interface AuthContextType {
-  user: { uid: string; username: string; role: string; token: string } | null;
+  user: { uid: string; username: string; role: string; token: string; email?: string } | null;
   loading: boolean;
-  login: (userData: { uid: string; username: string; role: string; token: string }) => void;
+  login: (userData: { uid: string; username: string; role: string; token: string; email?: string }) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -18,7 +18,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<{ uid: string; username: string; role: string; token: string } | null>(null);
+  const [user, setUser] = useState<{ uid: string; username: string; role: string; token: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [banido, setBanido] = useState(false);
 
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = (userData: { uid: string; username: string; role: string; token: string }) => {
+  const login = (userData: { uid: string; username: string; role: string; token: string; email?: string }) => {
     setUser(userData);
   };
 

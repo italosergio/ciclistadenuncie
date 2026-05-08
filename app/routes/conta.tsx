@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { changePassword } from "../lib/auth";
+import { changePassword, updateUserEmail } from "../lib/auth";
 import { useAuth } from "../lib/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Eye, EyeOff, Trash2, User as UserIcon, Key } from "lucide-react";
+import { Eye, EyeOff, Trash2, User as UserIcon, Key, Mail } from "lucide-react";
 import { ref, update, remove, get } from "firebase/database";
 import { db, auth } from "../lib/firebase";
 import { deleteUser } from "firebase/auth";
@@ -45,6 +45,7 @@ export default function Conta() {
           <h1 className="text-3xl font-bold text-white mb-8">Configurações da Conta</h1>
           
           <div className="space-y-6">
+            <EmailCard />
             <MudarSenhaCard />
             <MudarUsernameCard />
             <ExcluirContaCard onSucesso={() => setContaExcluida(true)} />
@@ -59,6 +60,83 @@ export default function Conta() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+function EmailCard() {
+  const { user, login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  const hasRealEmail = user?.email && !user.email.endsWith('@ciclistadenuncie.local');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    if (!/\S+@\S+\.\S+/.test(email)) return setError("E-mail inválido");
+    setLoading(true);
+    try {
+      await updateUserEmail(email, senha);
+      const token = await auth.currentUser?.getIdToken();
+      login({ ...user!, email, token: token || user!.token });
+      setSuccess(hasRealEmail ? "E-mail atualizado! Verifique sua caixa de entrada para confirmar." : "E-mail adicionado com sucesso!");
+      setEmail(""); setSenha(""); setShowForm(false);
+    } catch (err: any) {
+      const msgs: Record<string, string> = {
+        'auth/wrong-password': 'Senha incorreta',
+        'auth/invalid-credential': 'Senha incorreta',
+        'auth/email-already-in-use': 'Este e-mail já está em uso',
+        'auth/requires-recent-login': 'Sessão expirada. Faça login novamente.',
+      };
+      setError(msgs[err.code] || err.message || 'Erro ao atualizar e-mail');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={`bg-gray-800 rounded-lg shadow-xl p-6 border ${!hasRealEmail ? 'border-yellow-700' : 'border-gray-700'}`}>
+      <div className="flex items-center gap-3 mb-2">
+        <Mail size={24} className={!hasRealEmail ? 'text-yellow-400' : 'text-blue-400'} />
+        <h2 className="text-xl font-bold text-white">{hasRealEmail ? 'Alterar E-mail' : 'Adicionar E-mail'}</h2>
+      </div>
+      {!hasRealEmail && (
+        <p className="text-yellow-300 text-sm mb-3 bg-yellow-900/30 border border-yellow-700 rounded p-2">
+          ⚠️ Sua conta não tem e-mail cadastrado. Adicione um para poder recuperar sua senha caso a esqueça.
+        </p>
+      )}
+      {hasRealEmail && <p className="text-gray-400 text-sm mb-3">E-mail atual: <span className="text-white">{user?.email}</span></p>}
+      {success && <p className="text-green-400 text-sm mb-3">{success}</p>}
+      {!showForm ? (
+        <button onClick={() => setShowForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+          {hasRealEmail ? 'Alterar E-mail' : 'Adicionar E-mail'}
+        </button>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3 max-w-sm">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Novo E-mail</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Senha atual</label>
+            <input type="password" value={senha} onChange={e => setSenha(e.target.value)} required
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => { setShowForm(false); setError(""); }} className="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg hover:bg-gray-600 text-sm">Cancelar</button>
+            <button type="submit" disabled={loading} className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium">
+              {loading ? "Salvando..." : "Salvar"}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
 
@@ -243,6 +321,19 @@ function MudarUsernameCard() {
     try {
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Verifica se username já existe
+      const snapshot = await get(ref(db, 'usuarios'));
+      if (snapshot.exists()) {
+        const taken = Object.values(snapshot.val()).some(
+          (u: any) => u.username?.toLowerCase() === novoUsername.trim().toLowerCase() && u.username !== user.username
+        );
+        if (taken) {
+          setError("Este nome de usuário já está em uso");
+          setLoading(false);
+          return;
+        }
+      }
+
       const usernameAntigo = user.username;
       await update(ref(db, `usuarios/${user.uid}`), { username: novoUsername });
       
@@ -386,7 +477,7 @@ function ExcluirContaCard({ onSucesso }: { onSucesso: () => void }) {
           uid: user.uid, 
           manterDenuncias, 
           denunciasExcluidas,
-          denunciasIds: manterDenuncias ? denunciasIds : undefined,
+          ...(manterDenuncias && denunciasIds.length > 0 ? { denunciasIds } : {}),
           email: user.email || 'N/A'
         },
       });
