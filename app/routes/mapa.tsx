@@ -77,16 +77,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [showTipoDropdown, setShowTipoDropdown] = useState(false);
   const [anoFiltro, setAnoFiltro] = useState<number | 'todos'>('todos');
   const [showAnoDropdown, setShowAnoDropdown] = useState(false);
-  const [useClusters, setUseClusters] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = document.cookie.split('; ').find(row => row.startsWith('useClusters='));
-      return saved ? saved.split('=')[1] === 'true' : true;
-    }
-    return true;
-  });
+
   const [savePreferences, setSavePreferences] = useState(() => {
     if (typeof window !== 'undefined') {
-      return document.cookie.includes('mapType=') || document.cookie.includes('useClusters=');
+      return document.cookie.includes('mapType=');
     }
     return false;
   });
@@ -125,13 +119,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     }
   }, [mapType, savePreferences]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && savePreferences) {
-      document.cookie = `useClusters=${useClusters}; path=/; max-age=31536000`;
-    } else if (typeof window !== 'undefined' && !savePreferences) {
-      document.cookie = `useClusters=; path=/; max-age=0`;
-    }
-  }, [useClusters, savePreferences]);
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -353,15 +341,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     import("leaflet/dist/leaflet.css");
-    import("react-leaflet-cluster/dist/assets/MarkerCluster.css");
-    import("react-leaflet-cluster/dist/assets/MarkerCluster.Default.css");
     Promise.all([
       import("react-leaflet"),
-      import("leaflet"),
-      import("react-leaflet-cluster")
-    ]).then(([reactLeaflet, L, cluster]) => {
+      import("leaflet")
+    ]).then(([reactLeaflet, L]) => {
       const { MapContainer, TileLayer, Marker, Popup, Tooltip } = reactLeaflet;
-      const MarkerClusterGroup = cluster.default;
       
       const icon = L.default.divIcon({
         html: `<div style="background-color: #dc2626; width: 21px; height: 21px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
@@ -372,10 +356,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
       const createColoredIcon = (color: string, IconComponent: any) => {
         return L.default.divIcon({
-          html: `<div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">${renderToString(<IconComponent size={16} color="white" />)}</div>`,
+          html: `<div style="background-color: ${color}; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">${renderToString(<IconComponent size={11} color="white" />)}</div>`,
           className: 'custom-marker',
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
         });
       };
 
@@ -562,7 +546,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
 
 
-      setMapComponent(() => ({ denuncias, center, zoom, isMarking, tempMarker, mapType, useClusters }: { denuncias: [string, Denuncia][], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite', useClusters: boolean }) => (
+      setMapComponent(() => ({ denuncias, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' }) => (
         <MapContainer 
           center={center} 
           zoom={zoom} 
@@ -606,62 +590,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
               icon={tempIcon}
             />
           )}
-          {useClusters ? (
-            <MarkerClusterGroup
-              chunkedLoading
-              maxClusterRadius={20}
-              spiderfyOnMaxZoom={true}
-              showCoverageOnHover={false}
-              zoomToBoundsOnClick={!isMarking}
-              disableClusteringAtZoom={15}
-            eventHandlers={{
-              click: async (e: any) => {
-                if (isMarking) {
-                  const latlng = e.layer.getLatLng();
-                  const pos = { lat: latlng.lat, lng: latlng.lng };
-                  setTempMarker(pos);
-                  
-                  try {
-                    const response = await fetch(
-                      `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
-                    );
-                    const data = await response.json();
-                    const addr = data.address;
-                    const rua = addr.road || addr.pedestrian || addr.footway || '';
-                    const numero = addr.house_number || '';
-                    const bairro = addr.suburb || addr.neighbourhood || '';
-                    const cidade = addr.city || addr.town || addr.municipality || '';
-                    const estado = addr.state || '';
-                    
-                    const partes = [];
-                    if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
-                    if (bairro) partes.push(bairro);
-                    if (cidade) partes.push(cidade);
-                    if (estado) partes.push(estado);
-                    
-                    const enderecoCompleto = partes.join(' - ');
-                    setEndereco(enderecoCompleto || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-                  } catch {
-                    setEndereco(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-                  }
-                  
-                  setShowModal(true);
-                  setMarkingMode(false);
-                  e.originalEvent.stopPropagation();
-                } else {
-                  e.originalEvent.stopPropagation();
-                }
-              }
-            }}
-            iconCreateFunction={(cluster: any) => {
-              return L.default.divIcon({
-                html: `<div style="background-color: #dc2626; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${cluster.getChildCount()}</div>`,
-                className: 'custom-cluster',
-                iconSize: [32, 32],
-              });
-            }}
-          >
-            {denuncias.map(([id, denuncia]) => {
+          {denuncias.map(([id, denuncia]) => {
               const tipoInfo = tipos.find(t => t.value === denuncia.tipo);
               const markerIcon = tipoInfo ? createColoredIcon(tipoInfo.color, tipoInfo.icon) : icon;
               
@@ -758,109 +687,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 )}
               </Marker>
             )})}
-            </MarkerClusterGroup>
-          ) : (
-            <>
-              {denuncias.map(([id, denuncia]) => {
-                const tipoInfo = tipos.find(t => t.value === denuncia.tipo);
-                const markerIcon = tipoInfo ? createColoredIcon(tipoInfo.color, tipoInfo.icon) : icon;
-                
-                return (
-                <Marker
-                  key={id}
-                  position={[denuncia.localizacao!.lat, denuncia.localizacao!.lng]}
-                  icon={markerIcon}
-                  eventHandlers={{
-                    mouseover: (e: any) => {
-                      if (!isMarking) {
-                        e.target.openPopup();
-                      }
-                    },
-                    mouseout: (e: any) => {
-                      if (!isMarking && !e.target.isPopupOpen()) {
-                        e.target.closePopup();
-                      }
-                    },
-                    click: async (e: any) => {
-                      if (!isMarking) {
-                        e.target.openPopup();
-                        return;
-                      }
-                      if (isMarking) {
-                        const pos = { lat: denuncia.localizacao!.lat, lng: denuncia.localizacao!.lng };
-                        setTempMarker(pos);
-                        
-                        try {
-                          const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1`
-                          );
-                          const data = await response.json();
-                          const addr = data.address;
-                          const rua = addr.road || addr.pedestrian || addr.footway || '';
-                          const numero = addr.house_number || '';
-                          const bairro = addr.suburb || addr.neighbourhood || '';
-                          const cidade = addr.city || addr.town || addr.municipality || '';
-                          const estado = addr.state || '';
-                          
-                          const partes = [];
-                          if (rua) partes.push(numero ? `${rua}, ${numero}` : rua);
-                          if (bairro) partes.push(bairro);
-                          if (cidade) partes.push(cidade);
-                          if (estado) partes.push(estado);
-                          
-                          const enderecoCompleto = partes.join(' - ');
-                          setEndereco(enderecoCompleto || `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-                        } catch {
-                          setEndereco(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
-                        }
-                        
-                        setShowModal(true);
-                        setMarkingMode(false);
-                        e.originalEvent.stopPropagation();
-                      } else {
-                        e.originalEvent.stopPropagation();
-                      }
-                    }
-                  }}
-                >
-                  {!isMarking && (
-                      <Popup className="custom-popup">
-                        <div style={{ minWidth: '200px', maxWidth: '300px' }}>
-                          <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>
-                            {new Date(denuncia.createdAt).toLocaleString('pt-BR', { 
-                              day: '2-digit', 
-                              month: '2-digit', 
-                              year: 'numeric', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-                            {denuncia.endereco}
-                          </div>
-                          {denuncia.tipo && (
-                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
-                              {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
-                            </div>
-                          )}
-                          {denuncia.relato && (
-                            <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                              {getRelatoTexto(denuncia.relato)}
-                            </div>
-                          )}
-                          {denuncia.placa && (
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
-                              Placa: {denuncia.placa}
-                            </div>
-                          )}
-                        </div>
-                      </Popup>
-                  )}
-                </Marker>
-              )})}
-            </>
-          )}
-        </MapContainer>
+          </MapContainer>
       ));
     });
   }, []);
@@ -1028,7 +855,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       `}</style>
       {MapComponent ? (
         <div className="absolute inset-0">
-          <MapComponent denuncias={denunciasComLocalizacao} center={center} zoom={zoom} isMarking={markingMode} tempMarker={tempMarker} mapType={mapType} useClusters={useClusters} />
+          <MapComponent denuncias={denunciasComLocalizacao} center={center} zoom={zoom} isMarking={markingMode} tempMarker={tempMarker} mapType={mapType} />
         </div>
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -1423,14 +1250,6 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'dark' ? 'bg-gray-200 font-semibold' : ''}`}
           >
             <Moon size={18} /> Escuro
-          </button>
-          <div className="border-t border-gray-200 my-2"></div>
-          <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase">Visualização</div>
-          <button
-            onClick={() => { setUseClusters(!useClusters); setShowOptionsMenu(false); }}
-            className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${useClusters ? 'bg-gray-200 font-semibold' : ''}`}
-          >
-            <Layers size={18} /> {useClusters ? 'Clusters: ON' : 'Clusters: OFF'}
           </button>
           <div className="border-t border-gray-200 my-2"></div>
           <label className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer text-black transition">

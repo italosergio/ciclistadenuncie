@@ -54,7 +54,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-screen flex items-center justify-center px-4 pt-14 md:pt-0 overflow-hidden" onClick={() => showAnimation && setShowAnimation(false)}>
+    <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => showAnimation && setShowAnimation(false)}>
       {(showAnimation || countUpDone) && <BikeFireAnimation />}
       
       {/* Links de autenticação no topo direito */}
@@ -124,22 +124,22 @@ export default function Home() {
         )}
       </div>
 
-      <div className="max-w-6xl text-center space-y-3 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
+      <div className="max-w-6xl text-center space-y-4 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center">
           <Logo onTripleClick={() => setShowAnimation(!showAnimation)} />
         </div>
         
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+        <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
           CICLISTA, DENUNCIE!
         </h2>
         
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <p className="text-xs md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Violência no trânsito não começa no atropelamento.
           <br />É hora de dar <Link to="/mapa" className="text-red-600 dark:text-red-500 font-bold underline hover:opacity-80 transition">visibilidade</Link> ao que você vive nas ruas.
         </p>
         
-        <Link to="/mapa" className="block py-2 md:py-3 hover:opacity-80 transition">
-          <div className="text-8xl md:text-8xl font-bold text-red-600 dark:text-red-500">
+        <Link to="/mapa" className="block py-3 md:py-3 hover:opacity-80 transition">
+          <div className="text-6xl md:text-8xl font-bold text-red-600 dark:text-red-500">
             {CountUpComponent ? (
               <CountUpComponent 
                 start={0}
@@ -151,37 +151,37 @@ export default function Home() {
               />
             ) : total.toLocaleString('pt-BR')}
           </div>
-          <p className="text-lg md:text-xl font-semibold mt-2 text-gray-700 dark:text-gray-300">
+          <p className="text-base md:text-xl font-semibold mt-2 md:mt-2 text-gray-700 dark:text-gray-300">
             denúncias registradas
           </p>
         </Link>
         
-        <div className="pt-1 pb-2">
+        <div className="pt-1 pb-2 md:pt-1 md:pb-2">
           <Link
             to="/denunciar"
-            className="inline-block bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-base font-semibold rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-white active:scale-95 transition-all"
+            className="inline-block bg-black dark:bg-white text-white dark:text-black px-5 py-2.5 text-sm md:text-base font-semibold rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-white active:scale-95 transition-all"
           >
             Registrar Denúncia
           </Link>
         </div>
         
-        <div className="pt-1 space-x-4">
+        <div className="pt-1 md:pt-1 space-x-4">
           <Link
             to="/mapa"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs md:text-sm"
           >
             Mapa
           </Link>
           <span className="text-gray-400">•</span>
           <Link
             to="/contato"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs md:text-sm"
           >
             Contato
           </Link>
         </div>
         
-        <div className="pt-4 pb-2 text-xs text-gray-400 dark:text-gray-500 space-y-2">
+        <div className="pt-4 pb-1 md:pt-4 md:pb-2 text-[10px] md:text-xs text-gray-400 dark:text-gray-500 space-y-1 md:space-y-2">
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             <Link to="/lgpd" className="hover:text-gray-600 dark:hover:text-gray-400 underline">
               Proteção de Dados
@@ -197,7 +197,17 @@ export default function Home() {
           </div>
         </div>
 
-        <p className="pt-2 text-[11px] font-light italic font-raleway text-gray-400 dark:text-gray-600 tracking-wide">
+        <div className="pt-2 pb-1">
+          <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">Apoiadores</p>
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            <a href="https://www.instagram.com/bicinosplanos/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition">
+              <img src="/apoiadores/bicinosplanos.png" alt="Bici nos Planos MS" className="h-8 object-contain" />
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">Bici nos Planos MS</span>
+            </a>
+          </div>
+        </div>
+
+        <p className="pt-2 md:pt-2 text-[10px] md:text-[11px] font-light italic font-raleway text-gray-400 dark:text-gray-600 tracking-wide">
           Criadores{" "}
           <a href="https://heblisamello.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 underline">Heblisa Mello</a>
           {" "}&{" "}
