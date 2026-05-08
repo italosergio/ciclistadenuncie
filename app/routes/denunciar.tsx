@@ -158,7 +158,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
       localStorage.removeItem('denuncia_location');
       localStorage.removeItem('denuncia_etapa');
       
-      navigate("/sucesso", { state: { location } });
+      navigate("/sucesso", { state: { location, tipo: tipo === "outro" ? descricaoOutro : tipo, endereco: enderecoAtual, placa: mostrarPlaca ? placa : undefined } });
     } catch (error) {
       console.error('Erro completo:', error);
       setErrors({ localizacao: "Erro ao registrar denúncia. Tente novamente." });

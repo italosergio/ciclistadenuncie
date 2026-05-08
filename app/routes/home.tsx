@@ -58,7 +58,7 @@ export default function Home() {
       {(showAnimation || countUpDone) && <BikeFireAnimation />}
       
       {/* Links de autenticação no topo direito */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-4 space-x-4 z-50">
+      <div className="absolute top-4 right-4 z-50">
         {user ? (
           <div className="relative">
             <button
@@ -109,16 +109,9 @@ export default function Home() {
           <>
             <Link
               to="/login"
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs"
             >
               Entrar
-            </Link>
-            <span className="text-gray-400">•</span>
-            <Link
-              to="/login"
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
-            >
-              Cadastrar
             </Link>
           </>
         )}

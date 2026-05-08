@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { loginUser, registerUser } from "../lib/auth";
 import { useAuth } from "../lib/AuthContext";
-import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle, ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -64,6 +64,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+      <Link to="/" className="absolute top-4 left-4 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition">
+        <ArrowLeft size={16} /> Voltar
+      </Link>
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
         <h1 className="text-3xl font-bold text-center mb-6 text-white">
           {isRegister ? "Cadastrar" : "Login"}

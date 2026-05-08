@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router";
 import type { Route } from "./+types/sucesso";
+import { MapPin, Tag, Car } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Denúncia Enviada - Ciclista Denuncie" }];
@@ -7,65 +8,65 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Sucesso() {
   const location = useLocation();
-  const denunciaLocation = location.state?.location;
-  
+  const { location: coords, tipo, endereco, placa } = location.state || {};
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-2xl text-center space-y-6">
-        <div className="text-6xl">✅</div>
-        
-        <h1 className="text-4xl font-bold">
-          Denúncia Registrada
-        </h1>
-        
-        <p className="text-xl text-gray-600 dark:text-gray-400">
-          Sua denúncia foi salva com sucesso no banco de dados.
-          <br />
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="text-5xl">✅</div>
+
+        <h1 className="text-3xl font-bold">Denúncia Registrada!</h1>
+
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
           Obrigado por contribuir com dados reais para a luta por um trânsito mais seguro.
         </p>
-        
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300">
-          <p className="font-semibold mb-2">🔒 Cuidamos dos seus dados</p>
-          <p className="mb-3">Você não aparece publicamente na denúncia. Ao fazer denúncia logado, você pode acessar a página <strong>Minhas Contribuições</strong> para ver, editar ou excluir suas denúncias.</p>
-          <div className="flex flex-wrap justify-center gap-2 text-xs">
-            <Link to="/termo-responsabilidade-usuario" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Termo do Usuário
-            </Link>
-            <span className="text-gray-400">•</span>
-            <Link to="/termo-responsabilidade-plataforma" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Termo da Plataforma
-            </Link>
-            <span className="text-gray-400">•</span>
-            <Link to="/lgpd" className="text-blue-600 dark:text-blue-400 hover:underline">
-              Proteção de Dados (LGPD)
-            </Link>
+
+        {(tipo || endereco || placa) && (
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-left space-y-3">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Resumo da denúncia</p>
+            {tipo && (
+              <div className="flex items-start gap-2 text-sm">
+                <Tag size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                <span className="text-gray-700 dark:text-gray-300">{tipo}</span>
+              </div>
+            )}
+            {endereco && (
+              <div className="flex items-start gap-2 text-sm">
+                <MapPin size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                <span className="text-gray-700 dark:text-gray-300">{endereco}</span>
+              </div>
+            )}
+            {placa && (
+              <div className="flex items-start gap-2 text-sm">
+                <Car size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                <span className="font-mono text-gray-700 dark:text-gray-300">{placa}</span>
+              </div>
+            )}
           </div>
-        </div>
-        
-        <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             to="/mapa"
-            state={{ center: denunciaLocation ? [denunciaLocation.lat, denunciaLocation.lng] : undefined, zoom: 16 }}
-            className="inline-block bg-red-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-red-700 transition"
+            state={{ center: coords ? [coords.lat, coords.lng] : undefined, zoom: 16 }}
+            className="inline-block bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition"
           >
             Ver no Mapa
           </Link>
           <Link
             to="/"
-            className="inline-block bg-black dark:bg-white text-white dark:text-black px-8 py-4 text-lg font-semibold rounded-lg hover:opacity-90 transition"
+            className="inline-block bg-black dark:bg-white text-white dark:text-black px-6 py-3 font-semibold rounded-lg hover:opacity-90 transition"
           >
             Voltar ao Início
           </Link>
         </div>
-        
-        <div className="pt-4">
-          <Link
-            to="/denunciar"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
-          >
-            Fazer Outra Denúncia
-          </Link>
-        </div>
+
+        <Link
+          to="/denunciar"
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
+        >
+          Fazer Outra Denúncia
+        </Link>
       </div>
     </div>
   );
