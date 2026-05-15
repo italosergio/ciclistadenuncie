@@ -606,7 +606,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     }
                   },
                   mouseout: (e: any) => {
-                    if (!isMarking && !e.target.isPopupOpen()) {
+                    if (!isMarking) {
                       e.target.closePopup();
                     }
                   },
