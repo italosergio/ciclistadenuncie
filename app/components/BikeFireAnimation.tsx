@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Bike } from "lucide-react";
 
 const names = ["MARINA", "RAUL", "RENATA", "DANIEL", "NEO", "ADEYLLE", "NAVE", "MAIK", "TARTA", "MAYRA", "VIQUE", "HEBLISA", "MILLENA", "CAROLINA", "JAQUELINE", "JANAINA", "SUJEIRA", "LIMPEZA", "NELSON", "FERNANDO", "ITALO", "DJ PRÉ", "ALDENIO", "ZERBINATO", "FALZONI", "LIGIA", "VIOLA", "DAMIAO", "JADSON", "JAIDIU", "DIEGO", "NINA"];
 const whiteBikes = ["MARINA", "RAUL", "SUJEIRA", "NELSON", "LIMPEZA"];
 
-export default function BikeFireAnimation() {
+export default memo(function BikeFireAnimation() {
   const [wave, setWave] = useState(0);
 
   useEffect(() => {
@@ -56,4 +56,4 @@ export default function BikeFireAnimation() {
       `}</style>
     </div>
   );
-}
+});
