@@ -196,6 +196,10 @@ export default function Home() {
               <img src="/apoiadores/bicinosplanos.png" alt="Bici nos Planos MS" className="h-16 object-contain" />
               <span className="text-[10px] text-gray-400 dark:text-gray-500">Bici nos Planos MS</span>
             </a>
+            <a href="https://ameciclo.org" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition">
+              <img src="/apoiadores/ameciclo.jpg" alt="Ameciclo" className="h-16 object-contain" />
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">Ameciclo</span>
+            </a>
           </div>
         </div>
 
