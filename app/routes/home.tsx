@@ -82,7 +82,7 @@ export default function Home() {
         setApoiadorIndex(prev => (prev + 1) % APOIADORES.length);
         setFading(false);
       }, 300);
-    }, 4000);
+    }, 2000);
     return () => clearInterval(timer);
   }, []);
 
