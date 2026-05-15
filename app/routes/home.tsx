@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
 import { ref, onValue } from "firebase/database";
@@ -7,6 +7,21 @@ import Logo from "../components/Logo";
 import BikeFireAnimation from "../components/BikeFireAnimation";
 import { useAuth } from "../lib/AuthContext";
 import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
+
+const APOIADORES = [
+  {
+    nome: "Bici nos Planos MS",
+    url: "https://www.instagram.com/bicinosplanos/",
+    img: "/apoiadores/bicinosplanos.png",
+    alt: "Bici nos Planos MS",
+  },
+  {
+    nome: "Ameciclo",
+    url: "https://ameciclo.org",
+    img: "/apoiadores/ameciclo.jpg",
+    alt: "Ameciclo",
+  },
+];
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -54,6 +69,22 @@ export default function Home() {
   }, []);
 
   const [showEmailBanner, setShowEmailBanner] = useState(false);
+
+  const [apoiadorIndex, setApoiadorIndex] = useState(0);
+  const [fading, setFading] = useState(false);
+  const hoverRef = useRef(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (hoverRef.current) return;
+      setFading(true);
+      setTimeout(() => {
+        setApoiadorIndex(prev => (prev + 1) % APOIADORES.length);
+        setFading(false);
+      }, 300);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (user && (!user.email || user.email.endsWith('@ciclistadenuncie.local'))) {
@@ -191,15 +222,47 @@ export default function Home() {
         
         <div className="pt-2 pb-1">
           <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">Apoiadores</p>
-          <div className="flex flex-wrap justify-center items-center gap-4">
-            <a href="https://www.instagram.com/bicinosplanos/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition">
-              <img src="/apoiadores/bicinosplanos.png" alt="Bici nos Planos MS" className="h-16 object-contain" />
-              <span className="text-[10px] text-gray-400 dark:text-gray-500">Bici nos Planos MS</span>
+          <div
+            className="flex flex-col items-center gap-3"
+            onMouseEnter={() => { hoverRef.current = true; }}
+            onMouseLeave={() => { hoverRef.current = false; }}
+            aria-live="polite"
+          >
+            <a
+              href={APOIADORES[apoiadorIndex].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition-opacity duration-300 ${
+                fading ? 'opacity-0' : ''
+              }`}
+            >
+              <img
+                src={APOIADORES[apoiadorIndex].img}
+                alt={APOIADORES[apoiadorIndex].alt}
+                className="h-16 object-contain"
+              />
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                {APOIADORES[apoiadorIndex].nome}
+              </span>
             </a>
-            <a href="https://ameciclo.org" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition">
-              <img src="/apoiadores/ameciclo.jpg" alt="Ameciclo" className="h-16 object-contain" />
-              <span className="text-[10px] text-gray-400 dark:text-gray-500">Ameciclo</span>
-            </a>
+            {/* Indicadores (dots) */}
+            <div className="flex items-center gap-1.5">
+              {APOIADORES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setApoiadorIndex(i);
+                    setFading(false);
+                  }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    i === apoiadorIndex
+                      ? 'bg-red-600 dark:bg-red-500 w-3'
+                      : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label={`Apoiador ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
