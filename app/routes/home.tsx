@@ -73,18 +73,49 @@ export default function Home() {
   const [apoiadorIndex, setApoiadorIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const hoverRef = useRef(false);
+  const preloadedRef = useRef(new Set<string>());
+
+  // Pré-carrega a imagem do próximo apoiador
+  const preloadNext = useRef((index: number) => {
+    const src = APOIADORES[index].img;
+    if (!preloadedRef.current.has(src)) {
+      preloadedRef.current.add(src);
+      const img = new Image();
+      img.src = src;
+    }
+  });
+
+  useEffect(() => {
+    // Pré-carrega a primeira imagem seguinte já no início
+    preloadNext.current((apoiadorIndex + 1) % APOIADORES.length);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (hoverRef.current) return;
-      setFading(true);
-      setTimeout(() => {
-        setApoiadorIndex(prev => (prev + 1) % APOIADORES.length);
-        setFading(false);
-      }, 300);
+      if (hoverRef.current || fading) return;
+      const next = (apoiadorIndex + 1) % APOIADORES.length;
+      preloadNext.current((next + 1) % APOIADORES.length); // pré-carrega a próxima
+      setFading(true); // inicia fade OUT
     }, 2000);
     return () => clearInterval(timer);
-  }, []);
+  }, [apoiadorIndex, fading]);
+
+  // Fade OUT completo (300ms) → troca conteúdo → aguarda paint → fade IN
+  useEffect(() => {
+    if (!fading) return;
+    const t = setTimeout(() => {
+      // Troca o índice (nova img aparece invisível, opacity-0)
+      setApoiadorIndex(prev => (prev + 1) % APOIADORES.length);
+      // Espera o browser pintar a nova imagem
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // Agora sim: fade IN (remove opacity-0, transiciona para opacity-100)
+          setFading(false);
+        });
+      });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [fading]);
 
   useEffect(() => {
     if (user && (!user.email || user.email.endsWith('@ciclistadenuncie.local'))) {
@@ -232,7 +263,7 @@ export default function Home() {
               href={APOIADORES[apoiadorIndex].url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex flex-col items-center gap-1 opacity-60 hover:opacity-100 transition-opacity duration-300 ${
+              className={`flex flex-col items-center gap-1 opacity-100 hover:opacity-100 transition-opacity duration-300 ${
                 fading ? 'opacity-0' : ''
               }`}
             >
