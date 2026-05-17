@@ -39,6 +39,12 @@ const APOIADORES = [
     img: "/apoiadores/massascriticasbrasil.png",
     alt: "Massas Críticas Brasil",
   },
+  {
+    nome: "Massa Crítica Marília/SP",
+    url: "https://www.instagram.com/massacriticamarilia?igsh=OG1sdmV3dDZ2eG1q",
+    img: "/apoiadores/massacriticamarilia.png",
+    alt: "Massa Crítica Marília/SP",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
