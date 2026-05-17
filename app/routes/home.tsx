@@ -51,6 +51,12 @@ const APOIADORES = [
     img: "/apoiadores/massacriticanatal.jpg",
     alt: "Massa Crítica Natal/RN",
   },
+  {
+    nome: "Massa Crítica Sorocaba/SP",
+    url: "https://www.instagram.com/os6dopedal?igsh=MW10MnJ1cTMxOWgwNA==",
+    img: "/apoiadores/massacriticasorocaba.jpg",
+    alt: "Massa Crítica Sorocaba/SP",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
