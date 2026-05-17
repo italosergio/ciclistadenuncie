@@ -45,6 +45,12 @@ const APOIADORES = [
     img: "/apoiadores/massacriticamarilia.jpg",
     alt: "Massa Crítica Marília/SP",
   },
+  {
+    nome: "Massa Crítica Natal/RN",
+    url: "https://www.instagram.com/bicicletadanatal?igsh=Z2dhYnoybXozcGdq",
+    img: "/apoiadores/massacriticanatal.png",
+    alt: "Massa Crítica Natal/RN",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
