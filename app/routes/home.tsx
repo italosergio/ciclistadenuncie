@@ -42,7 +42,7 @@ const APOIADORES = [
   {
     nome: "Massa Crítica Marília/SP",
     url: "https://www.instagram.com/massacriticamarilia?igsh=OG1sdmV3dDZ2eG1q",
-    img: "/apoiadores/massacriticamarilia.png",
+    img: "/apoiadores/massacriticamarilia.jpg",
     alt: "Massa Crítica Marília/SP",
   },
 ];
