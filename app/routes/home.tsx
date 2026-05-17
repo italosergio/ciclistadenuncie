@@ -27,6 +27,12 @@ const APOIADORES = [
     img: "/apoiadores/cicloativismo.png",
     alt: "Cicloativismo",
   },
+  {
+    nome: "Massa Crítica Dourados/MS",
+    url: "https://www.instagram.com/bicicletadaddos?igsh=MXQxZHN6aXpwOTlqbg==",
+    img: "/apoiadores/massacriticadd.png",
+    alt: "Massa Crítica Dourados/MS",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
