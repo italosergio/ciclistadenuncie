@@ -48,7 +48,7 @@ const APOIADORES = [
   {
     nome: "Massa Crítica Natal/RN",
     url: "https://www.instagram.com/bicicletadanatal?igsh=Z2dhYnoybXozcGdq",
-    img: "/apoiadores/massacriticanatal.png",
+    img: "/apoiadores/massacriticanatal.jpg",
     alt: "Massa Crítica Natal/RN",
   },
 ];
