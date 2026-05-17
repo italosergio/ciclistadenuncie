@@ -21,6 +21,12 @@ const APOIADORES = [
     img: "/apoiadores/ameciclo.jpg",
     alt: "Ameciclo",
   },
+  {
+    nome: "Cicloativismo",
+    url: "https://www.instagram.com/cicloativismo?igsh=MWRiZDczejlidngyeA==",
+    img: "/apoiadores/cicloativismo.jpg",
+    alt: "Cicloativismo",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
