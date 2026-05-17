@@ -33,6 +33,12 @@ const APOIADORES = [
     img: "/apoiadores/massacriticadd.png",
     alt: "Massa Crítica Dourados/MS",
   },
+  {
+    nome: "Massas Críticas Brasil",
+    url: "https://www.instagram.com/massascriticasbrasil?igsh=eXR5cWY3anNqemN6",
+    img: "/apoiadores/massascriticasbrasil.png",
+    alt: "Massas Críticas Brasil",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
