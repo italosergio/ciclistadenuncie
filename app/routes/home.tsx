@@ -24,7 +24,7 @@ const APOIADORES = [
   {
     nome: "Cicloativismo",
     url: "https://www.instagram.com/cicloativismo?igsh=MWRiZDczejlidngyeA==",
-    img: "/apoiadores/cicloativismo.jpg",
+    img: "/apoiadores/cicloativismo.png",
     alt: "Cicloativismo",
   },
 ];
