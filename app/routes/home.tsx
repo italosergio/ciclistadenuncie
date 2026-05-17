@@ -57,6 +57,12 @@ const APOIADORES = [
     img: "/apoiadores/massacriticasorocaba.jpg",
     alt: "Massa Crítica Sorocaba/SP",
   },
+  {
+    nome: "Massa Crítica DF",
+    url: "https://www.instagram.com/bicicletada.df?igsh=djQ2bmF3aHdvZnhn",
+    img: "/apoiadores/massacriticadf.jpg",
+    alt: "Massa Crítica DF",
+  },
 ];
 
 export function meta({}: Route.MetaArgs) {
