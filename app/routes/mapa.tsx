@@ -3,7 +3,7 @@ import { ref, onValue, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
-import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield } from "lucide-react";
+import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield, Globe, Filter, Eye, EyeOff } from "lucide-react";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link, useLocation } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
@@ -29,8 +29,21 @@ interface Denuncia {
   createdAt: string;
 }
 
+interface Iniciativa {
+  id: string;
+  nome: string;
+  url: string;
+  descricao?: string;
+  endereco?: string;
+  localizacao?: { lat: number; lng: number };
+  criadoPor: string;
+  createdAt: string;
+}
+
 export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [denuncias, setDenuncias] = useState<Record<string, Denuncia>>({});
+  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
+  const [mostrarIniciativas, setMostrarIniciativas] = useState(true);
   const [MapComponent, setMapComponent] = useState<any>(null);
   const [cidade, setCidade] = useState("");
   const [sugestoes, setSugestoes] = useState<string[]>([]);
@@ -295,6 +308,31 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   }, []);
 
   useEffect(() => {
+    const iniciativasRef = ref(db, "iniciativas");
+    const unsubscribe = onValue(iniciativasRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const lista = Object.entries(data)
+          .map(([key, value]: [string, any]) => ({
+            id: key,
+            nome: value.nome || "",
+            url: value.url || "",
+            descricao: value.descricao || "",
+            endereco: value.endereco || "",
+            localizacao: value.lat && value.lng ? { lat: value.lat, lng: value.lng } : undefined,
+            criadoPor: value.criadoPor || "",
+            createdAt: value.createdAt || "",
+          }))
+          .filter(i => i.localizacao);
+        setIniciativas(lista);
+      } else {
+        setIniciativas([]);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const removeTabIndex = () => {
       const links = document.querySelectorAll('.leaflet-control-attribution a');
       links.forEach(link => {
@@ -368,6 +406,13 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         className: 'custom-marker',
         iconSize: [40, 40],
         iconAnchor: [20, 40],
+      });
+
+      const iniciativaIcon = L.default.divIcon({
+        html: `<div style="background-color: #16a34a; width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">${renderToString(<Globe size={13} color="white" />)}</div>`,
+        className: 'custom-marker',
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
       });
 
       const MouseFollower = ({ isMarking }: { isMarking: boolean }) => {
@@ -546,7 +591,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
 
 
-      setMapComponent(() => ({ denuncias, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' }) => (
+      setMapComponent(() => ({ denuncias, iniciativas, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], iniciativas: Iniciativa[], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' }) => (
         <MapContainer 
           center={center} 
           zoom={zoom} 
@@ -687,6 +732,64 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 )}
               </Marker>
             )})}
+          {iniciativas.length > 0 && (
+            <>
+              {iniciativas.map((iniciativa) => (
+                <Marker
+                  key={iniciativa.id}
+                  position={[iniciativa.localizacao!.lat, iniciativa.localizacao!.lng]}
+                  icon={iniciativaIcon}
+                  eventHandlers={{
+                    mouseover: (e: any) => {
+                      if (!isMarking) e.target.openPopup();
+                    },
+                    mouseout: (e: any) => {
+                      if (!isMarking) e.target.closePopup();
+                    },
+                    click: (e: any) => {
+                      if (!isMarking) e.target.openPopup();
+                    }
+                  }}
+                >
+                  {!isMarking && (
+                    <Popup className="custom-popup">
+                      <div style={{ minWidth: '200px', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          <div style={{ backgroundColor: '#16a34a', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ color: 'white', fontSize: '10px', fontWeight: 'bold' }}>i</span>
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: '700', color: '#166534' }}>
+                            Iniciativa Cicloativista
+                          </span>
+                        </div>
+                        <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>
+                          {iniciativa.nome}
+                        </h3>
+                        {iniciativa.descricao && (
+                          <p style={{ fontSize: '13px', color: '#374151', marginBottom: '8px', lineHeight: '1.4' }}>
+                            {iniciativa.descricao}
+                          </p>
+                        )}
+                        {iniciativa.endereco && (
+                          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                            📍 {iniciativa.endereco}
+                          </div>
+                        )}
+                        <a
+                          href={iniciativa.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          🌐 {iniciativa.url}
+                        </a>
+                      </div>
+                    </Popup>
+                  )}
+                </Marker>
+              ))}
+            </>
+          )}
           </MapContainer>
       ));
     });
@@ -855,7 +958,15 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       `}</style>
       {MapComponent ? (
         <div className="absolute inset-0">
-          <MapComponent denuncias={denunciasComLocalizacao} center={center} zoom={zoom} isMarking={markingMode} tempMarker={tempMarker} mapType={mapType} />
+          <MapComponent 
+            denuncias={denunciasComLocalizacao} 
+            iniciativas={mostrarIniciativas ? iniciativas : []}
+            center={center} 
+            zoom={zoom} 
+            isMarking={markingMode} 
+            tempMarker={tempMarker} 
+            mapType={mapType} 
+          />
         </div>
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -1251,6 +1362,18 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           >
             <Moon size={18} /> Escuro
           </button>
+          <div className="border-t border-gray-200 my-2"></div>
+          <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase">Iniciativas</div>
+          <label className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer text-black transition">
+            <input
+              type="checkbox"
+              checked={mostrarIniciativas}
+              onChange={(e) => setMostrarIniciativas(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <Globe size={16} className="text-green-600" />
+            <span className="text-sm">Mostrar Iniciativas Cicloativistas</span>
+          </label>
           <div className="border-t border-gray-200 my-2"></div>
           <label className="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-gray-100 cursor-pointer text-black transition">
             <input

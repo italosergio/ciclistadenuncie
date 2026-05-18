@@ -3,13 +3,16 @@ import { ref, onValue, push, remove } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
-import { Plus, Trash2, ExternalLink, Globe } from "lucide-react";
+import { Plus, Trash2, ExternalLink, Globe, MapPin, Search } from "lucide-react";
 
 interface Iniciativa {
   id: string;
   nome: string;
   url: string;
   descricao?: string;
+  endereco?: string;
+  lat?: number;
+  lng?: number;
   criadoPor: string;
   createdAt: string;
 }
@@ -21,6 +24,10 @@ export default function IniciativasTab() {
   const [nome, setNome] = useState("");
   const [url, setUrl] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const [buscando, setBuscando] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const { user } = useAuth();
@@ -36,6 +43,9 @@ export default function IniciativasTab() {
             nome: value.nome || "",
             url: value.url || "",
             descricao: value.descricao || "",
+            endereco: value.endereco || "",
+            lat: value.lat || undefined,
+            lng: value.lng || undefined,
             criadoPor: value.criadoPor || "Desconhecido",
             createdAt: value.createdAt || "",
           }))
@@ -49,6 +59,27 @@ export default function IniciativasTab() {
     return () => unsubscribe();
   }, []);
 
+  async function buscarEndereco() {
+    if (!endereco.trim()) return;
+    setBuscando(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(endereco)}&format=json&limit=1&countrycodes=br`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        setLat(data[0].lat);
+        setLng(data[0].lon);
+      } else {
+        alert("Endereço não encontrado. Tente ser mais específico.");
+      }
+    } catch {
+      alert("Erro ao buscar endereço. Tente novamente.");
+    } finally {
+      setBuscando(false);
+    }
+  }
+
   async function handleSalvar() {
     if (!nome.trim() || !url.trim() || !user?.username) return;
 
@@ -59,6 +90,11 @@ export default function IniciativasTab() {
         nome: nome.trim(),
         url: url.trim(),
         descricao: descricao.trim(),
+        endereco: endereco.trim(),
+        ...(lat && lng ? {
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+        } : {}),
         criadoPor: user.username,
         createdAt: new Date().toISOString(),
       });
@@ -76,6 +112,9 @@ export default function IniciativasTab() {
       setNome("");
       setUrl("");
       setDescricao("");
+      setEndereco("");
+      setLat("");
+      setLng("");
       setShowForm(false);
     } catch (error: any) {
       alert("Erro ao salvar iniciativa: " + error.message);
@@ -165,14 +204,60 @@ export default function IniciativasTab() {
               <textarea
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                placeholder="Breve descrição da iniciativa..."
-                rows={3}
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white resize-none"
+              placeholder="Breve descrição da iniciativa..."
+              rows={3}
+              className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-1">
+              Endereço / Local (para aparecer no mapa)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={endereco}
+                onChange={(e) => setEndereco(e.target.value)}
+                placeholder="Ex: São Paulo, SP"
+                className="flex-1 p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
               />
+              <button
+                onClick={buscarEndereco}
+                disabled={!endereco.trim() || buscando}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm disabled:opacity-50 flex items-center gap-1"
+              >
+                <Search size={16} />
+                {buscando ? "..." : "Buscar"}
+              </button>
             </div>
-            <button
-              onClick={handleSalvar}
-              disabled={!nome.trim() || !url.trim() || salvando}
+          </div>
+          {(lat || lng) && (
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Latitude</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Longitude</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                />
+              </div>
+            </div>
+          )}
+          <button
+            onClick={handleSalvar}
+            disabled={!nome.trim() || !url.trim() || salvando}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {salvando ? "Salvando..." : "Salvar Iniciativa"}
@@ -214,6 +299,12 @@ export default function IniciativasTab() {
                     <ExternalLink size={14} />
                     {iniciativa.url}
                   </a>
+                  {iniciativa.endereco && (
+                    <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                      <MapPin size={12} />
+                      {iniciativa.endereco}
+                    </div>
+                  )}
                   <div className="mt-2 text-xs text-gray-500">
                     Adicionado por {iniciativa.criadoPor} em{" "}
                     {iniciativa.createdAt
