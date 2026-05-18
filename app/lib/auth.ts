@@ -4,6 +4,9 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, up
 import { registrarEvento } from "./historico";
 
 export async function registerUser(username: string, password: string, email: string) {
+  // Normaliza username pra minúsculo
+  username = username.toLowerCase().trim();
+  
   // Verifica se email já está em uso
   const methods = await fetchSignInMethodsForEmail(auth, email);
   if (methods.length > 0) throw { code: 'auth/email-already-in-use' };
@@ -42,7 +45,7 @@ export async function loginUser(username: string, password: string) {
 
   snapshot.forEach((child) => {
     const data = child.val();
-    if (data.username === username) {
+    if (data.username?.toLowerCase() === username.toLowerCase()) {
       email = data.email;
       userData = data;
       uid = child.key;
