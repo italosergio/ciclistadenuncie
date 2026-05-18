@@ -64,8 +64,10 @@ export default function IniciativasTab() {
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
 
+  // Inicializa o mapa sempre (sem depender de lat/lng)
   useEffect(() => {
-    if (!lat || !lng || !mapRef.current) return;
+    if (!mapRef.current) return;
+    if (mapInstanceRef.current) return; // já inicializado
     
     let destroyed = false;
     
@@ -75,15 +77,15 @@ export default function IniciativasTab() {
     ]).then(([L]) => {
       if (destroyed || !mapRef.current) return;
       
-      // Destroi mapa anterior se existir
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      const hasCoords = lat && lng;
+      const center: [number, number] = hasCoords
+        ? [parseFloat(lat), parseFloat(lng)]
+        : [-14.235, -51.925]; // centro do Brasil
+      const zoom = hasCoords ? 13 : 4;
       
       const map = L.default.map(mapRef.current, {
-        center: [parseFloat(lat), parseFloat(lng)],
-        zoom: 13,
+        center,
+        zoom,
         zoomControl: false,
         attributionControl: false,
       });
@@ -92,24 +94,48 @@ export default function IniciativasTab() {
         maxZoom: 19,
       }).addTo(map);
       
-      const marker = L.default.marker([parseFloat(lat), parseFloat(lng)], {
-        draggable: true,
-      }).addTo(map);
+      // Cria marcador se já tem coordenadas
+      if (hasCoords) {
+        const marker = L.default.marker([parseFloat(lat), parseFloat(lng)], {
+          draggable: true,
+        }).addTo(map);
+        
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          setLat(pos.lat.toFixed(6));
+          setLng(pos.lng.toFixed(6));
+        });
+        
+        markerRef.current = marker;
+      }
       
-      marker.on('dragend', () => {
-        const pos = marker.getLatLng();
-        setLat(pos.lat.toFixed(6));
-        setLng(pos.lng.toFixed(6));
-      });
-      
+      // Clique no mapa: cria/atualiza marcador
       map.on('click', (e: any) => {
-        marker.setLatLng(e.latlng);
-        setLat(e.latlng.lat.toFixed(6));
-        setLng(e.latlng.lng.toFixed(6));
+        const newLat = e.latlng.lat.toFixed(6);
+        const newLng = e.latlng.lng.toFixed(6);
+        
+        if (markerRef.current) {
+          markerRef.current.setLatLng(e.latlng);
+        } else {
+          const marker = L.default.marker(e.latlng, {
+            draggable: true,
+          }).addTo(map);
+          
+          marker.on('dragend', () => {
+            const pos = marker.getLatLng();
+            setLat(pos.lat.toFixed(6));
+            setLng(pos.lng.toFixed(6));
+          });
+          
+          markerRef.current = marker;
+          map.setZoom(13);
+        }
+        
+        setLat(newLat);
+        setLng(newLng);
       });
       
       mapInstanceRef.current = map;
-      markerRef.current = marker;
     });
     
     return () => {
@@ -119,6 +145,31 @@ export default function IniciativasTab() {
         mapInstanceRef.current = null;
       }
     };
+  }, []); // só roda uma vez na montagem
+  
+  // Atualiza marcador se lat/lng mudarem externamente (ex: busca de endereço)
+  useEffect(() => {
+    if (!mapInstanceRef.current || !lat || !lng) return;
+    
+    import("leaflet").then((L) => {
+      if (markerRef.current) {
+        markerRef.current.setLatLng([parseFloat(lat), parseFloat(lng)]);
+        mapInstanceRef.current.setView([parseFloat(lat), parseFloat(lng)], 13);
+      } else {
+        const marker = L.default.marker([parseFloat(lat), parseFloat(lng)], {
+          draggable: true,
+        }).addTo(mapInstanceRef.current);
+        
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          setLat(pos.lat.toFixed(6));
+          setLng(pos.lng.toFixed(6));
+        });
+        
+        markerRef.current = marker;
+        mapInstanceRef.current.setView([parseFloat(lat), parseFloat(lng)], 13);
+      }
+    });
   }, [lat, lng]);
 
   async function buscarEndereco() {
@@ -293,9 +344,7 @@ export default function IniciativasTab() {
               </button>
             </div>
           </div>
-          {(lat || lng) && (
-            <>
-              <div className="flex gap-4">
+          <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Latitude</label>
                   <input
@@ -318,16 +367,14 @@ export default function IniciativasTab() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Preview no mapa</label>
-                <p className="text-xs text-gray-500 mb-2">Clique no mapa ou arraste o marcador para ajustar</p>
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Localização no mapa</label>
+                <p className="text-xs text-gray-500 mb-2">Clique no mapa para marcar o ponto ou arraste o marcador para ajustar</p>
                 <div
                   ref={mapRef}
                   className="w-full h-56 rounded-lg border border-gray-600 z-0"
                   style={{ cursor: 'crosshair' }}
                 />
               </div>
-            </>
-          )}
           <button
             onClick={handleSalvar}
             disabled={!nome.trim() || !url.trim() || salvando}
