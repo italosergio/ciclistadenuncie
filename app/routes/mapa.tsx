@@ -409,10 +409,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       });
 
       const iniciativaIcon = L.default.divIcon({
-        html: `<div style="background-color: #16a34a; width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">${renderToString(<Globe size={13} color="white" />)}</div>`,
+        html: `<div style="background-color: #15803d; width: 38px; height: 38px; border-radius: 6px; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">${renderToString(<Bike size={22} color="white" />)}</div>`,
         className: 'custom-marker',
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
       });
 
       const MouseFollower = ({ isMarking }: { isMarking: boolean }) => {
