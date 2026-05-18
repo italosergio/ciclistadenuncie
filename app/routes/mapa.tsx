@@ -591,7 +591,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
 
 
 
-      setMapComponent(() => ({ denuncias, iniciativas, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], iniciativas: Iniciativa[], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' }) => (
+      setMapComponent(() => ({ denuncias, iniciativas, center, zoom, isMarking, tempMarker, mapType }: { denuncias: [string, Denuncia][], iniciativas: Iniciativa[], center: [number, number], zoom: number, isMarking: boolean, tempMarker: {lat: number, lng: number} | null, mapType: 'street' | 'satellite' | 'light' | 'dark' }) => (
         <MapContainer 
           center={center} 
           zoom={zoom} 

@@ -65,7 +65,7 @@ export default function UserContributions() {
       const data = snapshot.val() || {};
       const userDenuncias = Object.entries(data)
         .filter(([_, d]: [string, any]) => d.username === username)
-        .sort((a, b) => b[1].createdAt.localeCompare(a[1].createdAt));
+        .sort((a: [string, any], b: [string, any]) => b[1].createdAt.localeCompare(a[1].createdAt));
       setDenuncias(userDenuncias as [string, Denuncia][]);
       setLoading(false);
     });
@@ -101,7 +101,7 @@ export default function UserContributions() {
       setContatos(userContatos);
     }, (error) => {
       console.error('Erro ao ler contatos:', error);
-      console.error('Código do erro:', error.code);
+      console.error('Código do erro:', (error as any).code);
       console.error('Mensagem:', error.message);
     });
     return () => unsubscribe();
