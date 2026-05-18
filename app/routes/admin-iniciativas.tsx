@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ref, onValue, push, remove } from "firebase/database";
+import { useState, useEffect, useRef } from "react";
+import { ref, onValue, push, remove, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
@@ -58,6 +58,68 @@ export default function IniciativasTab() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Mini-mapa Leaflet para selecionar localização
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!lat || !lng || !mapRef.current) return;
+    
+    let destroyed = false;
+    
+    Promise.all([
+      import("leaflet"),
+      import("leaflet/dist/leaflet.css")
+    ]).then(([L]) => {
+      if (destroyed || !mapRef.current) return;
+      
+      // Destroi mapa anterior se existir
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+      
+      const map = L.default.map(mapRef.current, {
+        center: [parseFloat(lat), parseFloat(lng)],
+        zoom: 13,
+        zoomControl: false,
+        attributionControl: false,
+      });
+      
+      L.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(map);
+      
+      const marker = L.default.marker([parseFloat(lat), parseFloat(lng)], {
+        draggable: true,
+      }).addTo(map);
+      
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng();
+        setLat(pos.lat.toFixed(6));
+        setLng(pos.lng.toFixed(6));
+      });
+      
+      map.on('click', (e: any) => {
+        marker.setLatLng(e.latlng);
+        setLat(e.latlng.lat.toFixed(6));
+        setLng(e.latlng.lng.toFixed(6));
+      });
+      
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
+    });
+    
+    return () => {
+      destroyed = true;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [lat, lng]);
 
   async function buscarEndereco() {
     if (!endereco.trim()) return;
@@ -232,28 +294,39 @@ export default function IniciativasTab() {
             </div>
           </div>
           {(lat || lng) && (
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Latitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+            <>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-1">Latitude</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={lat}
+                    onChange={(e) => setLat(e.target.value)}
+                    className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-1">Longitude</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={lng}
+                    onChange={(e) => setLng(e.target.value)}
+                    className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-1">Preview no mapa</label>
+                <p className="text-xs text-gray-500 mb-2">Clique no mapa ou arraste o marcador para ajustar</p>
+                <div
+                  ref={mapRef}
+                  className="w-full h-56 rounded-lg border border-gray-600 z-0"
+                  style={{ cursor: 'crosshair' }}
                 />
               </div>
-              <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Longitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={lng}
-                  onChange={(e) => setLng(e.target.value)}
-                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
-                />
-              </div>
-            </div>
+            </>
           )}
           <button
             onClick={handleSalvar}
