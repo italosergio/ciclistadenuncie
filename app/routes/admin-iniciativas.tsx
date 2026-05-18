@@ -325,7 +325,7 @@ export default function IniciativasTab() {
           Iniciativas Cicloativistas ({iniciativas.length})
         </h2>
         <button
-          onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(false); setEditandoId(null); } }}
+          onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(!showForm); } }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold"
         >
           <Plus size={18} />
