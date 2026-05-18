@@ -8,6 +8,5 @@ export default defineConfig({
   plugins: [basicSsl(), tailwindcss(), reactRouter(), tsconfigPaths()],
   server: {
     host: true,
-    https: true
-  }
+  },
 });
