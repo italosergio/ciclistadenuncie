@@ -3,7 +3,7 @@ import { ref, onValue, push, remove, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
-import { Plus, Trash2, ExternalLink, Globe, MapPin, Search } from "lucide-react";
+import { Plus, Trash2, ExternalLink, Globe, MapPin, Search, Edit3 } from "lucide-react";
 
 interface Iniciativa {
   id: string;
@@ -30,6 +30,7 @@ export default function IniciativasTab() {
   const [buscando, setBuscando] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -193,13 +194,35 @@ export default function IniciativasTab() {
     }
   }
 
+  function handleEditar(iniciativa: Iniciativa) {
+    setEditandoId(iniciativa.id);
+    setNome(iniciativa.nome);
+    setUrl(iniciativa.url);
+    setDescricao(iniciativa.descricao || "");
+    setEndereco(iniciativa.endereco || "");
+    setLat(iniciativa.lat?.toString() || "");
+    setLng(iniciativa.lng?.toString() || "");
+    setShowForm(true);
+    setExcluindoId(null);
+  }
+
+  function handleCancelarEdicao() {
+    setEditandoId(null);
+    setNome("");
+    setUrl("");
+    setDescricao("");
+    setEndereco("");
+    setLat("");
+    setLng("");
+    setShowForm(false);
+  }
+
   async function handleSalvar() {
     if (!nome.trim() || !url.trim() || !user?.username) return;
 
     setSalvando(true);
     try {
-      const iniciativasRef = ref(db, "iniciativas");
-      const novoRef = await push(iniciativasRef, {
+      const dados = {
         nome: nome.trim(),
         url: url.trim(),
         descricao: descricao.trim(),
@@ -208,20 +231,49 @@ export default function IniciativasTab() {
           lat: parseFloat(lat),
           lng: parseFloat(lng),
         } : {}),
-        criadoPor: user.username,
-        createdAt: new Date().toISOString(),
-      });
+        editadoPor: user.username,
+        editadoEm: new Date().toISOString(),
+      };
 
-      await registrarEvento({
-        tipo: "adicionar_iniciativa",
-        usuario: user.username,
-        detalhes: {
-          iniciativaId: novoRef.key,
-          nome: nome.trim(),
-          url: url.trim(),
-        },
-      });
+      if (editandoId) {
+        // Atualizar iniciativa existente
+        const iniciativaOriginal = iniciativas.find(i => i.id === editandoId);
+        await set(ref(db, `iniciativas/${editandoId}`), {
+          ...dados,
+          criadoPor: iniciativaOriginal?.criadoPor || user.username,
+          createdAt: iniciativaOriginal?.createdAt || new Date().toISOString(),
+        });
 
+        await registrarEvento({
+          tipo: "editar_iniciativa",
+          usuario: user.username,
+          detalhes: {
+            iniciativaId: editandoId,
+            nome: nome.trim(),
+            url: url.trim(),
+          },
+        });
+      } else {
+        // Nova iniciativa
+        const iniciativasRef = ref(db, "iniciativas");
+        const novoRef = await push(iniciativasRef, {
+          ...dados,
+          criadoPor: user.username,
+          createdAt: new Date().toISOString(),
+        });
+
+        await registrarEvento({
+          tipo: "adicionar_iniciativa",
+          usuario: user.username,
+          detalhes: {
+            iniciativaId: novoRef.key,
+            nome: nome.trim(),
+            url: url.trim(),
+          },
+        });
+      }
+
+      setEditandoId(null);
       setNome("");
       setUrl("");
       setDescricao("");
@@ -273,18 +325,18 @@ export default function IniciativasTab() {
           Iniciativas Cicloativistas ({iniciativas.length})
         </h2>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(false); setEditandoId(null); } }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold"
         >
           <Plus size={18} />
-          {showForm ? "Cancelar" : "Nova Iniciativa"}
+          {showForm ? (editandoId ? "Cancelar Edição" : "Cancelar") : "Nova Iniciativa"}
         </button>
       </div>
 
       {/* Formulário de nova iniciativa */}
       {showForm && (
         <div className="bg-gray-800 p-6 rounded-xl shadow-lg mb-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-4">Nova Iniciativa Cicloativista</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">{editandoId ? "Editar Iniciativa" : "Nova Iniciativa Cicloativista"}</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-1">
@@ -380,7 +432,7 @@ export default function IniciativasTab() {
             disabled={!nome.trim() || !url.trim() || salvando}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {salvando ? "Salvando..." : "Salvar Iniciativa"}
+              {salvando ? "Salvando..." : (editandoId ? "Atualizar Iniciativa" : "Salvar Iniciativa")}
             </button>
           </div>
         </div>
@@ -432,15 +484,24 @@ export default function IniciativasTab() {
                       : "N/A"}
                   </div>
                 </div>
-                <button
-                  onClick={() =>
-                    setExcluindoId(excluindoId === iniciativa.id ? null : iniciativa.id)
-                  }
-                  className="text-red-400 hover:text-red-300 p-2 flex-shrink-0"
-                  title="Excluir iniciativa"
-                >
-                  <Trash2 size={20} />
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleEditar(iniciativa)}
+                    className="text-blue-400 hover:text-blue-300 p-2 flex-shrink-0"
+                    title="Editar iniciativa"
+                  >
+                    <Edit3 size={18} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      setExcluindoId(excluindoId === iniciativa.id ? null : iniciativa.id)
+                    }
+                    className="text-red-400 hover:text-red-300 p-2 flex-shrink-0"
+                    title="Excluir iniciativa"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
 
               {excluindoId === iniciativa.id && (
