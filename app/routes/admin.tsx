@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle } from "lucide-react";
+import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, onValue, update, remove, push } from "firebase/database";
 import type { Route } from "./+types/admin";
@@ -10,6 +10,7 @@ import { registrarEvento } from "../lib/historico";
 
 import HistoricoTab from "./admin-historico";
 import UsuariosTab from "./admin-usuarios";
+import IniciativasTab from "./admin-iniciativas";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Admin - Ciclista Denuncie" }];
@@ -118,6 +119,23 @@ export default function Admin() {
               </button>
             )}
 
+            {user?.role === "administrador" && (
+              <button
+                onClick={() => {
+                  setSearchParams({ tab: "iniciativas" });
+                  setMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition whitespace-nowrap text-sm ${
+                  tab === "iniciativas"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                <Globe size={18} className="flex-shrink-0" />
+                <span>Iniciativas</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setSearchParams({ tab: "denuncias" });
@@ -183,6 +201,7 @@ export default function Admin() {
           <div className="pt-16 md:pt-0">
           {tab === "atividade" && <HistoricoTab />}
           {tab === "usuarios" && user?.role === "administrador" && <UsuariosTab />}
+          {tab === "iniciativas" && user?.role === "administrador" && <IniciativasTab />}
           {tab === "denuncias" && <DenunciasTab />}
           {tab === "contatos" && <ContatosTab />}
           </div>
