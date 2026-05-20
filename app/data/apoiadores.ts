@@ -60,4 +60,10 @@ export const APOIADORES: Apoiador[] = [
     img: "/apoiadores/massacriticadf.jpg",
     alt: "Massa Crítica DF",
   },
+  {
+    nome: "Massa Crítica Porto Alegre/RS",
+    url: "https://www.instagram.com/massacriticaportoalegre?igsh=MTBtaTY5YjJtYXk2ZA==",
+    img: "/apoiadores/massacriticaportoalegre.jpg",
+    alt: "Massa Crítica Porto Alegre/RS",
+  },
 ];
