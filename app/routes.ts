@@ -16,4 +16,5 @@ export default [
   route("termo-responsabilidade-usuario", "routes/termo-responsabilidade-usuario.tsx"),
   route("termo-responsabilidade-plataforma", "routes/termo-responsabilidade-plataforma.tsx"),
   route("usuario/:username", "routes/usuario.$username.tsx"),
+  route("planos", "routes/planos.tsx"),
 ] satisfies RouteConfig;
