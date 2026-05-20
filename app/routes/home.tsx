@@ -9,6 +9,13 @@ import { useAuth } from "../lib/AuthContext";
 import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
 import { APOIADORES } from "../data/apoiadores";
 
+interface ApoiadorCarousel {
+  nome: string;
+  url: string;
+  img: string;
+  alt: string;
+}
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Ciclista Denuncie - Plataforma Nacional de Denúncia do Ciclista" },
@@ -54,6 +61,31 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
+  const [apoiadoresFirebase, setApoiadoresFirebase] = useState<ApoiadorCarousel[]>([]);
+
+  useEffect(() => {
+    const apoiadoresRef = ref(db, "apoiadores");
+    const unsubscribe = onValue(apoiadoresRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const lista = Object.entries(data)
+          .map(([key, value]: [string, any]) => ({
+            nome: value.nome || "",
+            url: value.url || "",
+            img: value.img || `/apoiadores/default.jpg`,
+            alt: value.alt || value.nome || "",
+          }))
+          .filter(a => a.nome);
+        setApoiadoresFirebase(lista);
+      } else {
+        setApoiadoresFirebase([]);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const allApoiadores = apoiadoresFirebase.length > 0 ? apoiadoresFirebase : APOIADORES;
+
   const [showEmailBanner, setShowEmailBanner] = useState(false);
 
   const [apoiadorIndex, setApoiadorIndex] = useState(0);
@@ -63,7 +95,7 @@ export default function Home() {
 
   // Pré-carrega a imagem do próximo apoiador
   const preloadNext = useRef((index: number) => {
-    const src = APOIADORES[index].img;
+    const src = allApoiadores[index].img;
     if (!preloadedRef.current.has(src)) {
       preloadedRef.current.add(src);
       const img = new Image();
@@ -73,14 +105,14 @@ export default function Home() {
 
   useEffect(() => {
     // Pré-carrega a primeira imagem seguinte já no início
-    preloadNext.current((apoiadorIndex + 1) % APOIADORES.length);
+    preloadNext.current((apoiadorIndex + 1) % allApoiadores.length);
   }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
       if (hoverRef.current || fading) return;
-      const next = (apoiadorIndex + 1) % APOIADORES.length;
-      preloadNext.current((next + 1) % APOIADORES.length); // pré-carrega a próxima
+      const next = (apoiadorIndex + 1) % allApoiadores.length;
+      preloadNext.current((next + 1) % allApoiadores.length); // pré-carrega a próxima
       setFading(true); // inicia fade OUT
     }, 2000);
     return () => clearInterval(timer);
@@ -91,7 +123,7 @@ export default function Home() {
     if (!fading) return;
     const t = setTimeout(() => {
       // Troca o índice (nova img aparece invisível, opacity-0)
-      setApoiadorIndex(prev => (prev + 1) % APOIADORES.length);
+      setApoiadorIndex(prev => (prev + 1) % allApoiadores.length);
       // Espera o browser pintar a nova imagem
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -246,7 +278,7 @@ export default function Home() {
             aria-live="polite"
           >
             <a
-              href={APOIADORES[apoiadorIndex].url}
+              href={allApoiadores[apoiadorIndex].url}
               target="_blank"
               rel="noopener noreferrer"
               className={`flex flex-col items-center gap-1 opacity-100 hover:opacity-100 transition-opacity duration-300 ${
@@ -254,17 +286,17 @@ export default function Home() {
               }`}
             >
               <img
-                src={APOIADORES[apoiadorIndex].img}
-                alt={APOIADORES[apoiadorIndex].alt}
+                src={allApoiadores[apoiadorIndex].img}
+                alt={allApoiadores[apoiadorIndex].alt}
                 className="h-16 object-contain"
               />
               <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                {APOIADORES[apoiadorIndex].nome}
+                {allApoiadores[apoiadorIndex].nome}
               </span>
             </a>
             {/* Indicadores (dots) */}
             <div className="flex items-center gap-1.5">
-              {APOIADORES.map((_, i) => (
+              {allApoiadores.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => {

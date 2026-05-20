@@ -5,6 +5,18 @@ export interface Apoiador {
   alt: string;
 }
 
+export interface ApoiadorFirebase extends Apoiador {
+  id: string;
+  descricao?: string;
+  endereco?: string;
+  lat?: number;
+  lng?: number;
+  criadoPor: string;
+  createdAt: string;
+  editadoPor?: string;
+  editadoEm?: string;
+}
+
 export const APOIADORES: Apoiador[] = [
   {
     nome: "Bici nos Planos MS",
