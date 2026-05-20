@@ -540,6 +540,7 @@ export default function ApoiadoresTab() {
                     >
                       <GripVertical size={20} />
                     </button>
+                    <span className="text-xs font-mono text-gray-500 min-w-[2rem]">#{index + 1}</span>
                     {apoiador.img && (
                       <img
                         src={apoiador.img}
