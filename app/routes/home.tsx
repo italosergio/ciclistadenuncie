@@ -273,7 +273,7 @@ export default function Home() {
         </div>
         
         <div className="pt-2 pb-1">
-          <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">Apoiadores</p>
+          <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">Apoiadores ({allApoiadores.length})</p>
           <div
             className="flex flex-col items-center gap-3"
             onMouseEnter={() => { hoverRef.current = true; }}

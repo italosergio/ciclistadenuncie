@@ -533,13 +533,12 @@ export default function ApoiadoresTab() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <button
-                      className="text-gray-500 hover:text-white cursor-grab active:cursor-grabbing flex-shrink-0"
+                    <span
+                      className="text-gray-500 hover:text-white cursor-grab active:cursor-grabbing flex-shrink-0 inline-flex"
                       title="Arrastar para reordenar"
-                      onMouseDown={(e) => e.preventDefault()}
                     >
                       <GripVertical size={20} />
-                    </button>
+                    </span>
                     <span className="text-xs font-mono text-gray-500 min-w-[2rem]">#{index + 1}</span>
                     {apoiador.img && (
                       <img
