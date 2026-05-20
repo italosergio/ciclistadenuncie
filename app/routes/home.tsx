@@ -14,7 +14,6 @@ interface ApoiadorCarousel {
   url: string;
   img: string;
   alt: string;
-  createdAt?: string;
 }
 
 export function meta({}: Route.MetaArgs) {
@@ -75,9 +74,7 @@ export default function Home() {
             url: value.url || "",
             img: value.img || `/apoiadores/default.jpg`,
             alt: value.alt || value.nome || "",
-            createdAt: value.createdAt || "",
           }))
-          .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))
           .filter(a => a.nome);
         setApoiadoresFirebase(lista);
       } else {

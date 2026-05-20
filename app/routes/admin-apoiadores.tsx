@@ -55,7 +55,7 @@ export default function ApoiadoresTab() {
             criadoPor: value.criadoPor || "Desconhecido",
             createdAt: value.createdAt || "",
           }))
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+          .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
         setApoiadores(lista);
       } else {
         setApoiadores([]);
