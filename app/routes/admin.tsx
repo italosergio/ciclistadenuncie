@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart } from "lucide-react";
+import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart, FileText } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, onValue, update, remove, push } from "firebase/database";
 import type { Route } from "./+types/admin";
@@ -153,6 +153,17 @@ export default function Admin() {
                 <span>Apoiadores</span>
               </button>
             )}
+
+            <button
+              onClick={() => {
+                navigate("/planos");
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition whitespace-nowrap text-sm text-gray-300 hover:bg-gray-700"
+            >
+              <FileText size={18} className="flex-shrink-0" />
+              <span>Planos</span>
+            </button>
 
             <button
               onClick={() => {
