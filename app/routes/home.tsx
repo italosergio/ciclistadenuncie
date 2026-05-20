@@ -14,6 +14,7 @@ interface ApoiadorCarousel {
   url: string;
   img: string;
   alt: string;
+  ordem: number;
 }
 
 export function meta({}: Route.MetaArgs) {
@@ -74,7 +75,9 @@ export default function Home() {
             url: value.url || "",
             img: value.img || `/apoiadores/default.jpg`,
             alt: value.alt || value.nome || "",
+            ordem: typeof value.ordem === "number" ? value.ordem : 999,
           }))
+          .sort((a, b) => a.ordem - b.ordem)
           .filter(a => a.nome);
         setApoiadoresFirebase(lista);
       } else {

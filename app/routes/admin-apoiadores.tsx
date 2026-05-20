@@ -3,7 +3,7 @@ import { ref, onValue, push, remove, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
-import { Plus, Trash2, ExternalLink, MapPin, Search, Edit3, Heart } from "lucide-react";
+import { Plus, Trash2, ExternalLink, MapPin, Search, Edit3, Heart, GripVertical } from "lucide-react";
 
 interface Apoiador {
   id: string;
@@ -15,6 +15,7 @@ interface Apoiador {
   endereco?: string;
   lat?: number;
   lng?: number;
+  ordem: number;
   criadoPor: string;
   createdAt: string;
 }
@@ -32,8 +33,11 @@ export default function ApoiadoresTab() {
   const [lng, setLng] = useState("");
   const [buscando, setBuscando] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [reordenando, setReordenando] = useState(false);
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<string | null>(null);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -54,8 +58,9 @@ export default function ApoiadoresTab() {
             lng: value.lng || undefined,
             criadoPor: value.criadoPor || "Desconhecido",
             createdAt: value.createdAt || "",
+            ordem: typeof value.ordem === "number" ? value.ordem : 999,
           }))
-          .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+          .sort((a, b) => a.ordem - b.ordem);
         setApoiadores(lista);
       } else {
         setApoiadores([]);
@@ -208,6 +213,50 @@ export default function ApoiadoresTab() {
     setExcluindoId(null);
   }
 
+  // Drag & drop reorder
+  function handleDragStart(index: number) {
+    dragItem.current = index;
+  }
+
+  function handleDragEnter(index: number) {
+    dragOverItem.current = index;
+  }
+
+  async function handleDrop() {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    if (dragItem.current === dragOverItem.current) return;
+    if (!user?.username) return;
+
+    const novaLista = [...apoiadores];
+    const [movido] = novaLista.splice(dragItem.current, 1);
+    novaLista.splice(dragOverItem.current, 0, movido);
+
+    // Atualiza ordem no Firebase
+    setReordenando(true);
+    try {
+      for (let i = 0; i < novaLista.length; i++) {
+        if (novaLista[i].ordem !== i) {
+          await set(ref(db, `apoiadores/${novaLista[i].id}/ordem`), i);
+        }
+      }
+      await registrarEvento({
+        tipo: "editar_apoiador",
+        usuario: user.username,
+        detalhes: {
+          apoiadorId: movido.id,
+          nome: movido.nome,
+          acao: "reordenar",
+        },
+      });
+    } catch (error: any) {
+      alert("Erro ao reordenar: " + error.message);
+    } finally {
+      setReordenando(false);
+      dragItem.current = null;
+      dragOverItem.current = null;
+    }
+  }
+
   function handleCancelarEdicao() {
     setEditandoId(null);
     setNome("");
@@ -245,6 +294,7 @@ export default function ApoiadoresTab() {
         const apoiadorOriginal = apoiadores.find(a => a.id === editandoId);
         await set(ref(db, `apoiadores/${editandoId}`), {
           ...dados,
+          ordem: apoiadorOriginal?.ordem ?? 999,
           criadoPor: apoiadorOriginal?.criadoPor || user.username,
           createdAt: apoiadorOriginal?.createdAt || new Date().toISOString(),
         });
@@ -262,6 +312,7 @@ export default function ApoiadoresTab() {
         const apoiadoresRef = ref(db, "apoiadores");
         const novoRef = await push(apoiadoresRef, {
           ...dados,
+          ordem: apoiadores.length,
           criadoPor: user.username,
           createdAt: new Date().toISOString(),
         });
@@ -469,14 +520,26 @@ export default function ApoiadoresTab() {
         </div>
       ) : (
         <div className="space-y-4">
-          {apoiadores.map((apoiador) => (
+          {apoiadores.map((apoiador, index) => (
             <div
               key={apoiador.id}
-              className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700"
+              className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${reordenando ? 'border-blue-500' : 'border-gray-700'}`}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
+                    <button
+                      className="text-gray-500 hover:text-white cursor-grab active:cursor-grabbing flex-shrink-0"
+                      title="Arrastar para reordenar"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <GripVertical size={20} />
+                    </button>
                     {apoiador.img && (
                       <img
                         src={apoiador.img}
