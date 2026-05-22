@@ -5,6 +5,8 @@ import { useAuth } from "../lib/AuthContext";
 import { Eye, EyeOff, AlertTriangle, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function Login() {
+  const legibleCredentialInputClass = "font-mono tracking-wide text-base";
+
   // Login
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -227,8 +229,8 @@ export default function Login() {
             <form onSubmit={nextStep} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Usuário</label>
-                <input type="text" value={regUsername} onChange={e => setRegUsername(e.target.value)} required autoComplete="username"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                <input type="text" value={regUsername} onChange={e => setRegUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                  className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
@@ -249,7 +251,7 @@ export default function Login() {
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} value={regPassword} onChange={e => setRegPassword(e.target.value)}
                     onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required minLength={6} autoComplete="new-password"
-                    className="w-full px-4 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                    className={`w-full px-4 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -259,7 +261,7 @@ export default function Login() {
                 <label className="block text-sm font-medium text-gray-300 mb-1">Confirmar Senha</label>
                 <input type={showPassword ? "text" : "password"} value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
                   onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required minLength={6} autoComplete="new-password"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                  className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               </div>
               {capsLockOn && <div className="flex items-center gap-1 text-yellow-400 text-xs"><AlertTriangle size={13} /> Caps Lock ativado</div>}
               {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -320,15 +322,15 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-4" autoComplete={rememberMe ? "on" : "off"}>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Usuário</label>
-            <input type="text" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username"
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+            <input type="text" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Senha</label>
             <div className="relative">
               <input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
                 onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required autoComplete="current-password"
-                className="w-full px-4 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-4 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
