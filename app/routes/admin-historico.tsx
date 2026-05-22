@@ -318,153 +318,159 @@ export default function HistoricoTab() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <p className="text-gray-400">Carregando histórico...</p>
+      <div className="p-4 md:p-6 lg:p-8 space-y-5">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
+          <p className="text-sm text-slate-400">Carregando histórico...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-white">Histórico de Eventos ({eventosFiltrados.length})</h2>
-        <button
-          onClick={() => setMostrarFiltros(!mostrarFiltros)}
-          className="text-gray-400 hover:text-white underline text-sm"
-        >
-          ~ filtros ~
-        </button>
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Histórico de Eventos</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">Acompanhe ações recentes e eventos de moderação.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{eventosFiltrados.length} itens</span>
+          <button
+            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
+          >
+            ~ filtros ~
+          </button>
+        </div>
       </div>
       
       {mostrarFiltros && (
         <>
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-1.5 mb-3">
         <button
           onClick={() => setAbaHistorico('todos')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-            abaHistorico === 'todos' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            abaHistorico === 'todos' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
           Todos
         </button>
         <button
           onClick={() => setAbaHistorico('moderacao')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-            abaHistorico === 'moderacao' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            abaHistorico === 'moderacao' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
           Moderação
         </button>
         <button
           onClick={() => setAbaHistorico('usuarios')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-            abaHistorico === 'usuarios' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+            abaHistorico === 'usuarios' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
           Usuários
         </button>
       </div>
 
-      <div className="bg-gray-800 p-4 rounded-lg mb-4 flex gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Buscar por termo..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
-          />
+      <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
+        <div className="flex gap-3 mb-3">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Buscar por termo..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+          <select
+            value={filtroTipo}
+            onChange={(e) => setFiltroTipo(e.target.value)}
+            className="rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="todos">Todos os tipos</option>
+            <option value="criar_conta">Criar conta</option>
+            <option value="login">Login</option>
+            <option value="logout">Logout</option>
+            <option value="adicionar_denuncia">Adicionar denúncia</option>
+            <option value="editar_denuncia">Editar denúncia</option>
+            <option value="excluir_denuncia">Excluir denúncia</option>
+            <option value="modificar_role">Modificar role</option>
+            <option value="enviar_contato">Enviar contato</option>
+            <option value="ler_contato">Ler contato</option>
+            <option value="responder_contato">Responder contato</option>
+            <option value="resolver_contato">Resolver contato</option>
+            <option value="marcar_pendente_contato">Marcar pendente</option>
+            <option value="alterar_senha">Alterar senha</option>
+            <option value="alterar_username">Alterar username</option>
+            <option value="excluir_conta">Excluir conta</option>
+            <option value="banir_usuario">Banir usuário</option>
+            <option value="desbanir_usuario">Desbanir usuário</option>
+            <option value="excluir_usuario">Excluir usuário</option>
+          </select>
         </div>
-        <select
-          value={filtroTipo}
-          onChange={(e) => setFiltroTipo(e.target.value)}
-          className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
-        >
-          <option value="todos">Todos os tipos</option>
-          <option value="criar_conta">Criar conta</option>
-          <option value="login">Login</option>
-          <option value="logout">Logout</option>
-          <option value="adicionar_denuncia">Adicionar denúncia</option>
-          <option value="editar_denuncia">Editar denúncia</option>
-          <option value="excluir_denuncia">Excluir denúncia</option>
-          <option value="modificar_role">Modificar role</option>
-          <option value="enviar_contato">Enviar contato</option>
-          <option value="ler_contato">Ler contato</option>
-          <option value="responder_contato">Responder contato</option>
-          <option value="resolver_contato">Resolver contato</option>
-          <option value="marcar_pendente_contato">Marcar pendente</option>
-          <option value="alterar_senha">Alterar senha</option>
-          <option value="alterar_username">Alterar username</option>
-          <option value="excluir_conta">Excluir conta</option>
-          <option value="banir_usuario">Banir usuário</option>
-          <option value="desbanir_usuario">Desbanir usuário</option>
-          <option value="excluir_usuario">Excluir usuário</option>
-        </select>
       </div>
 
-      <div className="bg-gray-800 p-4 rounded-lg mb-4 flex gap-4">
+      <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur flex gap-3">
         <div className="flex-1">
-          <label className="block text-xs text-gray-400 mb-1">Data Início</label>
+          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Início</label>
           <input
             type="date"
             value={dataInicio}
             onChange={(e) => setDataInicio(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <div className="flex-1">
-          <label className="block text-xs text-gray-400 mb-1">Data Fim</label>
+          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Fim</label>
           <input
             type="date"
             value={dataFim}
             onChange={(e) => setDataFim(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+            className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
       </div>
 
       {(busca || filtroTipo !== 'todos' || dataInicio || dataFim) && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-1.5 flex-wrap">
           {busca && (
             <button
               onClick={() => setBusca('')}
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600 flex items-center gap-1"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Busca: "{busca}" <X size={14} />
+              Busca: "{busca}" <X size={12} />
             </button>
           )}
           {filtroTipo !== 'todos' && (
             <button
               onClick={() => setFiltroTipo('todos')}
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600 flex items-center gap-1"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Tipo: {filtroTipo.replace('_', ' ')} <X size={14} />
+              Tipo: {filtroTipo.replace('_', ' ')} <X size={12} />
             </button>
           )}
           {dataInicio && (
             <button
               onClick={() => setDataInicio('')}
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600 flex items-center gap-1"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              De: {new Date(dataInicio).toLocaleDateString('pt-BR')} <X size={14} />
+              De: {new Date(dataInicio).toLocaleDateString('pt-BR')} <X size={12} />
             </button>
           )}
           {dataFim && (
             <button
               onClick={() => setDataFim('')}
-              className="px-3 py-1 bg-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-600 flex items-center gap-1"
+              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Até: {new Date(dataFim).toLocaleDateString('pt-BR')} <X size={14} />
+              Até: {new Date(dataFim).toLocaleDateString('pt-BR')} <X size={12} />
             </button>
           )}
           <button
-            onClick={() => {
-              setBusca('');
-              setFiltroTipo('todos');
-              setDataInicio('');
-              setDataFim('');
-            }}
-            className="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+            onClick={() => { setBusca(''); setFiltroTipo('todos'); setDataInicio(''); setDataFim(''); }}
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/20"
           >
             Limpar todos
           </button>
