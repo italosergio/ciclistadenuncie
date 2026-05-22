@@ -186,19 +186,23 @@ export default function UsuariosTab() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <h2 className="text-3xl font-bold text-white mb-6">Gerenciar Usuários</h2>
-        <p className="text-gray-400">Carregando usuários...</p>
+      <div className="p-4 md:p-6 lg:p-8 space-y-5">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
+          <p className="text-sm text-slate-400">Carregando usuários...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-8">
-        <h2 className="text-3xl font-bold text-white mb-6">Gerenciar Usuários</h2>
-        <div className="bg-red-900/50 text-red-300 p-4 rounded-lg">
-          Erro: {error}
+      <div className="p-4 md:p-6 lg:p-8 space-y-5">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white mb-4">Gerenciar Usuários</h2>
+          <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4">
+            <p className="text-xs text-red-300">Erro: {error}</p>
+          </div>
         </div>
       </div>
     );
@@ -206,40 +210,58 @@ export default function UsuariosTab() {
 
   if (usuarios.length === 0) {
     return (
-      <div className="p-8">
-        <h2 className="text-3xl font-bold text-white mb-6">Gerenciar Usuários (0)</h2>
-        <p className="text-gray-400">Nenhum usuário cadastrado ainda.</p>
+      <div className="p-4 md:p-6 lg:p-8 space-y-5">
+        <div className="flex items-end justify-between mb-2">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+            <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Gerenciar Usuários</h2>
+            <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie permissões, status e contas cadastradas.</p>
+          </div>
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">0 itens</span>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur text-center py-8">
+          <p className="text-sm text-slate-400">Nenhum usuário cadastrado ainda.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <h2 className="text-3xl font-bold text-white mb-6">Gerenciar Usuários ({usuarios.length})</h2>
+    <div className="p-4 md:p-6 lg:p-8 space-y-5">
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Gerenciar Usuários</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie permissões, status e contas cadastradas.</p>
+        </div>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{usuarios.length} itens</span>
+      </div>
       
-      <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-slate-900/80 shadow-xl shadow-black/20 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-700">
+          <thead className="bg-white/5">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Usuário</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Tipo</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Criado em</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Ações</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Usuário</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Tipo</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Status</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Criado em</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700">
+          <tbody className="divide-y divide-white/10">
             {usuarios.map((user) => (
               <>
-              <tr key={user.uid} className="hover:bg-gray-750">
-                <td className="px-6 py-4">
-                  <span className="text-white">{user.username}</span>
-                  {user.banido && <span className="ml-2 text-xs bg-red-600 text-white px-2 py-1 rounded">BANIDO</span>}
+              <tr key={user.uid} className="hover:bg-white/[0.04]">
+                <td className="px-3 md:px-4 py-2.5">
+                  <span className="text-xs text-slate-200">{user.username}</span>
+                  {user.banido && <span className="ml-2 text-[10px] bg-red-500/15 text-red-200 border border-red-400/20 px-1.5 py-0.5 rounded-full">BANIDO</span>}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 md:px-4 py-2.5">
                   {user.role === 'administrador' || user.uid === currentUser?.uid ? (
-                    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded text-xs font-semibold ${
-                      getRoleColor(user.role)
+                    <span className={`inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                      user.role === 'administrador' ? 'bg-purple-500/15 text-purple-200 border-purple-400/20' :
+                      user.role === 'moderador' ? 'bg-blue-500/15 text-blue-200 border-blue-400/20' :
+                      'bg-green-500/15 text-green-200 border-green-400/20'
                     }`}>
                       {getRoleDisplay(user.role)}
                     </span>
@@ -247,8 +269,10 @@ export default function UsuariosTab() {
                     <select
                       value={user.role}
                       onChange={(e) => handleRoleChange(user.uid, e.target.value)}
-                      className={`px-3 py-1 rounded text-xs font-semibold border-0 outline-none cursor-pointer ${
-                        getRoleColor(user.role)
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border outline-none cursor-pointer ${
+                        user.role === 'administrador' ? 'bg-purple-500/15 text-purple-200 border-purple-400/20' :
+                        user.role === 'moderador' ? 'bg-blue-500/15 text-blue-200 border-blue-400/20' :
+                        'bg-green-500/15 text-green-200 border-green-400/20'
                       }`}
                     >
                       <option value="usuario">Usu</option>
@@ -257,38 +281,37 @@ export default function UsuariosTab() {
                     </select>
                   )}
                 </td>
-                <td className="px-6 py-4">
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    user.banido ? 'bg-red-600 text-white' : 'bg-green-600 text-white'
+                <td className="px-3 md:px-4 py-2.5">
+                  <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                    user.banido ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-green-400/30 bg-green-500/10 text-green-300'
                   }`}>
                     {user.banido ? 'Banido' : 'Ativo'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-400 text-sm">
+                <td className="px-3 md:px-4 py-2.5 text-xs text-slate-400">
                   {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 md:px-4 py-2.5">
                   {user.uid !== currentUser?.uid && (
                     <div className="flex gap-2">
                       {user.banido ? (
                         <button
                           onClick={() => handleDesbanirUsuario(user.uid, user.username)}
-                          className="text-green-400 hover:text-green-300 text-sm"
+                          className="rounded-lg border border-green-500/30 px-2.5 py-1 text-xs font-semibold text-green-300 transition hover:bg-green-500/10 hover:text-green-200"
                         >
                           Desbanir
                         </button>
                       ) : (
                         <button
                           onClick={() => setBanindoUid(banindoUid === user.uid ? null : user.uid)}
-                          className="text-yellow-400 hover:text-yellow-300 text-sm"
+                          className="rounded-lg border border-yellow-500/30 px-2.5 py-1 text-xs font-semibold text-yellow-300 transition hover:bg-yellow-500/10 hover:text-yellow-200"
                         >
                           Banir
                         </button>
                       )}
-                      <span className="text-gray-600">|</span>
                       <button
                         onClick={() => setExcluindoUid(excluindoUid === user.uid ? null : user.uid)}
-                        className="text-red-400 hover:text-red-300 text-sm"
+                        className="rounded-lg border border-red-500/30 px-2.5 py-1 text-xs font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
                       >
                         Excluir
                       </button>
@@ -298,19 +321,19 @@ export default function UsuariosTab() {
               </tr>
               {banindoUid === user.uid && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4">
-                    <div className="bg-yellow-900/20 border border-yellow-800 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-yellow-400 mb-3">Tem certeza que deseja banir o usuário {user.username}?</p>
+                  <td colSpan={5} className="px-3 md:px-4 py-2.5">
+                    <div className="rounded-xl border border-yellow-500/30 bg-yellow-950/30 p-4">
+                      <p className="text-sm font-semibold text-yellow-300 mb-3">Tem certeza que deseja banir o usuário {user.username}?</p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleBanirUsuario(user.uid, user.username)}
-                          className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm font-semibold"
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                         >
                           Confirmar Banimento
                         </button>
                         <button
                           onClick={() => setBanindoUid(null)}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
                         >
                           Cancelar
                         </button>
@@ -321,19 +344,19 @@ export default function UsuariosTab() {
               )}
               {excluindoUid === user.uid && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4">
-                    <div className="bg-red-900/20 border border-red-800 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-red-400 mb-3">Tem certeza que deseja excluir este usuário? Esta ação é IRREVERSÍVEL.</p>
-                      <label className="block text-xs font-semibold text-red-400 mb-1">Motivo da exclusão *</label>
+                  <td colSpan={5} className="px-3 md:px-4 py-2.5">
+                    <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4">
+                      <p className="text-sm font-semibold text-red-300 mb-3">Tem certeza que deseja excluir este usuário? Esta ação é IRREVERSÍVEL.</p>
+                      <label className="block text-xs font-semibold text-red-300 mb-1">Motivo da exclusão *</label>
                       <textarea
                         placeholder="Informe o motivo da exclusão (obrigatório)"
                         value={motivoExclusao}
                         onChange={(e) => setMotivoExclusao(e.target.value)}
                         required
                         rows={3}
-                        className="w-full p-2 border rounded-lg text-sm mb-3 bg-gray-700 border-gray-600 text-white"
+                        className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 mb-3"
                       />
-                      <label className="flex items-center gap-2 text-sm text-gray-300 mb-3 cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-slate-300 mb-3 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={manterDenuncias}
@@ -346,7 +369,7 @@ export default function UsuariosTab() {
                         <button
                           onClick={() => handleExcluirUsuario(user.uid, user.username)}
                           disabled={!motivoExclusao.trim()}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                         >
                           Confirmar Exclusão
                         </button>
@@ -356,7 +379,7 @@ export default function UsuariosTab() {
                             setMotivoExclusao("");
                             setManterDenuncias(false);
                           }}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
                         >
                           Cancelar
                         </button>

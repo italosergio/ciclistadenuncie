@@ -367,35 +367,41 @@ export default function ApoiadoresTab() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <h2 className="text-3xl font-bold text-white mb-6">Apoiadores</h2>
-        <p className="text-gray-400">Carregando apoiadores...</p>
+      <div className="p-4 md:p-6 lg:p-8 space-y-5">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
+          <p className="text-sm text-slate-400">Carregando apoiadores...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-white">
-          Apoiadores ({apoiadores.length})
-        </h2>
-        <button
-          onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(!showForm); } }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold"
-        >
-          <Plus size={18} />
-          {showForm ? (editandoId ? "Cancelar Edição" : "Cancelar") : "Novo Apoiador"}
-        </button>
+    <div className="p-4 md:p-6 lg:p-8 space-y-5">
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Apoiadores</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie parceiros, patrocinadores e organizações apoiadoras.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{apoiadores.length} itens</span>
+          <button
+            onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(!showForm); } }}
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-700"
+          >
+            <Plus size={14} />
+            {showForm ? (editandoId ? "Cancelar Edição" : "Cancelar") : "Novo Apoiador"}
+          </button>
+        </div>
       </div>
 
       {/* Formulário */}
       {showForm && (
-        <div className="bg-gray-800 p-6 rounded-xl shadow-lg mb-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-4">{editandoId ? "Editar Apoiador" : "Novo Apoiador"}</h3>
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur mb-5">
+          <h3 className="text-sm font-semibold text-white mb-4">{editandoId ? "Editar Apoiador" : "Novo Apoiador"}</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
                 Nome do apoiador *
               </label>
               <input
@@ -403,11 +409,11 @@ export default function ApoiadoresTab() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Ex: Massa Crítica São Paulo"
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
                 URL (Instagram, site...) *
               </label>
               <input
@@ -415,11 +421,11 @@ export default function ApoiadoresTab() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.instagram.com/..."
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
                 Caminho da imagem (opcional)
               </label>
               <input
@@ -427,14 +433,14 @@ export default function ApoiadoresTab() {
                 value={img}
                 onChange={(e) => setImg(e.target.value)}
                 placeholder="/apoiadores/nomedoapoioador.png"
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Deixe vazio para definir automaticamente com base no nome
               </p>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
                 Descrição (opcional)
               </label>
               <textarea
@@ -442,11 +448,11 @@ export default function ApoiadoresTab() {
                 onChange={(e) => setDescricao(e.target.value)}
                 placeholder="Breve descrição do apoiador..."
                 rows={3}
-                className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white resize-none"
+                className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
                 Endereço / Local (para aparecer no mapa)
               </label>
               <div className="flex gap-2">
@@ -455,12 +461,12 @@ export default function ApoiadoresTab() {
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
                   placeholder="Ex: Porto Alegre, RS"
-                  className="flex-1 p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                  className="flex-1 rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <button
                   onClick={buscarEndereco}
                   disabled={!endereco.trim() || buscando}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm disabled:opacity-50 flex items-center gap-1"
+                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
                 >
                   <Search size={16} />
                   {buscando ? "..." : "Buscar"}
@@ -469,39 +475,39 @@ export default function ApoiadoresTab() {
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Latitude</label>
+                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Latitude</label>
                 <input
                   type="number"
                   step="any"
                   value={lat}
                   onChange={(e) => setLat(e.target.value)}
-                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Longitude</label>
+                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Longitude</label>
                 <input
                   type="number"
                   step="any"
                   value={lng}
                   onChange={(e) => setLng(e.target.value)}
-                  className="w-full p-2 border border-gray-600 rounded-lg bg-gray-900 text-white"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-1">Localização no mapa</label>
-              <p className="text-xs text-gray-500 mb-2">Clique no mapa para marcar o ponto ou arraste o marcador para ajustar</p>
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Localização no mapa</label>
+              <p className="text-xs text-slate-500 mb-2">Clique no mapa para marcar o ponto ou arraste o marcador para ajustar</p>
               <div
                 ref={mapRef}
-                className="w-full h-56 rounded-lg border border-gray-600 z-0"
+                className="w-full h-56 rounded-xl border border-white/10 z-0"
                 style={{ cursor: 'crosshair' }}
               />
             </div>
             <button
               onClick={handleSalvar}
               disabled={!nome.trim() || !url.trim() || salvando}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-green-950/40 transition hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {salvando ? "Salvando..." : (editandoId ? "Atualizar Apoiador" : "Salvar Apoiador")}
             </button>
@@ -511,10 +517,10 @@ export default function ApoiadoresTab() {
 
       {/* Lista */}
       {apoiadores.length === 0 ? (
-        <div className="bg-gray-800 p-8 rounded-xl shadow-lg text-center">
-          <Heart size={48} className="mx-auto text-gray-600 mb-4" />
-          <p className="text-gray-400">Nenhum apoiador cadastrado ainda</p>
-          <p className="text-gray-500 text-sm mt-2">
+        <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-xl shadow-black/20 backdrop-blur text-center">
+          <Heart size={36} className="mx-auto text-slate-600 mb-3" />
+          <p className="text-sm text-slate-400">Nenhum apoiador cadastrado ainda</p>
+          <p className="text-xs text-slate-500 mt-2">
             Clique em "Novo Apoiador" para adicionar o primeiro
           </p>
         </div>
@@ -523,7 +529,7 @@ export default function ApoiadoresTab() {
           {apoiadores.map((apoiador, index) => (
             <div
               key={apoiador.id}
-              className={`bg-gray-800 p-6 rounded-xl shadow-lg border ${reordenando ? 'border-blue-500' : 'border-gray-700'}`}
+              className={`rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur ${reordenando ? 'border-blue-500' : ''}`}
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragEnter={() => handleDragEnter(index)}
@@ -548,29 +554,29 @@ export default function ApoiadoresTab() {
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
                     )}
-                    <h3 className="text-xl font-bold text-white break-words">
+                    <h3 className="text-sm font-semibold text-white break-words">
                       {apoiador.nome}
                     </h3>
                   </div>
                   {apoiador.descricao && (
-                    <p className="text-gray-400 text-sm mb-3">{apoiador.descricao}</p>
+                    <p className="text-xs text-slate-400 mb-2">{apoiador.descricao}</p>
                   )}
                   <a
                     href={apoiador.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+                    className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs"
                   >
                     <ExternalLink size={14} />
                     {apoiador.url}
                   </a>
                   {apoiador.endereco && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                    <div className="mt-2 flex items-center gap-1 text-xs text-slate-500">
                       <MapPin size={12} />
                       {apoiador.endereco}
                     </div>
                   )}
-                  <div className="mt-2 text-xs text-gray-500">
+                  <div className="mt-2 text-xs text-slate-500">
                     Adicionado por {apoiador.criadoPor} em{" "}
                     {apoiador.createdAt
                       ? new Date(apoiador.createdAt).toLocaleDateString("pt-BR")
@@ -580,38 +586,38 @@ export default function ApoiadoresTab() {
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleEditar(apoiador)}
-                    className="text-blue-400 hover:text-blue-300 p-2 flex-shrink-0"
+                    className="text-blue-400 hover:text-blue-300 p-1.5 flex-shrink-0"
                     title="Editar apoiador"
                   >
-                    <Edit3 size={18} />
+                    <Edit3 size={16} />
                   </button>
                   <button
                     onClick={() =>
                       setExcluindoId(excluindoId === apoiador.id ? null : apoiador.id)
                     }
-                    className="text-red-400 hover:text-red-300 p-2 flex-shrink-0"
+                    className="text-red-400 hover:text-red-300 p-1.5 flex-shrink-0"
                     title="Excluir apoiador"
                   >
-                    <Trash2 size={20} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
 
               {excluindoId === apoiador.id && (
-                <div className="mt-4 bg-red-900/20 border border-red-800 rounded-lg p-4">
+                <div className="mt-4 rounded-xl border border-red-500/30 bg-red-950/30 p-4">
                   <p className="text-sm font-semibold text-red-400 mb-3">
                     Tem certeza que deseja excluir o apoiador "{apoiador.nome}"?
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleExcluir(apoiador.id, apoiador.nome)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold"
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700"
                     >
                       Confirmar Exclusão
                     </button>
                     <button
                       onClick={() => setExcluindoId(null)}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
                     >
                       Cancelar
                     </button>
