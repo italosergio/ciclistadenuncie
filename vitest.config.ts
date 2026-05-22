@@ -5,7 +5,13 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
-    environment: "node",
-    include: ["app/**/*.test.ts"],
+    environment: "jsdom",
+    include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
+    setupFiles: ["./app/test-setup.ts"],
+    environmentMatch: {
+      "app/data/**": "node",
+      "app/services/**": "node",
+      "app/lib/**": "node",
+    },
   },
 });
