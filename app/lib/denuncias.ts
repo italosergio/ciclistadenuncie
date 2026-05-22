@@ -2,11 +2,18 @@ import { ref, set, get, remove } from "firebase/database";
 import { db } from "./firebase";
 import { registrarEvento } from "./historico";
 
+export interface Situacao {
+  tipo: string;
+  relato?: string;
+  placa?: string;
+}
+
 export interface DenunciaData {
   endereco: string;
-  relato: string | string[];
-  tipo: string;
+  relato?: string | string[];
+  tipo?: string;
   placa?: string;
+  situacoes?: Situacao[];
   localizacao: { lat: number; lng: number } | null;
   userId?: string;
   username?: string;
@@ -26,14 +33,26 @@ export async function salvarDenuncia(data: DenunciaData) {
   const ms = String(brasiliaTime.getMilliseconds()).padStart(3, '0');
   const id = `${ano}-${mes}-${dia}T${hora}-${min}-${seg}-${ms}Z`;
 
+  // Converter formato antigo (tipo+placa+relato) para situacoes array
+  const situacoes = data.situacoes || (data.tipo ? [{
+    tipo: data.tipo,
+    relato: typeof data.relato === 'string' ? data.relato : undefined,
+  }] : undefined);
+
   const denunciaData: any = {
     endereco: data.endereco,
-    relato: data.relato,
-    tipo: data.tipo,
     localizacao: data.localizacao,
     createdAt,
   };
 
+  // Salvar ambos os formatos para compatibilidade retroativa
+  if (situacoes) {
+    denunciaData.situacoes = situacoes;
+    denunciaData.tipo = situacoes[0]?.tipo;
+    denunciaData.relato = situacoes.map(s => s.relato).filter(Boolean).join(' | ');
+  }
+
+  // Placa é única por denúncia (cluster), não por situação
   if (data.placa) {
     denunciaData.placa = data.placa;
   }
@@ -50,10 +69,11 @@ export async function salvarDenuncia(data: DenunciaData) {
   
   // Registra evento
   const eventoDetalhes: any = {
-    tipo: data.tipo,
+    tipo: situacoes?.[0]?.tipo || '',
     endereco: data.endereco,
-    relato: typeof data.relato === 'string' ? data.relato : '',
+    relato: situacoes?.map(s => s.relato).filter(Boolean).join(' ') || '',
     id,
+    quantidadeSituacoes: situacoes?.length || 1,
   };
   
   if (data.placa) {
