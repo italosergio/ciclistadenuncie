@@ -471,7 +471,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       const createClusterIcon = (count: number) => {
         const fontSize = count >= 100 ? '0.9rem' : count >= 10 ? '1.1rem' : '1.4rem';
         return L.default.divIcon({
-          html: `<div class="cluster-marker-pin" style="filter: drop-shadow(0 4px 12px rgba(220,38,38,0.4));">
+          html: `<div class="cluster-marker-pin" style="filter: drop-shadow(0 2px 7px rgba(220,38,38,0.4));">
             <div class="pulse-ring d1"></div>
             <div class="pulse-ring d2"></div>
             <div class="pulse-ring d3"></div>
@@ -485,8 +485,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             </div>
           </div>`,
           className: 'custom-marker',
-          iconSize: [56, 60],
-          iconAnchor: [28, 58],
+          iconSize: [34, 36],
+          iconAnchor: [17, 35],
         });
       };
 
@@ -1207,26 +1207,26 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         }
         .cluster-marker-pin .pin-shadow {
           position: absolute;
-          width: 48px;
-          height: 8px;
+          width: 29px;
+          height: 5px;
           background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
           border-radius: 50%;
-          bottom: -4px;
+          bottom: -2px;
           left: 50%;
           transform: translateX(-50%);
         }
         .cluster-marker-pin .pin-icon {
-          width: 56px;
-          height: 56px;
+          width: 34px;
+          height: 34px;
           background: linear-gradient(135deg, #dc2626, #b91c1c);
           border-radius: 50% 50% 50% 0;
           transform: rotate(-45deg);
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 3px solid #fca5a5;
+          border: 2px solid #fca5a5;
           position: relative;
-          box-shadow: 0 4px 16px rgba(220,38,38,0.5);
+          box-shadow: 0 2px 10px rgba(220,38,38,0.5);
           animation: bomb-flash 3s ease-in-out infinite;
         }
         .cluster-marker-pin .pin-icon-inner {
@@ -1243,11 +1243,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         }
         .cluster-marker-pin .pulse-ring {
           position: absolute;
-          width: 48px;
-          height: 48px;
+          width: 29px;
+          height: 29px;
           border-radius: 50%;
-          top: 4px;
-          left: 4px;
+          top: 2px;
+          left: 2px;
           animation: bomb-shockwave 3s ease-out infinite;
           pointer-events: none;
         }
@@ -1264,10 +1264,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           100% { transform: scale(4.5); opacity: 0; border: 1px solid transparent; box-shadow: none; }
         }
         @keyframes bomb-flash {
-          0%, 85%, 100% { box-shadow: 0 4px 16px rgba(220,38,38,0.5); filter: brightness(1); }
-          5% { box-shadow: 0 0 30px rgba(255,200,50,0.9), 0 0 60px rgba(255,100,0,0.6), 0 0 100px rgba(255,50,0,0.3); filter: brightness(1.8) saturate(1.5); border-color: #fff; }
-          15% { box-shadow: 0 0 20px rgba(255,150,0,0.5), 0 0 40px rgba(255,80,0,0.3); filter: brightness(1.3); border-color: #fca5a5; }
-          25% { box-shadow: 0 4px 16px rgba(220,38,38,0.5); filter: brightness(1); border-color: #fca5a5; }
+          0%, 85%, 100% { box-shadow: 0 2px 10px rgba(220,38,38,0.5); filter: brightness(1); }
+          5% { box-shadow: 0 0 20px rgba(255,200,50,0.9), 0 0 40px rgba(255,100,0,0.6), 0 0 60px rgba(255,50,0,0.3); filter: brightness(1.8) saturate(1.5); border-color: #fff; }
+          15% { box-shadow: 0 0 12px rgba(255,150,0,0.5), 0 0 30px rgba(255,80,0,0.3); filter: brightness(1.3); border-color: #fca5a5; }
+          25% { box-shadow: 0 2px 10px rgba(220,38,38,0.5); filter: brightness(1); border-color: #fca5a5; }
         }
       `}</style>
       {MapComponent ? (
