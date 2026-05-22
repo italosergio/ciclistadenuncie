@@ -22,7 +22,6 @@ export async function loader() {
 
 interface Situacao {
   tipo: string;
-  placa?: string;
   relato?: string;
 }
 
@@ -835,6 +834,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                             <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: '#dc2626' }}>
                               🔴 {numSituacoes} situações nesta denúncia
                             </div>
+                            {denuncia.placa && (
+                              <div style={{ fontSize: '12px', color: '#d97706', fontFamily: 'monospace', marginBottom: '6px', padding: '4px 8px', background: 'rgba(217,119,6,0.1)', borderRadius: '4px' }}>
+                                🏷 Placa: {denuncia.placa}
+                              </div>
+                            )}
                             {denuncia.situacoes!.map((sit, idx) => {
                               const tipoNome = tipos.find(t => t.value === sit.tipo)?.label || sit.tipo;
                               return (
@@ -848,11 +852,6 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                                     <span>{getSituacaoIconHtml(sit.tipo)}</span>
                                     {tipoNome}
                                   </div>
-                                  {sit.placa && (
-                                    <div style={{ fontSize: '11px', color: '#d97706', fontFamily: 'monospace', marginTop: '2px' }}>
-                                      🏷 {sit.placa}
-                                    </div>
-                                  )}
                                   {sit.relato && (
                                     <div style={{ fontSize: '12px', color: '#374151', lineHeight: '1.3', marginTop: '2px' }}>
                                       {sit.relato}

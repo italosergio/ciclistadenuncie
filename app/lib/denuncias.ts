@@ -4,8 +4,8 @@ import { registrarEvento } from "./historico";
 
 export interface Situacao {
   tipo: string;
-  placa?: string;
   relato?: string;
+  placa?: string;
 }
 
 export interface DenunciaData {
@@ -36,7 +36,6 @@ export async function salvarDenuncia(data: DenunciaData) {
   // Converter formato antigo (tipo+placa+relato) para situacoes array
   const situacoes = data.situacoes || (data.tipo ? [{
     tipo: data.tipo,
-    placa: data.placa,
     relato: typeof data.relato === 'string' ? data.relato : undefined,
   }] : undefined);
 
@@ -50,8 +49,12 @@ export async function salvarDenuncia(data: DenunciaData) {
   if (situacoes) {
     denunciaData.situacoes = situacoes;
     denunciaData.tipo = situacoes[0]?.tipo;
-    if (situacoes[0]?.placa) denunciaData.placa = situacoes[0].placa;
     denunciaData.relato = situacoes.map(s => s.relato).filter(Boolean).join(' | ');
+  }
+
+  // Placa é única por denúncia (cluster), não por situação
+  if (data.placa) {
+    denunciaData.placa = data.placa;
   }
 
   if (data.userId) {
@@ -73,8 +76,8 @@ export async function salvarDenuncia(data: DenunciaData) {
     quantidadeSituacoes: situacoes?.length || 1,
   };
   
-  if (situacoes && situacoes.length === 1 && situacoes[0].placa) {
-    eventoDetalhes.placa = situacoes[0].placa;
+  if (data.placa) {
+    eventoDetalhes.placa = data.placa;
   }
   
   await registrarEvento({
