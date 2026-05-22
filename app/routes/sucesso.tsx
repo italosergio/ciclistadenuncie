@@ -1,6 +1,23 @@
 import { Link, useLocation } from "react-router";
 import type { Route } from "./+types/sucesso";
-import { MapPin, Tag, Car } from "lucide-react";
+import { MapPin, Car, Wind, Megaphone, Hand, MessageSquareWarning, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Construction, MoreHorizontal } from "lucide-react";
+
+const ICON_MAP: Record<string, any> = {
+  fina: Wind,
+  ameaca: Megaphone,
+  assedio: Hand,
+  "agressao-verbal": MessageSquareWarning,
+  "agressao-fisica": Car,
+  "invasao-ciclovia": Construction,
+  "buraco-via": AlertTriangle,
+  "falta-sinalizacao": CircleSlash,
+  "trecho-perigoso": AlertTriangle,
+  "ciclovia-obstruida": Construction,
+  "falta-iluminacao": Lightbulb,
+  "veiculo-estacionado": Car,
+  "ma-conservacao": Wrench,
+  "falta-ciclovia": Bike,
+};
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Denúncia Enviada - Ciclista Denuncie" }];
@@ -8,7 +25,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Sucesso() {
   const location = useLocation();
-  const { location: coords, tipo, endereco, placa } = location.state || {};
+  const { location: coords, situacoes, tipo, endereco, placa } = location.state || {};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -21,12 +38,32 @@ export default function Sucesso() {
           Obrigado por contribuir com dados reais para a luta por um trânsito mais seguro.
         </p>
 
-        {(tipo || endereco || placa) && (
+        {(situacoes || tipo || endereco || placa) && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-left space-y-3">
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Resumo da denúncia</p>
-            {tipo && (
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              {situacoes ? `Resumo (${situacoes.length} situação${situacoes.length > 1 ? 'ões' : ''})` : 'Resumo da denúncia'}
+            </p>
+
+            {/* Lista de situações (novo formato) */}
+            {situacoes && situacoes.length > 0 && (
+              <div className="space-y-2">
+                {situacoes.map((sit: any, index: number) => {
+                  const Icon = ICON_MAP[sit.tipo] || MoreHorizontal;
+                  const label = sit.tipo === "outro" && sit.relato ? sit.relato : sit.tipo;
+                  return (
+                    <div key={index} className="flex items-start gap-2 text-sm">
+                      <Icon size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                      <span className="text-gray-700 dark:text-gray-300 capitalize">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Fallback para denúncias legadas (único tipo) */}
+            {!situacoes && tipo && (
               <div className="flex items-start gap-2 text-sm">
-                <Tag size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                <MoreHorizontal size={15} className="mt-0.5 shrink-0 text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">{tipo}</span>
               </div>
             )}

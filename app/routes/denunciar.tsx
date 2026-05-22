@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { salvarDenuncia } from "../lib/denuncias";
+import type { Situacao } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
-import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft, ArrowLeft } from "lucide-react";
+import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft, ArrowLeft, Plus, X } from "lucide-react";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
@@ -34,13 +35,14 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     return null;
   });
   const [mostrarPlaca, setMostrarPlaca] = useState(false);
-  const [tipo, setTipo] = useState(() => {
+  const [situacoes, setSituacoes] = useState<Situacao[]>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('denuncia_tipo') || '';
+      const saved = localStorage.getItem('denuncia_situacoes');
+      return saved ? JSON.parse(saved) : [];
     }
-    return '';
+    return [];
   });
-  const [showTipoDropdown, setShowTipoDropdown] = useState(false);
+  const [showAddSituacao, setShowAddSituacao] = useState(false);
   const [descricaoOutro, setDescricaoOutro] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('denuncia_descricaoOutro') || '';
@@ -69,8 +71,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   const [miniMapCenter, setMiniMapCenter] = useState<[number, number]>([-14.235, -51.925]);
   const [miniMapZoom, setMiniMapZoom] = useState(4);
   const [MiniMapComponent, setMiniMapComponent] = useState<any>(null);
-  const [errors, setErrors] = useState<{tipo?: string; descricaoOutro?: string; placa?: string; localizacao?: string}>({});
-  const tipoRef = useRef<HTMLDivElement>(null);
+  const [errors, setErrors] = useState<{situacoes?: string; descricaoOutro?: string; placa?: string; localizacao?: string}>({});
+  const situacaoRef = useRef<HTMLDivElement>(null);
   const descricaoOutroRef = useRef<HTMLInputElement>(null);
   const placaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -105,9 +107,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
 
   const proximaEtapa = () => {
     if (etapaAtual === 0) {
-      const newErrors: {tipo?: string; descricaoOutro?: string} = {};
-      if (!tipo) newErrors.tipo = "Selecione o tipo";
-      if (tipo === "outro" && !descricaoOutro.trim()) newErrors.descricaoOutro = "Descreva o tipo";
+      const newErrors: {situacoes?: string; descricaoOutro?: string} = {};
+      if (situacoes.length === 0) newErrors.situacoes = "Selecione pelo menos uma situação";
+      const outroSituacao = situacoes.find(s => s.tipo === "outro");
+      if (outroSituacao && !outroSituacao.relato?.trim()) newErrors.descricaoOutro = "Descreva o tipo";
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return;
@@ -139,10 +142,15 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     setErrors({});
 
     try {
+      const situacoesData = situacoes.map(s => ({
+        tipo: s.tipo === "outro" ? (s.relato || "outro") : s.tipo,
+        ...(s.tipo === "outro" && s.relato ? { relato: s.relato } : {}),
+      }));
+
       await salvarDenuncia({
         endereco: enderecoAtual || "",
         relato: relato || "",
-        tipo: tipo === "outro" ? descricaoOutro : tipo,
+        situacoes: situacoesData,
         placa: mostrarPlaca ? placa : undefined,
         localizacao: location,
         userId: user?.uid,
@@ -150,7 +158,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
       });
       
       // Limpa localStorage após envio bem-sucedido
-      localStorage.removeItem('denuncia_tipo');
+      localStorage.removeItem('denuncia_situacoes');
       localStorage.removeItem('denuncia_descricaoOutro');
       localStorage.removeItem('denuncia_relato');
       localStorage.removeItem('denuncia_placa');
@@ -158,7 +166,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
       localStorage.removeItem('denuncia_location');
       localStorage.removeItem('denuncia_etapa');
       
-      navigate("/sucesso", { state: { location, tipo: tipo === "outro" ? descricaoOutro : tipo, endereco: enderecoAtual, placa: mostrarPlaca ? placa : undefined } });
+      navigate("/sucesso", { state: { location, situacoes: situacoesData, endereco: enderecoAtual, placa: mostrarPlaca ? placa : undefined } });
     } catch (error) {
       console.error('Erro completo:', error);
       setErrors({ localizacao: "Erro ao registrar denúncia. Tente novamente." });
@@ -268,6 +276,30 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     { value: "outro", label: "Outro", icon: MoreHorizontal },
   ];
 
+  function adicionarSituacao(tipoValue: string) {
+    if (situacoes.some(s => s.tipo === tipoValue)) return; // já adicionado
+    const novas = [...situacoes, { tipo: tipoValue, relato: "", placa: "" }];
+    setSituacoes(novas);
+    localStorage.setItem('denuncia_situacoes', JSON.stringify(novas));
+    setShowAddSituacao(false);
+  }
+
+  function removerSituacao(index: number) {
+    const novas = situacoes.filter((_, i) => i !== index);
+    setSituacoes(novas);
+    localStorage.setItem('denuncia_situacoes', JSON.stringify(novas));
+  }
+
+  function atualizarOutroRelato(valor: string) {
+    const novas = situacoes.map(s =>
+      s.tipo === "outro" ? { ...s, relato: valor } : s
+    );
+    setSituacoes(novas);
+    localStorage.setItem('denuncia_situacoes', JSON.stringify(novas));
+  }
+
+  const tiposDisponiveis = tipos.filter(t => !situacoes.some(s => s.tipo === t.value));
+
   const etapas = [
     { numero: 1, titulo: "Tipo" },
     { numero: 2, titulo: "Relato" },
@@ -321,42 +353,54 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           {/* Etapa 1: Tipo */}
           {etapaAtual === 0 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-6">Qual o tipo da denúncia?</h2>
-              <div className="relative" ref={tipoRef}>
-                <div
-                  tabIndex={0}
-                  onClick={() => setShowTipoDropdown(!showTipoDropdown)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowTipoDropdown(!showTipoDropdown);
-                    }
-                  }}
-                  className={`w-full p-4 cursor-pointer text-left flex items-center gap-3 text-2xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white rounded-lg ${
-                    errors.tipo ? 'text-red-500' : tipo ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'
-                  }`}
-                >
-                  {tipo ? (
-                    <>
-                      {tipos.find(t => t.value === tipo)?.icon && (() => {
-                        const Icon = tipos.find(t => t.value === tipo)!.icon;
-                        return <Icon size={28} />;
-                      })()}
-                      {tipos.find(t => t.value === tipo)?.label}
-                    </>
-                  ) : "Selecione o tipo"}
+              <h2 className="text-2xl font-bold mb-2">Quais situações aconteceram?</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Selecione uma ou mais situações que ocorreram</p>
+
+              {/* Chips já selecionados */}
+              {situacoes.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {situacoes.map((sit, index) => {
+                    const tipoInfo = tipos.find(t => t.value === sit.tipo);
+                    const Icon = tipoInfo?.icon || MoreHorizontal;
+                    const label = sit.tipo === "outro" && sit.relato ? sit.relato : (tipoInfo?.label || sit.tipo);
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 px-3 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium"
+                      >
+                        <Icon size={16} />
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          onClick={() => removerSituacao(index)}
+                          className="ml-1 hover:opacity-70"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-                {showTipoDropdown && (
+              )}
+
+              {/* Botão Adicionar */}
+              <div className="relative" ref={situacaoRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddSituacao(!showAddSituacao)}
+                  className="w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <Plus size={18} />
+                  Adicionar situação
+                </button>
+
+                {showAddSituacao && tiposDisponiveis.length > 0 && (
                   <div className="absolute z-10 w-full bg-white dark:bg-gray-900 border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
-                    {tipos.map(t => (
+                    {tiposDisponiveis.map(t => (
                       <button
                         key={t.value}
                         type="button"
-                        onClick={() => {
-                          setTipo(t.value);
-                          localStorage.setItem('denuncia_tipo', t.value);
-                          setShowTipoDropdown(false);
-                        }}
+                        onClick={() => adicionarSituacao(t.value)}
                         className="w-full p-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left flex items-center gap-2"
                       >
                         <t.icon size={18} />
@@ -365,26 +409,35 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                     ))}
                   </div>
                 )}
-                {errors.tipo && <p className="text-red-500 text-sm mt-1">{errors.tipo}</p>}
+
+                {showAddSituacao && tiposDisponiveis.length === 0 && (
+                  <div className="absolute z-10 w-full bg-white dark:bg-gray-900 border rounded-lg mt-1 shadow-lg p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    Todos os tipos já foram adicionados
+                  </div>
+                )}
               </div>
 
-              {tipo === "outro" && (
+              {/* Input "Outro" se adicionado */}
+              {situacoes.some(s => s.tipo === "outro") && (
                 <div className="mt-4">
-                  <label className="block mb-2 font-semibold">Descreva o tipo *</label>
+                  <label className="block mb-2 font-semibold">Descreva o outro tipo *</label>
                   <input
                     ref={descricaoOutroRef}
                     type="text"
-                    value={descricaoOutro}
-                    onChange={(e) => {
-                      setDescricaoOutro(e.target.value);
-                      localStorage.setItem('denuncia_descricaoOutro', e.target.value);
-                    }}
+                    value={situacoes.find(s => s.tipo === "outro")?.relato || ""}
+                    onChange={(e) => atualizarOutroRelato(e.target.value)}
                     placeholder="Ex: Buraco na ciclovia, falta de sinalização..."
                     className={`w-full p-3 border rounded-lg dark:bg-gray-900 ${errors.descricaoOutro ? 'border-red-500' : ''}`}
                   />
                   {errors.descricaoOutro && <p className="text-red-500 text-sm mt-1">{errors.descricaoOutro}</p>}
                 </div>
               )}
+
+              {errors.situacoes && <p className="text-red-500 text-sm mt-2">{errors.situacoes}</p>}
+
+              <div className="mt-4 text-xs text-gray-400 dark:text-gray-500">
+                {situacoes.length === 0 ? "Nenhuma situação selecionada" : `${situacoes.length} situação(s) selecionada(s)`}
+              </div>
             </div>
           )}
 
