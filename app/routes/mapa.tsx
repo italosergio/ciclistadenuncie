@@ -90,10 +90,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const [showModal, setShowModal] = useState(false);
   const [endereco, setEndereco] = useState("");
   const [relato, setRelato] = useState("");
-  const [tipo, setTipo] = useState("");
+  const [situacoes, setSituacoes] = useState<Situacao[]>([]);
+  const [showAddSituacao, setShowAddSituacao] = useState(false);
   const [placa, setPlaca] = useState("");
   const [mostrarPlaca, setMostrarPlaca] = useState(false);
-  const [descricaoOutro, setDescricaoOutro] = useState("");
   const [denunciasVisiveis, setDenunciasVisiveis] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [mapType, setMapType] = useState<'street' | 'satellite' | 'light' | 'dark'>(() => {
@@ -118,7 +118,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   });
   const modalRef = useRef<HTMLDivElement>(null);
   const [errorModal, setErrorModal] = useState<string>("");
-  const selectTipoRef = useRef<HTMLSelectElement>(null);
+  const situacaoRef = useRef<HTMLDivElement>(null);
   const inputOutroRef = useRef<HTMLInputElement>(null);
   const inputPlacaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -1060,17 +1060,36 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     }
   }
 
+  function adicionarSituacao(tipoValue: string) {
+    if (situacoes.some(s => s.tipo === tipoValue)) return;
+    const novas = [...situacoes, { tipo: tipoValue, relato: "" }];
+    setSituacoes(novas);
+    setShowAddSituacao(false);
+  }
+
+  function removerSituacao(index: number) {
+    setSituacoes(situacoes.filter((_, i) => i !== index));
+  }
+
+  function atualizarOutroRelato(valor: string) {
+    setSituacoes(situacoes.map(s =>
+      s.tipo === "outro" ? { ...s, relato: valor } : s
+    ));
+  }
+
+  const tiposDisponiveis = tipos.filter(t => !situacoes.some(s => s.tipo === t.value));
+
   async function salvarDenunciaModal() {
-    if (!tempMarker || !tipo) {
-      setErrorModal("Selecione o tipo");
+    if (!tempMarker || situacoes.length === 0) {
+      setErrorModal("Selecione pelo menos uma situação");
       setTimeout(() => {
-        selectTipoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        selectTipoRef.current?.focus();
+        situacaoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
       return;
     }
 
-    if (tipo === "outro" && !descricaoOutro.trim()) {
+    const outroSituacao = situacoes.find(s => s.tipo === "outro");
+    if (outroSituacao && !outroSituacao.relato?.trim()) {
       setErrorModal("Descreva o tipo");
       setTimeout(() => {
         inputOutroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1093,7 +1112,10 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       await salvarDenuncia({
         endereco: endereco,
         relato,
-        tipo: tipo === "outro" ? descricaoOutro : tipo,
+        situacoes: situacoes.map(s => ({
+          tipo: s.tipo === "outro" ? (s.relato || "outro") : s.tipo,
+          relato: s.relato || undefined,
+        })),
         placa: mostrarPlaca && placa ? placa : undefined,
         localizacao: tempMarker,
         userId: user?.uid,
@@ -1717,11 +1739,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             setShowModal(false);
             setTempMarker(null);
             setRelato("");
-            setTipo("");
+            setSituacoes([]);
+            setShowAddSituacao(false);
             setPlaca("");
             setMostrarPlaca(false);
             setEndereco("");
-            setDescricaoOutro("");
           }
         }}>
           <div ref={modalRef} className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
@@ -1732,41 +1754,94 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   <p><strong>Localização:</strong> {endereco}</p>
                   <p><strong>Coordenadas:</strong> {tempMarker?.lat.toFixed(6)}, {tempMarker?.lng.toFixed(6)}</p>
                 </div>
-                <select
-                  ref={selectTipoRef}
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value)}
-                  className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && !tipo ? 'border-red-500' : ''}`}
-                  size={6}
-                  style={{ height: '165px' }}
-                  required
-                >
-                  <option value="">Selecione o tipo *</option>
-                  <option value="fina">Fina</option>
-                  <option value="ameaca">Ameaça</option>
-                  <option value="assedio">Assédio</option>
-                  <option value="agressao-verbal">Agressão Verbal</option>
-                  <option value="agressao-fisica">Atropelamento</option>
-                  <option value="invasao-ciclovia">Invasão de Ciclovia/Ciclofaixa</option>
-                  <option value="buraco-via">Buraco na Via</option>
-                  <option value="falta-sinalizacao">Falta de Sinalização</option>
-                  <option value="trecho-perigoso">Trecho Perigoso</option>
-                  <option value="ciclovia-obstruida">Ciclovia Obstruída</option>
-                  <option value="falta-iluminacao">Falta de Iluminação</option>
-                  <option value="veiculo-estacionado">Veículo Estacionado na Ciclovia</option>
-                  <option value="ma-conservacao">Má Conservação da Via</option>
-                  <option value="falta-ciclovia">Falta de Ciclovia</option>
-                  <option value="outro">Outro</option>
-                </select>
-                {errorModal && <p className="text-red-500 text-sm mt-2">{errorModal}</p>}
-                {tipo === "outro" && (
+
+                {/* Situações selecionadas */}
+                <div ref={situacaoRef} className="mb-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Situações:</p>
+                  {situacoes.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {situacoes.map((sit, index) => {
+                        const tipoInfo = tipos.find(t => t.value === sit.tipo);
+                        const Icon = tipoInfo?.icon || MoreHorizontal;
+                        const label = sit.tipo === "outro" && sit.relato ? sit.relato : (tipoInfo?.label || sit.tipo);
+                        return (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-full text-xs font-medium"
+                          >
+                            {Icon && typeof Icon === 'function' && <Icon size={14} />}
+                            <span>{label}</span>
+                            <button
+                              type="button"
+                              onClick={() => removerSituacao(index)}
+                              className="ml-1 text-white/80 hover:text-white"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">Nenhuma situação selecionada</p>
+                  )}
+                </div>
+
+                {/* Add situação button */}
+                {!showAddSituacao && tiposDisponiveis.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddSituacao(true)}
+                    className="w-full p-2 mb-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors"
+                  >
+                    + Adicionar situação
+                  </button>
+                )}
+
+                {/* Dropdown para adicionar situação */}
+                {showAddSituacao && tiposDisponiveis.length > 0 && (
+                  <div className="mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-500 mb-2">Selecione uma situação:</p>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                      {tiposDisponiveis.map(t => {
+                        const Icon = t.icon;
+                        return (
+                          <button
+                            key={t.value}
+                            type="button"
+                            onClick={() => adicionarSituacao(t.value)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                          >
+                            {Icon && typeof Icon === 'function' && <Icon size={12} />}
+                            <span>{t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddSituacao(false)}
+                      className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )}
+
+                {/* Todos os tipos já adicionados */}
+                {tiposDisponiveis.length === 0 && (
+                  <p className="text-xs text-gray-400 mb-3 italic">Todos os tipos já foram adicionados</p>
+                )}
+
+                {/* Input "Outro" */}
+                {situacoes.some(s => s.tipo === "outro") && (
                   <input
                     ref={inputOutroRef}
                     type="text"
                     placeholder="Descreva o tipo *"
-                    value={descricaoOutro}
-                    onChange={(e) => setDescricaoOutro(e.target.value)}
-                    className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && tipo === "outro" && !descricaoOutro.trim() ? 'border-red-500' : ''}`}
+                    value={situacoes.find(s => s.tipo === "outro")?.relato || ""}
+                    onChange={(e) => atualizarOutroRelato(e.target.value)}
+                    className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && situacoes.some(s => s.tipo === "outro") && !situacoes.find(s => s.tipo === "outro")?.relato?.trim() ? 'border-red-500' : ''}`}
                     required
                   />
                 )}
@@ -1806,11 +1881,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       setShowModal(false);
                       setTempMarker(null);
                       setRelato("");
-                      setTipo("");
+                      setSituacoes([]);
+                      setShowAddSituacao(false);
                       setPlaca("");
                       setMostrarPlaca(false);
                       setEndereco("");
-                      setDescricaoOutro("");
                     }}
                     className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-bold hover:bg-gray-700"
                   >
@@ -1830,11 +1905,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       setShowSuccess(false);
                       setTempMarker(null);
                       setRelato("");
-                      setTipo("");
+                      setSituacoes([]);
+                      setShowAddSituacao(false);
                       setPlaca("");
                       setMostrarPlaca(false);
                       setEndereco("");
-                      setDescricaoOutro("");
                     }}
                     className="w-full px-4 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-800"
                   >

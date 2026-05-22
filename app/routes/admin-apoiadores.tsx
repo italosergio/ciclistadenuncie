@@ -3,7 +3,7 @@ import { ref, onValue, push, remove, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
-import { Plus, Trash2, ExternalLink, MapPin, Search, Edit3, Heart, GripVertical } from "lucide-react";
+import { Plus, Trash2, ExternalLink, MapPin, Search, Edit3, Heart, GripVertical, MoreVertical, X } from "lucide-react";
 
 interface Apoiador {
   id: string;
@@ -36,6 +36,8 @@ export default function ApoiadoresTab() {
   const [reordenando, setReordenando] = useState(false);
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [modalApoiador, setModalApoiador] = useState<Apoiador | null>(null);
+  const [menuApoiadorAberto, setMenuApoiadorAberto] = useState(false);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const { user } = useAuth();
@@ -529,12 +531,13 @@ export default function ApoiadoresTab() {
           {apoiadores.map((apoiador, index) => (
             <div
               key={apoiador.id}
-              className={`rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur ${reordenando ? 'border-blue-500' : ''}`}
+              className={`rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur cursor-pointer transition hover:border-blue-500/30 hover:bg-slate-900 ${reordenando ? 'border-blue-500' : ''}`}
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragEnter={() => handleDragEnter(index)}
               onDragEnd={handleDrop}
               onDragOver={(e) => e.preventDefault()}
+              onClick={() => { if (!reordenando) { setModalApoiador(apoiador); setMenuApoiadorAberto(false); } }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -583,49 +586,85 @@ export default function ApoiadoresTab() {
                       : "N/A"}
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => handleEditar(apoiador)}
-                    className="text-blue-400 hover:text-blue-300 p-1.5 flex-shrink-0"
-                    title="Editar apoiador"
-                  >
-                    <Edit3 size={16} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setExcluindoId(excluindoId === apoiador.id ? null : apoiador.id)
-                    }
-                    className="text-red-400 hover:text-red-300 p-1.5 flex-shrink-0"
-                    title="Excluir apoiador"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
               </div>
 
-              {excluindoId === apoiador.id && (
-                <div className="mt-4 rounded-xl border border-red-500/30 bg-red-950/30 p-4">
-                  <p className="text-sm font-semibold text-red-400 mb-3">
-                    Tem certeza que deseja excluir o apoiador "{apoiador.nome}"?
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleExcluir(apoiador.id, apoiador.nome)}
-                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700"
-                    >
-                      Confirmar Exclusão
-                    </button>
-                    <button
-                      onClick={() => setExcluindoId(null)}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modalApoiador && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setModalApoiador(null); setMenuApoiadorAberto(false); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between p-4 border-b border-white/10">
+              <div className="flex-1 min-w-0 pr-4">
+                <h3 className="text-sm font-semibold text-white">{modalApoiador.nome}</h3>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="relative">
+                  <button onClick={() => setMenuApoiadorAberto(!menuApoiadorAberto)} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                    <MoreVertical size={16} />
+                  </button>
+                  {menuApoiadorAberto && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
+                      <button onClick={() => { handleEditar(modalApoiador); setModalApoiador(null); }} className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center gap-2">
+                        <Edit3 size={14} /> Editar
+                      </button>
+                      <button onClick={() => { handleExcluir(modalApoiador.id, modalApoiador.nome); setModalApoiador(null); }} className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
+                        <Trash2 size={14} /> Excluir
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => { setModalApoiador(null); setMenuApoiadorAberto(false); }} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {modalApoiador.img && (
+                <div className="flex justify-center mb-2">
+                  <img src={modalApoiador.img} alt={modalApoiador.nome} className="w-20 h-20 object-contain rounded-xl bg-slate-800" />
+                </div>
+              )}
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Nome</p>
+                <p className="text-sm text-white">{modalApoiador.nome}</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">URL</p>
+                <a href={modalApoiador.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                  <ExternalLink size={14} /> {modalApoiador.url}
+                </a>
+              </div>
+              {modalApoiador.descricao && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Descrição</p>
+                  <p className="text-sm text-slate-200">{modalApoiador.descricao}</p>
+                </div>
+              )}
+              {modalApoiador.endereco && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Endereço</p>
+                  <p className="text-sm text-white flex items-center gap-1"><MapPin size={14} className="text-slate-400" /> {modalApoiador.endereco}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Ordem</p>
+                <p className="text-sm text-white">#{modalApoiador.ordem + 1}</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Criado por</p>
+                <p className="text-sm text-white">{modalApoiador.criadoPor}</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Data</p>
+                <p className="text-sm text-white">{modalApoiador.createdAt ? new Date(modalApoiador.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

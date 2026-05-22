@@ -3,6 +3,7 @@ import { ref, onValue, update, remove, get } from "firebase/database";
 import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
+import { MoreVertical, X, Trash2 } from "lucide-react";
 
 export default function UsuariosTab() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -14,6 +15,10 @@ export default function UsuariosTab() {
   const [banindoUid, setBanindoUid] = useState<string | null>(null);
   const [totalDenunciasUsuario, setTotalDenunciasUsuario] = useState<Record<string, number>>({});
   const { user: currentUser } = useAuth();
+  const [modalUsuario, setModalUsuario] = useState<any | null>(null);
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [confirmandoBanimento, setConfirmandoBanimento] = useState(false);
+  const [confirmandoExclusaoModal, setConfirmandoExclusaoModal] = useState(false);
 
   useEffect(() => {
     const usersRef = ref(db, 'usuarios');
@@ -245,13 +250,11 @@ export default function UsuariosTab() {
               <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Tipo</th>
               <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Status</th>
               <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Criado em</th>
-              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10">
             {usuarios.map((user) => (
-              <>
-              <tr key={user.uid} className="hover:bg-white/[0.04]">
+              <tr key={user.uid} className="hover:bg-white/[0.04] cursor-pointer" onClick={() => { setModalUsuario(user); setMenuAberto(false); setConfirmandoBanimento(false); setConfirmandoExclusaoModal(false); setMotivoExclusao(""); }}>
                 <td className="px-3 md:px-4 py-2.5">
                   <span className="text-xs text-slate-200">{user.username}</span>
                   {user.banido && <span className="ml-2 text-[10px] bg-red-500/15 text-red-200 border border-red-400/20 px-1.5 py-0.5 rounded-full">BANIDO</span>}
@@ -268,7 +271,7 @@ export default function UsuariosTab() {
                   ) : (
                     <select
                       value={user.role}
-                      onChange={(e) => handleRoleChange(user.uid, e.target.value)}
+                      onChange={(e) => { e.stopPropagation(); handleRoleChange(user.uid, e.target.value); }}
                       className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border outline-none cursor-pointer ${
                         user.role === 'administrador' ? 'bg-purple-500/15 text-purple-200 border-purple-400/20' :
                         user.role === 'moderador' ? 'bg-blue-500/15 text-blue-200 border-blue-400/20' :
@@ -291,108 +294,131 @@ export default function UsuariosTab() {
                 <td className="px-3 md:px-4 py-2.5 text-xs text-slate-400">
                   {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
                 </td>
-                <td className="px-3 md:px-4 py-2.5">
-                  {user.uid !== currentUser?.uid && (
-                    <div className="flex gap-2">
-                      {user.banido ? (
-                        <button
-                          onClick={() => handleDesbanirUsuario(user.uid, user.username)}
-                          className="rounded-lg border border-green-500/30 px-2.5 py-1 text-xs font-semibold text-green-300 transition hover:bg-green-500/10 hover:text-green-200"
-                        >
-                          Desbanir
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setBanindoUid(banindoUid === user.uid ? null : user.uid)}
-                          className="rounded-lg border border-yellow-500/30 px-2.5 py-1 text-xs font-semibold text-yellow-300 transition hover:bg-yellow-500/10 hover:text-yellow-200"
-                        >
-                          Banir
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setExcluindoUid(excluindoUid === user.uid ? null : user.uid)}
-                        className="rounded-lg border border-red-500/30 px-2.5 py-1 text-xs font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  )}
-                </td>
               </tr>
-              {banindoUid === user.uid && (
-                <tr>
-                  <td colSpan={5} className="px-3 md:px-4 py-2.5">
-                    <div className="rounded-xl border border-yellow-500/30 bg-yellow-950/30 p-4">
-                      <p className="text-sm font-semibold text-yellow-300 mb-3">Tem certeza que deseja banir o usuário {user.username}?</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleBanirUsuario(user.uid, user.username)}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
-                        >
-                          Confirmar Banimento
-                        </button>
-                        <button
-                          onClick={() => setBanindoUid(null)}
-                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {excluindoUid === user.uid && (
-                <tr>
-                  <td colSpan={5} className="px-3 md:px-4 py-2.5">
-                    <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4">
-                      <p className="text-sm font-semibold text-red-300 mb-3">Tem certeza que deseja excluir este usuário? Esta ação é IRREVERSÍVEL.</p>
-                      <label className="block text-xs font-semibold text-red-300 mb-1">Motivo da exclusão *</label>
-                      <textarea
-                        placeholder="Informe o motivo da exclusão (obrigatório)"
-                        value={motivoExclusao}
-                        onChange={(e) => setMotivoExclusao(e.target.value)}
-                        required
-                        rows={3}
-                        className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 mb-3"
-                      />
-                      <label className="flex items-center gap-2 text-xs text-slate-300 mb-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={manterDenuncias}
-                          onChange={(e) => setManterDenuncias(e.target.checked)}
-                          className="w-4 h-4"
-                        />
-                        Manter denúncias do usuário no sistema ({totalDenunciasUsuario[user.uid] || 0} total)
-                      </label>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleExcluirUsuario(user.uid, user.username)}
-                          disabled={!motivoExclusao.trim()}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
-                        >
-                          Confirmar Exclusão
-                        </button>
-                        <button
-                          onClick={() => {
-                            setExcluindoUid(null);
-                            setMotivoExclusao("");
-                            setManterDenuncias(false);
-                          }}
-                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              </>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal de Usuário */}
+      {modalUsuario && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setModalUsuario(null); setMenuAberto(false); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between p-4 border-b border-white/10">
+              <div className="flex-1 min-w-0 pr-4">
+                <h3 className="text-sm font-semibold text-white">{modalUsuario.username}</h3>
+              </div>
+              <div className="flex items-center gap-1">
+                {/* 3 pontinhos - só aparece se não for o próprio usuário */}
+                {modalUsuario.uid !== currentUser?.uid && (
+                  <div className="relative">
+                    <button onClick={() => setMenuAberto(!menuAberto)} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                      <MoreVertical size={16} />
+                    </button>
+                    {menuAberto && (
+                      <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
+                        {confirmandoBanimento && !modalUsuario.banido ? (
+                          <div className="px-3 py-2 space-y-2">
+                            <p className="text-xs text-yellow-300 font-semibold">Banir {modalUsuario.username}?</p>
+                            <div className="flex gap-1">
+                              <button onClick={() => { handleBanirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">Sim</button>
+                              <button onClick={() => setConfirmandoBanimento(false)} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                            </div>
+                          </div>
+                        ) : confirmandoExclusaoModal ? (
+                          <div className="px-3 py-2 space-y-2">
+                            <p className="text-xs text-red-300 font-semibold">Excluir {modalUsuario.username}?</p>
+                            <textarea
+                              placeholder="Motivo (obrigatório)"
+                              value={motivoExclusao}
+                              onChange={(e) => setMotivoExclusao(e.target.value)}
+                              rows={2}
+                              className="w-full rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1 text-xs text-white outline-none transition focus:border-blue-500"
+                            />
+                            <div className="flex gap-1">
+                              <button onClick={() => { setManterDenuncias(true); handleExcluirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} disabled={!motivoExclusao.trim()} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">Excluir</button>
+                              <button onClick={() => { setConfirmandoExclusaoModal(false); setMotivoExclusao(""); }} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {modalUsuario.banido ? (
+                              <button onClick={() => { handleDesbanirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} className="w-full text-left px-3 py-2 text-xs text-green-300 hover:bg-white/5 flex items-center gap-2">
+                                Desbanir usuário
+                              </button>
+                            ) : (
+                              <button onClick={() => setConfirmandoBanimento(true)} className="w-full text-left px-3 py-2 text-xs text-yellow-300 hover:bg-white/5 flex items-center gap-2">
+                                Banir usuário
+                              </button>
+                            )}
+                            <button onClick={() => setConfirmandoExclusaoModal(true)} className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
+                              Excluir conta
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <button onClick={() => { setModalUsuario(null); setMenuAberto(false); }} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Username</p>
+                  <p className="text-sm text-white">{modalUsuario.username}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Role</p>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    modalUsuario.role === 'administrador' ? 'bg-purple-500/15 text-purple-200 border-purple-400/20' :
+                    modalUsuario.role === 'moderador' ? 'bg-blue-500/15 text-blue-200 border-blue-400/20' :
+                    'bg-green-500/15 text-green-200 border-green-400/20'
+                  }`}>
+                    {getRoleDisplay(modalUsuario.role)}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Status</p>
+                  <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                    modalUsuario.banido ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-green-400/30 bg-green-500/10 text-green-300'
+                  }`}>
+                    {modalUsuario.banido ? 'Banido' : 'Ativo'}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Criado em</p>
+                  <p className="text-sm text-white">{modalUsuario.createdAt ? new Date(modalUsuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Denúncias</p>
+                  <p className="text-sm text-white">{totalDenunciasUsuario[modalUsuario.uid] || 0} denúncias</p>
+                </div>
+              </div>
+              
+              {/* Role change (select) para outros usuários */}
+              {modalUsuario.uid !== currentUser?.uid && (
+                <div className="pt-3 border-t border-white/10">
+                  <label className="block text-[11px] uppercase tracking-wide font-semibold mb-2 text-slate-400">Alterar Role</label>
+                  <select
+                    value={modalUsuario.role}
+                    onChange={(e) => { handleRoleChange(modalUsuario.uid, e.target.value); setModalUsuario({...modalUsuario, role: e.target.value}); }}
+                    className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  >
+                    <option value="usuario">Usuário</option>
+                    <option value="moderador">Moderador</option>
+                    <option value="administrador">Administrador</option>
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

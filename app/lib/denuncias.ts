@@ -37,6 +37,7 @@ export async function salvarDenuncia(data: DenunciaData) {
   const situacoes = data.situacoes || (data.tipo ? [{
     tipo: data.tipo,
     relato: typeof data.relato === 'string' ? data.relato : undefined,
+    placa: data.placa,
   }] : undefined);
 
   const denunciaData: any = {

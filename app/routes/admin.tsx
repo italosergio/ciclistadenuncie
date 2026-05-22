@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart, FileText } from "lucide-react";
+import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart, FileText, Clipboard, Check, MoreVertical, BarChart3, BookOpen } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, onValue, update, remove, push } from "firebase/database";
 import type { Route } from "./+types/admin";
@@ -12,6 +12,7 @@ import HistoricoTab from "./admin-historico";
 import UsuariosTab from "./admin-usuarios";
 import IniciativasTab from "./admin-iniciativas";
 import ApoiadoresTab from "./admin-apoiadores";
+import { PLANOS, type Plano } from "../data/planos";
 
 // --- Admin visual constants ---
 const adminShellClass = "min-h-screen flex bg-slate-950 text-slate-100 font-raleway";
@@ -136,8 +137,8 @@ export default function Admin() {
             )}
 
             <button
-              onClick={() => { navigate("/planos"); setMenuOpen(false); }}
-              className={`${navButtonBaseClass} ${navButtonIdleClass}`}
+              onClick={() => { setSearchParams({ tab: "planos" }); setMenuOpen(false); }}
+              className={`${navButtonBaseClass} ${tab === "planos" ? navButtonActiveClass : navButtonIdleClass}`}
             >
               <FileText size={16} className="flex-shrink-0" />
               <span>Planos</span>
@@ -190,6 +191,7 @@ export default function Admin() {
           {tab === "usuarios" && user?.role === "administrador" && <UsuariosTab />}
           {tab === "iniciativas" && user?.role === "administrador" && <IniciativasTab />}
           {tab === "apoiadores" && user?.role === "administrador" && <ApoiadoresTab />}
+          {tab === "planos" && <PlanosTab />}
           {tab === "denuncias" && <DenunciasTab />}
           {tab === "contatos" && <ContatosTab />}
           </div>
@@ -199,11 +201,132 @@ export default function Admin() {
   );
 }
 
+function PlanosTab() {
+  const [modalPlano, setModalPlano] = useState<Plano | null>(null);
+  const [copiado, setCopiado] = useState(false);
+
+  async function handleCopiar(conteudo: string) {
+    try {
+      await navigator.clipboard.writeText(conteudo);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      alert("Erro ao copiar. Selecione o texto manualmente.");
+    }
+  }
+
+  function renderConteudo(conteudo: string) {
+    const lines = conteudo.split("\n");
+    return lines.map((line, i) => {
+      if (line.startsWith("### ")) return <h3 key={i} className="text-lg font-bold text-white mt-6 mb-2">{line.slice(4)}</h3>;
+      if (line.startsWith("## ")) return <h2 key={i} className="text-xl font-bold text-blue-400 mt-8 mb-3 border-b border-gray-700 pb-2">{line.slice(3)}</h2>;
+      if (line.startsWith("# ")) return <h1 key={i} className="text-2xl font-bold text-white mt-2 mb-4">{line.slice(2)}</h1>;
+      if (line.startsWith("```")) return null;
+      if (line.trim().startsWith("- `") || line.trim().startsWith("- **")) {
+        return <p key={i} className="text-slate-300 text-sm leading-relaxed ml-4 mb-1">{formatInline(line.replace(/^-\s*/, ""))}</p>;
+      }
+      if (line.trim().startsWith("- ")) {
+        return <li key={i} className="text-slate-300 text-sm leading-relaxed ml-4 mb-1 list-disc">{formatInline(line.trim().slice(2))}</li>;
+      }
+      if (/^\d+\.\s/.test(line.trim())) {
+        const match = line.trim().match(/^(\d+\.)\s(.+)/);
+        if (match) return <li key={i} className="text-slate-300 text-sm leading-relaxed ml-4 mb-1 list-decimal">{formatInline(match[2])}</li>;
+      }
+      if (!line.trim()) return <div key={i} className="h-2" />;
+      return <p key={i} className="text-slate-300 text-sm leading-relaxed mb-1">{formatInline(line)}</p>;
+    });
+  }
+
+  function formatInline(text: string) {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+      const codeParts = part.split(/(`[^`]+`)/g);
+      if (codeParts.length === 1) return part;
+      return codeParts.map((cp, j) => {
+        if (cp.startsWith("`") && cp.endsWith("`")) return <code key={j} className="bg-slate-800 text-cyan-300 px-1.5 py-0.5 rounded text-xs font-mono">{cp.slice(1, -1)}</code>;
+        return cp;
+      });
+    });
+  }
+
+  const categoriaIcon: Record<string, { icon: typeof BarChart3; color: string }> = {
+    analytics: { icon: BarChart3, color: "text-blue-400" },
+    placa: { icon: Search, color: "text-yellow-400" },
+    "boas-praticas": { icon: BookOpen, color: "text-green-400" },
+    pagina: { icon: Globe, color: "text-purple-400" },
+  };
+
+  return (
+    <div className={sectionShellClass}>
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Planos de Implementação</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">Acompanhe o roadmap de melhorias e funcionalidades do projeto.</p>
+        </div>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{PLANOS.length} {PLANOS.length === 1 ? 'plano' : 'planos'}</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {PLANOS.map((plano) => {
+          const cat = categoriaIcon[plano.categoria] || categoriaIcon.pagina;
+          const Icon = cat.icon;
+          return (
+            <button key={plano.id} onClick={() => { setModalPlano(plano); setCopiado(false); }}
+              className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur text-left w-full transition hover:border-blue-500/30 hover:bg-slate-900">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={cat.color}><Icon size={20} /></div>
+                <span className="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">{plano.id}</span>
+              </div>
+              <h3 className="text-sm font-bold text-white mb-2 line-clamp-2">{plano.titulo}</h3>
+              <p className="text-xs text-slate-400 mb-4 line-clamp-3">{plano.resumo}</p>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <FileText size={14} />
+                <span>{plano.data}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {modalPlano && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setModalPlano(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between p-4 border-b border-white/10">
+              <div className="flex-1 min-w-0 pr-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">{modalPlano.id}</span>
+                  <span className="text-xs text-slate-500">{modalPlano.data}</span>
+                </div>
+                <h2 className="text-sm font-bold text-white">{modalPlano.titulo}</h2>
+              </div>
+              <button onClick={() => setModalPlano(null)} className="text-slate-400 hover:text-white p-1 flex-shrink-0 rounded-lg hover:bg-white/5">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">{renderConteudo(modalPlano.conteudo)}</div>
+            <div className="p-4 border-t border-white/10 flex justify-end">
+              <button onClick={() => handleCopiar(modalPlano.conteudo)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition text-xs font-semibold">
+                {copiado ? <><Check size={14} /> Copiado!</> : <><Clipboard size={14} /> Copiar texto</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DenunciasTab() {
   const [denuncias, setDenuncias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const [motivoExclusao, setMotivoExclusao] = useState("");
+  const [modalDenuncia, setModalDenuncia] = useState<any | null>(null);
+  const [menuDenunciaAberto, setMenuDenunciaAberto] = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -236,7 +359,9 @@ function DenunciasTab() {
       await excluirDenuncia(id, user.username, motivoExclusao);
     }
     
-    setExcluindoId(null);
+    setConfirmandoExclusao(false);
+    setMenuDenunciaAberto(false);
+    setModalDenuncia(null);
     setMotivoExclusao("");
   }
 
@@ -275,65 +400,75 @@ function DenunciasTab() {
                   <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Tipo</th>
                   <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Endereço</th>
                   <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Usuário</th>
-                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
                 {denuncias.map((denuncia) => (
-                  <Fragment key={denuncia.id}>
-                    <tr className="hover:bg-white/[0.04] transition-colors">
-                      <td className="px-3 py-2.5 text-xs text-slate-300">
-                        {new Date(denuncia.createdAt).toLocaleDateString('pt-BR')}
-                      </td>
-                      <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.tipo}</td>
-                      <td className="px-3 py-2.5 text-xs text-slate-300 max-w-xs truncate">{denuncia.endereco}</td>
-                      <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.username || 'Anônimo'}</td>
-                      <td className="px-3 py-2.5">
-                        <button
-                          onClick={() => setExcluindoId(excluindoId === denuncia.id ? null : denuncia.id)}
-                          className="rounded-lg border border-red-500/30 px-2.5 py-1 text-xs font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
-                        >
-                          Excluir
-                        </button>
-                      </td>
-                    </tr>
-                    {excluindoId === denuncia.id && (
-                      <tr>
-                        <td colSpan={5} className="px-3 py-2.5">
-                          <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4">
-                            <p className="text-xs font-semibold text-red-300 mb-3">Tem certeza que deseja excluir esta denúncia?</p>
-                            <label className="block text-[11px] font-semibold text-red-400 mb-1">Motivo da exclusão *</label>
-                            <textarea
-                              placeholder="Informe o motivo da exclusão (obrigatório)"
-                              value={motivoExclusao}
-                              onChange={(e) => setMotivoExclusao(e.target.value)}
-                              required
-                              rows={3}
-                              className={fieldClass + " mb-3"}
-                            />
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleDelete(denuncia.id)}
-                                disabled={!motivoExclusao.trim()}
-                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                Confirmar Exclusão
-                              </button>
-                              <button
-                                onClick={() => { setExcluindoId(null); setMotivoExclusao(""); }}
-                                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
+                  <tr key={denuncia.id} onClick={() => { setModalDenuncia(denuncia); setMenuDenunciaAberto(false); setConfirmandoExclusao(false); setMotivoExclusao(""); }} className="hover:bg-white/[0.04] transition-colors cursor-pointer">
+                    <td className="px-3 py-2.5 text-xs text-slate-300">
+                      {new Date(denuncia.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.tipo}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-300 max-w-xs truncate">{denuncia.endereco}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.username || 'Anônimo'}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {modalDenuncia && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setModalDenuncia(null); setMenuDenunciaAberto(false); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between p-4 border-b border-white/10">
+              <div className="flex-1 min-w-0 pr-4"><h3 className="text-sm font-semibold text-white">Detalhes da Denúncia</h3></div>
+              <div className="flex items-center gap-1">
+                <div className="relative">
+                  <button onClick={() => setMenuDenunciaAberto(!menuDenunciaAberto)} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                    <MoreVertical size={16} />
+                  </button>
+                  {menuDenunciaAberto && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
+                      {confirmandoExclusao ? (
+                        <div className="px-3 py-2 space-y-2">
+                          <p className="text-xs text-red-300 font-semibold">Tem certeza?</p>
+                          <textarea placeholder="Motivo (obrigatório)" value={motivoExclusao}
+                            onChange={(e) => setMotivoExclusao(e.target.value)} rows={2}
+                            className="w-full rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1 text-xs text-white outline-none transition focus:border-blue-500" />
+                          <div className="flex gap-1">
+                            <button onClick={() => handleDelete(modalDenuncia.id)} disabled={!motivoExclusao.trim()}
+                              className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">Confirmar</button>
+                            <button onClick={() => { setConfirmandoExclusao(false); setMotivoExclusao(""); }}
+                              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setConfirmandoExclusao(true)}
+                          className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
+                          <Trash2 size={14} /> Excluir denúncia
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => { setModalDenuncia(null); setMenuDenunciaAberto(false); }} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Data</p><p className="text-sm text-white">{new Date(modalDenuncia.createdAt).toLocaleDateString('pt-BR')}</p></div>
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Tipo</p><p className="text-sm text-white">{modalDenuncia.tipo}</p></div>
+                <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Endereço</p><p className="text-sm text-white">{modalDenuncia.endereco}</p></div>
+                {modalDenuncia.relato && <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Relato</p><p className="text-sm text-white whitespace-pre-wrap">{modalDenuncia.relato}</p></div>}
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Usuário</p><p className="text-sm text-white">{modalDenuncia.username || 'Anônimo'}</p></div>
+                {modalDenuncia.placa && <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Placa</p><p className="text-sm text-white">{modalDenuncia.placa}</p></div>}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -353,6 +488,8 @@ function ContatosTab() {
   const { user } = useAuth();
   const [respondendoId, setRespondendoId] = useState<string | null>(null);
   const [respostaTexto, setRespostaTexto] = useState("");
+  const [menuContatoAberto, setMenuContatoAberto] = useState<string | null>(null);
+  const [confirmandoExclusaoContato, setConfirmandoExclusaoContato] = useState<string | null>(null);
 
   useEffect(() => {
     const contatosRef = ref(db, 'contatos');
@@ -394,6 +531,19 @@ function ContatosTab() {
 
     return () => unsubscribe();
   }, []);
+
+  const excluirContato = async (contatoId: string) => {
+    if (!user?.username) return;
+    try {
+      const contato = contatos.find(c => c.id === contatoId);
+      await remove(ref(db, `contatos/${contatoId}`));
+      await registrarEvento({
+        tipo: 'excluir_contato',
+        usuario: user.username,
+        detalhes: { contatoId, usuarioContato: contato?.usuario, tipo: contato?.tipo },
+      });
+    } catch (error) { alert("Erro ao excluir contato"); }
+  };
 
   const contatosFiltrados = useMemo(() => {
     return contatos.filter(c => {
@@ -659,6 +809,56 @@ function ContatosTab() {
                   >
                     <Pin size={16} className={contato.pinada ? 'fill-yellow-500 text-yellow-500' : ''} />
                   </button>
+                  {/* 3 pontinhos */}
+                  <div className="relative">
+                    <button onClick={(e) => { e.stopPropagation(); setMenuContatoAberto(menuContatoAberto === contato.id ? null : contato.id); }}
+                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5" title="Ações">
+                      <MoreVertical size={16} />
+                    </button>
+                    {menuContatoAberto === contato.id && (
+                      <div className="absolute left-0 top-full mt-1 w-48 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
+                        {confirmandoExclusaoContato === contato.id ? (
+                          <div className="px-3 py-2 space-y-2">
+                            <p className="text-xs text-red-300 font-semibold">Excluir contato?</p>
+                            <div className="flex gap-1">
+                              <button onClick={async (e) => { e.stopPropagation(); await excluirContato(contato.id); setConfirmandoExclusaoContato(null); setMenuContatoAberto(null); }}
+                                className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">Sim</button>
+                              <button onClick={(e) => { e.stopPropagation(); setConfirmandoExclusaoContato(null); }}
+                                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Não</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {!contato.resolvido ? (
+                              <button onClick={(e) => { e.stopPropagation(); handleMarcarResolvido(contato.id); setMenuContatoAberto(null); }}
+                                className="w-full text-left px-3 py-2 text-xs text-green-300 hover:bg-white/5 flex items-center gap-2">
+                                <CheckCircle size={14} /> Resolvido
+                              </button>
+                            ) : (
+                              <button onClick={(e) => { e.stopPropagation(); handleMarcarPendente(contato.id); setMenuContatoAberto(null); }}
+                                className="w-full text-left px-3 py-2 text-xs text-yellow-300 hover:bg-white/5 flex items-center gap-2">
+                                <AlertTriangle size={14} /> Pendente
+                              </button>
+                            )}
+                            {!expandidos.has(contato.id) && (
+                              <button onClick={(e) => { e.stopPropagation(); setExpandidos(new Set(expandidos).add(contato.id)); setMenuContatoAberto(null); if (!contato.lida && user) { update(ref(db, `contatos/${contato.id}`), { lida: true }); } }}
+                                className="w-full text-left px-3 py-2 text-xs text-blue-300 hover:bg-white/5 flex items-center gap-2">
+                                <MessageCircle size={14} /> Ler mensagem
+                              </button>
+                            )}
+                            <button onClick={(e) => { e.stopPropagation(); setRespondendoId(contato.id); setMenuContatoAberto(null); }}
+                              className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center gap-2">
+                              <MessageSquare size={14} /> Responder
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); setConfirmandoExclusaoContato(contato.id); }}
+                              className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
+                              <Trash2 size={14} /> Excluir
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {contato.resolvido && (
                     <CheckCircle size={16} className="text-green-500" />
                   )}
