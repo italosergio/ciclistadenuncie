@@ -31,9 +31,14 @@ export default function HistoricoTab() {
             id: key,
             ...value
           }))
-          .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+          .sort((a, b) => {
+            try { return b.timestamp?.localeCompare(a.timestamp); } catch { return 0; }
+          });
         setEventos(eventosArray);
       }
+      setLoading(false);
+    }, (error) => {
+      console.error("Erro ao carregar histórico:", error);
       setLoading(false);
     });
     
@@ -48,9 +53,13 @@ export default function HistoricoTab() {
       }
     });
     
+    // Timeout de segurança: se após 10s o loading não resolveu, força false
+    const safetyTimeout = setTimeout(() => setLoading(false), 10000);
+    
     return () => {
       unsubscribeHistorico();
       unsubscribeUsuarios();
+      clearTimeout(safetyTimeout);
     };
   }, []);
 
