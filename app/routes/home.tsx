@@ -265,6 +265,13 @@ export default function Home() {
           </Link>
           <span className="text-gray-400">•</span>
           <Link
+            to="/blog"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs md:text-sm"
+          >
+            Blog
+          </Link>
+          <span className="text-gray-400">•</span>
+          <Link
             to="/contato"
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs md:text-sm"
           >
