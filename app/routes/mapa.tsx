@@ -20,11 +20,18 @@ export async function loader() {
   return { cidades };
 }
 
+interface Situacao {
+  tipo: string;
+  placa?: string;
+  relato?: string;
+}
+
 interface Denuncia {
   endereco: string;
   relato: string | Array<{ texto: string; editadoEm: string }> | Array<string>;
   tipo?: string;
   placa?: string;
+  situacoes?: Situacao[];
   localizacao?: { lat: number; lng: number };
   createdAt: string;
 }
@@ -462,6 +469,61 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         iconAnchor: [19, 19],
       });
 
+      const createClusterIcon = (count: number) => {
+        const fontSize = count >= 100 ? '0.9rem' : count >= 10 ? '1.1rem' : '1.4rem';
+        return L.default.divIcon({
+          html: `<div class="cluster-marker-pin" style="filter: drop-shadow(0 4px 12px rgba(220,38,38,0.4));">
+            <div class="pulse-ring d1"></div>
+            <div class="pulse-ring d2"></div>
+            <div class="pulse-ring d3"></div>
+            <div class="pulse-ring d4"></div>
+            <div class="pulse-ring d5"></div>
+            <div class="pin-shadow"></div>
+            <div class="pin-icon">
+              <div class="pin-icon-inner">
+                <span class="badge-number" style="font-size:${fontSize}">${count}</span>
+              </div>
+            </div>
+          </div>`,
+          className: 'custom-marker',
+          iconSize: [56, 60],
+          iconAnchor: [28, 58],
+        });
+      };
+
+      const getSituacaoIconHtml = (tipo: string) => {
+        const iconMap: Record<string, string> = {
+          fina: '🌬',
+          ameaca: '📣',
+          assedio: '✋',
+          'agressao-verbal': '💬',
+          'agressao-fisica': '🚗',
+          'invasao-ciclovia': '🚧',
+          'buraco-via': '⚠',
+          'falta-sinalizacao': '🚫',
+          'trecho-perigoso': '⚠',
+          'ciclovia-obstruida': '🚧',
+          'falta-iluminacao': '💡',
+          'veiculo-estacionado': '🚗',
+          'ma-conservacao': '🔧',
+          'falta-ciclovia': '🚲',
+          outro: '⋯',
+        };
+        return iconMap[tipo] || '📌';
+      };
+
+      const getSituacaoColor = (tipo: string): string => {
+        const colorMap: Record<string, string> = {
+          fina: 'rgba(220,38,38,0.15)',
+          ameaca: 'rgba(249,115,22,0.15)',
+          assedio: 'rgba(168,85,247,0.15)',
+          'agressao-fisica': 'rgba(239,68,68,0.15)',
+          'invasao-ciclovia': 'rgba(234,179,8,0.15)',
+          'buraco-via': 'rgba(59,130,246,0.15)',
+        };
+        return colorMap[tipo] || 'rgba(100,116,139,0.15)';
+      };
+
       const MouseFollower = ({ isMarking }: { isMarking: boolean }) => {
         const map = reactLeaflet.useMap();
         
@@ -683,8 +745,17 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             />
           )}
           {denuncias.map(([id, denuncia]) => {
-              const tipoInfo = tipos.find(t => t.value === denuncia.tipo);
-              const markerIcon = tipoInfo ? createColoredIcon(tipoInfo.color, tipoInfo.icon) : icon;
+              const temMultiplasSituacoes = denuncia.situacoes && denuncia.situacoes.length >= 2;
+              const numSituacoes = denuncia.situacoes?.length || 1;
+
+              let markerIcon: any;
+              if (temMultiplasSituacoes) {
+                markerIcon = createClusterIcon(numSituacoes);
+              } else {
+                const tipoInfo = denuncia.situacoes?.[0]?.tipo || denuncia.tipo;
+                const tipoEncontrado = tipos.find(t => t.value === tipoInfo);
+                markerIcon = tipoEncontrado ? createColoredIcon(tipoEncontrado.color, tipoEncontrado.icon) : icon;
+              }
               
               return (
               <Marker
@@ -759,20 +830,56 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                         <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
                           {denuncia.endereco}
                         </div>
-                        {denuncia.tipo && (
-                          <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
-                            {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
+                        {temMultiplasSituacoes ? (
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: '#dc2626' }}>
+                              🔴 {numSituacoes} situações nesta denúncia
+                            </div>
+                            {denuncia.situacoes!.map((sit, idx) => {
+                              const tipoNome = tipos.find(t => t.value === sit.tipo)?.label || sit.tipo;
+                              return (
+                                <div key={idx} style={{
+                                  padding: '6px 8px',
+                                  borderRadius: '6px',
+                                  background: getSituacaoColor(sit.tipo),
+                                  marginBottom: '4px',
+                                }}>
+                                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#111827', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>{getSituacaoIconHtml(sit.tipo)}</span>
+                                    {tipoNome}
+                                  </div>
+                                  {sit.placa && (
+                                    <div style={{ fontSize: '11px', color: '#d97706', fontFamily: 'monospace', marginTop: '2px' }}>
+                                      🏷 {sit.placa}
+                                    </div>
+                                  )}
+                                  {sit.relato && (
+                                    <div style={{ fontSize: '12px', color: '#374151', lineHeight: '1.3', marginTop: '2px' }}>
+                                      {sit.relato}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        )}
-                        {denuncia.relato && (
-                          <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
-                            {getRelatoTexto(denuncia.relato)}
-                          </div>
-                        )}
-                        {denuncia.placa && (
-                          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
-                            Placa: {denuncia.placa}
-                          </div>
+                        ) : (
+                          <>
+                            {denuncia.tipo && (
+                              <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>
+                                {tipos.find(t => t.value === denuncia.tipo)?.label || denuncia.tipo}
+                              </div>
+                            )}
+                            {denuncia.relato && (
+                              <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.4', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                                {getRelatoTexto(denuncia.relato)}
+                              </div>
+                            )}
+                            {denuncia.placa && (
+                              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
+                                Placa: {denuncia.placa}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </Popup>
@@ -904,7 +1011,15 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const denunciasComLocalizacao = Object.entries(denuncias).filter(
     ([_, d]) => {
       if (!d.localizacao) return false;
-      if (tipoFiltro !== 'todos' && d.tipo !== tipoFiltro) return false;
+      if (tipoFiltro !== 'todos') {
+        if (d.situacoes) {
+          // Denúncia com múltiplas situações — aparece se ALGUMA corresponder
+          if (!d.situacoes.some(s => s.tipo === tipoFiltro)) return false;
+        } else {
+          // Denúncia antiga com tipo único
+          if (d.tipo !== tipoFiltro) return false;
+        }
+      }
       if (anoFiltro !== 'todos') {
         const ano = new Date(d.createdAt).getFullYear();
         if (ano !== anoFiltro) return false;
@@ -1060,6 +1175,78 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         }
         .leaflet-control-attribution a {
           tabindex: -1 !important;
+        }
+
+        /* Cluster marker animations - bomb explosion */
+        .cluster-marker-pin {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cluster-marker-pin .pin-shadow {
+          position: absolute;
+          width: 48px;
+          height: 8px;
+          background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
+          border-radius: 50%;
+          bottom: -4px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .cluster-marker-pin .pin-icon {
+          width: 56px;
+          height: 56px;
+          background: linear-gradient(135deg, #dc2626, #b91c1c);
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 3px solid #fca5a5;
+          position: relative;
+          box-shadow: 0 4px 16px rgba(220,38,38,0.5);
+          animation: bomb-flash 3s ease-in-out infinite;
+        }
+        .cluster-marker-pin .pin-icon-inner {
+          transform: rotate(45deg);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cluster-marker-pin .badge-number {
+          font-weight: 700;
+          color: #fff;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          line-height: 1;
+        }
+        .cluster-marker-pin .pulse-ring {
+          position: absolute;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          top: 4px;
+          left: 4px;
+          animation: bomb-shockwave 3s ease-out infinite;
+          pointer-events: none;
+        }
+        .pulse-ring.d1 { animation-delay: 0s; }
+        .pulse-ring.d2 { animation-delay: 0.6s; }
+        .pulse-ring.d3 { animation-delay: 1.2s; }
+        .pulse-ring.d4 { animation-delay: 1.8s; }
+        .pulse-ring.d5 { animation-delay: 2.4s; }
+        @keyframes bomb-shockwave {
+          0% { transform: scale(0.6); opacity: 0.9; border: 3px solid rgba(255,200,50,0.9); box-shadow: 0 0 20px rgba(255,200,50,0.6); }
+          15% { transform: scale(1.2); opacity: 0.7; border: 3px solid rgba(255,150,0,0.7); box-shadow: 0 0 40px rgba(255,150,0,0.4); }
+          30% { transform: scale(2); opacity: 0.4; border: 2px solid rgba(255,100,0,0.3); box-shadow: 0 0 60px rgba(255,100,0,0.15); }
+          50% { transform: scale(3); opacity: 0.15; border: 1px solid rgba(255,50,0,0.1); box-shadow: none; }
+          100% { transform: scale(4.5); opacity: 0; border: 1px solid transparent; box-shadow: none; }
+        }
+        @keyframes bomb-flash {
+          0%, 85%, 100% { box-shadow: 0 4px 16px rgba(220,38,38,0.5); filter: brightness(1); }
+          5% { box-shadow: 0 0 30px rgba(255,200,50,0.9), 0 0 60px rgba(255,100,0,0.6), 0 0 100px rgba(255,50,0,0.3); filter: brightness(1.8) saturate(1.5); border-color: #fff; }
+          15% { box-shadow: 0 0 20px rgba(255,150,0,0.5), 0 0 40px rgba(255,80,0,0.3); filter: brightness(1.3); border-color: #fca5a5; }
+          25% { box-shadow: 0 4px 16px rgba(220,38,38,0.5); filter: brightness(1); border-color: #fca5a5; }
         }
       `}</style>
       {MapComponent ? (
