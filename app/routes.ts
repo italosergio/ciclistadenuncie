@@ -4,6 +4,7 @@ export default [
   index("routes/home.tsx"),
   route("denunciar", "routes/denunciar.tsx"),
   route("mapa", "routes/mapa.tsx"),
+  route("blog", "routes/blog.tsx"),
   route("contato", "routes/contato.tsx"),
   route("login", "routes/login.tsx"),
   route("mudar-senha", "routes/mudar-senha.tsx"),
