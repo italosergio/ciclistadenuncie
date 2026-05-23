@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estilo 3 - Minimal Globe + Chip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f0f0f;
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .font-bungee { font-family: 'Bungee', cursive; }
+  </style>
+</head>
+<body>
+  <!-- Simula o canto superior direito do site -->
+  <div class="fixed top-4 right-4 z-50">
+    <!-- ESTILO 3: Minimal Globe + Chip dropdown -->
+    <div class="relative" id="switcher3">
+      <button
+        id="toggleBtn3"
+        class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium
+               bg-transparent
+               border border-gray-700/30
+               rounded-md
+               hover:bg-gray-800/50 hover:border-gray-600/50
+               active:scale-95
+               transition-all duration-150"
+      >
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 12h20"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+        </svg>
+        <span class="text-[11px] text-gray-500 font-semibold tracking-wider uppercase">PT</span>
+      </button>
+
+      <!-- Popover minimalista -->
+      <div id="popover3" class="hidden absolute right-0 mt-2 min-w-[130px]
+                  bg-gray-900/95 backdrop-blur-lg
+                  border border-gray-700/40
+                  rounded-lg shadow-2xl shadow-black/30
+                  overflow-hidden origin-top-right">
+        
+        <!-- PT-BR (ativo) -->
+        <button class="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs
+                       text-gray-200 font-medium
+                       hover:bg-gray-800/60 transition-colors
+                       border-l-2 border-red-500 bg-gray-800/30">
+          <span>🇧🇷</span>
+          <span>Português</span>
+        </button>
+
+        <!-- EN -->
+        <button class="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs
+                       text-gray-400
+                       hover:bg-gray-800/60 hover:text-gray-200 transition-colors
+                       border-l-2 border-transparent">
+          <span>🇺🇸</span>
+          <span>English</span>
+        </button>
+
+        <!-- ES -->
+        <button class="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs
+                       text-gray-400
+                       hover:bg-gray-800/60 hover:text-gray-200 transition-colors
+                       border-l-2 border-transparent">
+          <span>🇪🇸</span>
+          <span>Español</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo simulando a home -->
+  <div class="text-center max-w-lg px-6">
+    <h1 class="font-bungee text-4xl md:text-6xl text-red-500 mb-6">🚲</h1>
+    <h2 class="font-bungee text-2xl md:text-3xl text-white mb-4">Ciclista, Denuncie!</h2>
+    <p class="text-gray-400 text-sm leading-relaxed mb-8">
+      Registre e visualize denúncias de violência no trânsito, infraestrutura precária e incidentes contra ciclistas.
+    </p>
+    <div class="inline-block bg-white text-black px-6 py-3 rounded-lg text-sm font-bold hover:bg-red-500 hover:text-white transition-all cursor-pointer active:scale-95">
+      FAZER DENÚNCIA
+    </div>
+  </div>
+
+  <!-- Label do sketch -->
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-gray-600 text-center">
+    <div class="bg-gray-900/80 px-3 py-1.5 rounded-full border border-gray-800">
+      <span class="font-bold text-red-500">Estilo 3:</span> Minimal Globe + Chip — usado por Notion, Figma, VS Code
+    </div>
+  </div>
+
+  <script>
+    const btn3 = document.getElementById('toggleBtn3');
+    const popover3 = document.getElementById('popover3');
+
+    btn3.addEventListener('click', (e) => {
+      e.stopPropagation();
+      popover3.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      popover3.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>

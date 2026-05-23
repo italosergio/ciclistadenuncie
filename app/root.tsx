@@ -5,13 +5,17 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import { initConsoleEasterEgg } from "./lib/console-easter-egg";
 import { AuthProvider } from "./lib/AuthContext";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 import "./app.css";
+import "./lib/i18n";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
@@ -27,6 +31,21 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+function HtmlLang() {
+  const { i18n } = useTranslation();
+  const location = useLocation();
+
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  return null;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -38,7 +57,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="font-bungee" suppressHydrationWarning>
-        {children}
+        <Suspense fallback={null}>
+          <HtmlLang />
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-1">
+            <LanguageSwitcher />
+          </div>
+          {children}
+        </Suspense>
         <ScrollRestoration />
         <Scripts />
       </body>

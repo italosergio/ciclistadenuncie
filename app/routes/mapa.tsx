@@ -9,10 +9,16 @@ import { useNavigate, Link, useLocation } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas, buscarCidadePorNome } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 import { useAuth } from "../lib/AuthContext";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Mapa de Denúncias - Ciclista Denuncie" }];
+  let title = "Mapa de Denúncias - Ciclista Denuncie";
+  try {
+    title = i18n.t('title', { ns: 'mapa', defaultValue: title }) + " - Ciclista Denuncie";
+  } catch {}
+  return [{ title }];
 }
 
 export async function loader() {
@@ -123,15 +129,16 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
   const inputPlacaRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation('mapa');
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const tipos = [
-    { value: "fina", label: "Fina", icon: Wind, color: "#dc2626" },
-    { value: "ameaca", label: "Ameaça", icon: Megaphone, color: "#dc2626" },
-    { value: "assedio", label: "Assédio", icon: Hand, color: "#dc2626" },
+    { value: "fina", label: t('tipos.fina', { ns: 'denunciar' }), icon: Wind, color: "#dc2626" },
+    { value: "ameaca", label: t('tipos.ameaca', { ns: 'denunciar' }), icon: Megaphone, color: "#dc2626" },
+    { value: "assedio", label: t('tipos.assedio', { ns: 'denunciar' }), icon: Hand, color: "#dc2626" },
     { value: "agressao-verbal", label: "Agressão Verbal", icon: MessageSquareWarning, color: "#dc2626" },
-    { value: "agressao-fisica", label: "Atropelamento", icon: Car, color: "#dc2626" },
-    { value: "invasao-ciclovia", label: "Invasão de Ciclovia/Ciclofaixa", icon: Construction, color: "#dc2626" },
+    { value: "agressao-fisica", label: t('tipos.atropelamento', { ns: 'denunciar' }), icon: Car, color: "#dc2626" },
+    { value: "invasao-ciclovia", label: t('tipos.estacionamento.ciclovia', { ns: 'denunciar' }), icon: Construction, color: "#dc2626" },
     { value: "buraco-via", label: "Buraco na Via", icon: AlertTriangle, color: "#dc2626" },
     { value: "falta-sinalizacao", label: "Falta de Sinalização", icon: CircleSlash, color: "#dc2626" },
     { value: "trecho-perigoso", label: "Trecho Perigoso", icon: AlertTriangle, color: "#dc2626" },
@@ -140,7 +147,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car, color: "#dc2626" },
     { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench, color: "#dc2626" },
     { value: "falta-ciclovia", label: "Falta de Ciclovia", icon: Bike, color: "#dc2626" },
-    { value: "outro", label: "Outro", icon: MoreHorizontal, color: "#dc2626" },
+    { value: "outro", label: t('tipos.outro', { ns: 'denunciar' }), icon: MoreHorizontal, color: "#dc2626" },
   ];
 
   useEffect(() => {
@@ -832,11 +839,11 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                         {temMultiplasSituacoes ? (
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: '#dc2626' }}>
-                              🔴 {numSituacoes} situações nesta denúncia
+                              🔴 {numSituacoes} {t('denuncia.situacoes')} {t('denuncia.cluster')}
                             </div>
                             {denuncia.placa && (
                               <div style={{ fontSize: '12px', color: '#d97706', fontFamily: 'monospace', marginBottom: '6px', padding: '4px 8px', background: 'rgba(217,119,6,0.1)', borderRadius: '4px' }}>
-                                🏷 Placa: {denuncia.placa}
+                                🏷 {t('denuncia.placa')}: {denuncia.placa}
                               </div>
                             )}
                             {denuncia.situacoes!.map((sit, idx) => {
@@ -875,7 +882,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                             )}
                             {denuncia.placa && (
                               <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontFamily: 'monospace' }}>
-                                Placa: {denuncia.placa}
+                                {t('denuncia.placa')}: {denuncia.placa}
                               </div>
                             )}
                           </>
@@ -1138,7 +1145,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="text-gray-700 hover:text-gray-900 underline text-[10px] md:text-xs bg-white/95 md:bg-transparent px-2 py-1 md:px-0 md:py-0 rounded-lg md:rounded-none shadow-lg md:shadow-none flex items-center gap-1 font-medium whitespace-nowrap md:text-black dark:md:text-black"
             >
-              Bem-vindo, <span className="text-red-600 dark:text-red-500">{user.username}</span>!
+              {t('user.welcome', { ns: 'translation' })} <span className="text-red-600 dark:text-red-500">{user.username}</span>!
               <ChevronDown size={10} className="md:w-3 md:h-3" />
             </button>
             {showUserMenu && (
@@ -1148,7 +1155,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                   onClick={() => setShowUserMenu(false)}
                 >
-                  <BarChart3 size={16} /> Minhas Contribuições
+                  <BarChart3 size={16} /> {t('user.contributions', { ns: 'translation' })}
                 </Link>
                 {(user.role === 'administrador' || user.role === 'moderador') && (
                   <Link
@@ -1156,7 +1163,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                     onClick={() => setShowUserMenu(false)}
                   >
-                    <Shield size={16} /> Painel ADM
+                    <Shield size={16} /> {t('user.adminPanel', { ns: 'translation' })}
                   </Link>
                 )}
                 <button
@@ -1166,7 +1173,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                 >
-                  <LogOut size={16} /> Sair
+                  <LogOut size={16} /> {t('user.logout', { ns: 'translation' })}
                 </button>
               </div>
             )}
@@ -1178,7 +1185,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             to="/login"
             className="text-gray-700 hover:text-gray-900 underline text-xs md:text-sm bg-white/95 md:bg-transparent px-3 py-1.5 md:px-0 md:py-0 rounded-lg md:rounded-none shadow-lg md:shadow-none font-medium md:text-black dark:md:text-black"
           >
-            Entrar ou Registrar
+            {t('user.signIn', { ns: 'translation' })}
           </Link>
         </div>
       )}
@@ -1285,7 +1292,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         </div>
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <p>Carregando mapa...</p>
+          <p>{t('loading', { ns: 'translation' })}</p>
         </div>
       )}
       
@@ -1294,7 +1301,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           onClick={() => navigate('/')}
           className="text-white dark:text-black text-xs underline hover:opacity-70 transition-opacity mb-1 flex items-center gap-1"
         >
-          <ArrowLeft size={12} /> voltar
+          <ArrowLeft size={12} /> {t('back', { ns: 'translation' })}
         </button>
         <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg mb-2 relative z-[500]">
           <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2"><Map /> CICLISTA DENUNCIE - MAPA</h1>
@@ -1309,7 +1316,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     useEasing={true}
                   />
                 ) : denunciasVisiveis
-              ) : denunciasComLocalizacao.length} denúncias
+                ) : denunciasComLocalizacao.length} {t('denuncias.visiveis')}
             </p>
             <div className="relative z-[600]">
               <button
@@ -1317,7 +1324,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 className="text-xs md:text-sm flex items-center gap-1 hover:opacity-70 transition-opacity ano-button"
               >
                 <Calendar size={14} />
-                {anoFiltro === 'todos' ? 'Todos' : anoFiltro}
+                {anoFiltro === 'todos' ? t('all', { ns: 'translation' }) : anoFiltro}
               </button>
               {showAnoDropdown && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl min-w-[120px] overflow-hidden z-[700] ano-dropdown">
@@ -1330,7 +1337,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       anoFiltro === 'todos' ? 'bg-gray-200 font-semibold' : ''
                     }`}
                   >
-                    Todos
+                    {t('all', { ns: 'translation' })}
                   </button>
                   {anosDisponiveis.map(ano => (
                     <button
@@ -1354,7 +1361,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         <div className="relative w-80 mb-2">
           <input
             type="text"
-            placeholder="Buscar cidade..."
+            placeholder={t('filtro.cidade')}
             value={cidade}
             autoFocus
             onChange={(e) => {
@@ -1425,7 +1432,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none text-left flex items-center gap-2"
           >
             {tipoFiltro === 'todos' ? (
-              'Todos os tipos'
+              t('filtro.todas')
             ) : (
               <>
                 {tipos.find(t => t.value === tipoFiltro)?.icon && (() => {
@@ -1446,7 +1453,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 }}
                 className="w-full p-3 hover:bg-gray-100 text-left text-black"
               >
-                Todos os tipos
+                {t('filtro.todas')}
               </button>
               {tipos.map(t => (
                 <button
@@ -1472,7 +1479,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           onClick={() => navigate('/')}
           className="text-white dark:text-black text-xs underline hover:opacity-70 transition-opacity flex items-center gap-1"
         >
-          <ArrowLeft size={12} /> voltar
+          <ArrowLeft size={12} /> {t('back', { ns: 'translation' })}
         </button>
         <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-3 py-1.5 rounded-lg relative z-[500]">
           <h1 className="text-sm font-bold flex items-center gap-1.5"><Map size={16} /> CICLISTA DENUNCIE - MAPA</h1>
@@ -1487,7 +1494,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     useEasing={true}
                   />
                 ) : denunciasVisiveis
-              ) : denunciasComLocalizacao.length} denúncias
+                ) : denunciasComLocalizacao.length} {t('denuncias.visiveis')}
             </p>
             <div className="relative z-[600]">
               <button
@@ -1495,7 +1502,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity ano-button"
               >
                 <Calendar size={12} />
-                {anoFiltro === 'todos' ? 'Todos' : anoFiltro}
+                {anoFiltro === 'todos' ? t('all', { ns: 'translation' }) : anoFiltro}
               </button>
               {showAnoDropdown && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl min-w-[100px] overflow-hidden z-[700] ano-dropdown">
@@ -1508,7 +1515,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       anoFiltro === 'todos' ? 'bg-gray-200 font-semibold' : ''
                     }`}
                   >
-                    Todos
+                    {t('all', { ns: 'translation' })}
                   </button>
                   {anosDisponiveis.map(ano => (
                     <button
@@ -1532,7 +1539,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
         <div className="relative w-80">
           <input
             type="text"
-            placeholder="Buscar cidade..."
+            placeholder={t('filtro.cidade')}
             value={cidade}
             onChange={(e) => {
               const valor = e.target.value;
@@ -1602,7 +1609,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
             className="w-full p-3 border-2 border-white/50 rounded-lg text-black bg-white/90 backdrop-blur-sm shadow-lg focus:border-black focus:outline-none text-left flex items-center gap-2"
           >
             {tipoFiltro === 'todos' ? (
-              'Todos os tipos'
+              t('filtro.todas')
             ) : (
               <>
                 {tipos.find(t => t.value === tipoFiltro)?.icon && (() => {
@@ -1623,7 +1630,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                 }}
                 className="w-full p-3 hover:bg-gray-100 text-left text-black"
               >
-                Todos os tipos
+                {t('filtro.todas')}
               </button>
               {tipos.map(t => (
                 <button
@@ -1652,12 +1659,12 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
              style={{
                boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
              }}>
-          <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase">Tipo de Mapa</div>
+          <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase">{t('filtro.tipo')}</div>
           <button
             onClick={() => { setMapType('street'); setShowOptionsMenu(false); }}
             className={`w-full px-3 py-2.5 rounded-lg text-left hover:bg-gray-100 flex items-center gap-2 text-black transition ${mapType === 'street' ? 'bg-gray-200 font-semibold' : ''}`}
           >
-            <Map size={18} /> Mapa Padrão
+            <Map size={18} /> {t('filtro.todas')}
           </button>
           <button
             onClick={() => { setMapType('satellite'); setShowOptionsMenu(false); }}
@@ -1749,7 +1756,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           <div ref={modalRef} className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             {!showSuccess ? (
               <>
-                <h2 className="text-xl font-bold mb-4 text-black">Registrar Denúncia</h2>
+                <h2 className="text-xl font-bold mb-4 text-black">{t('modal.titulo')}</h2>
                 <div className="text-sm text-gray-700 mb-4 space-y-1">
                   <p><strong>Localização:</strong> {endereco}</p>
                   <p><strong>Coordenadas:</strong> {tempMarker?.lat.toFixed(6)}, {tempMarker?.lng.toFixed(6)}</p>
@@ -1783,7 +1790,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 italic">Nenhuma situação selecionada</p>
+                    <p className="text-sm text-gray-500 italic">{t('vazio.title')}</p>
                   )}
                 </div>
 
@@ -1794,14 +1801,14 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     onClick={() => setShowAddSituacao(true)}
                     className="w-full p-2 mb-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors"
                   >
-                    + Adicionar situação
+                    {t('modal.selecione')}
                   </button>
                 )}
 
                 {/* Dropdown para adicionar situação */}
                 {showAddSituacao && tiposDisponiveis.length > 0 && (
                   <div className="mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-xs text-gray-500 mb-2">Selecione uma situação:</p>
+                    <p className="text-xs text-gray-500 mb-2">{t('modal.selecione')}:</p>
                     <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
                       {tiposDisponiveis.map(t => {
                         const Icon = t.icon;
@@ -1823,14 +1830,14 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                       onClick={() => setShowAddSituacao(false)}
                       className="mt-2 text-xs text-gray-500 hover:text-gray-700 underline"
                     >
-                      Cancelar
+                      {t('cancel', { ns: 'translation' })}
                     </button>
                   </div>
                 )}
 
                 {/* Todos os tipos já adicionados */}
                 {tiposDisponiveis.length === 0 && (
-                  <p className="text-xs text-gray-400 mb-3 italic">Todos os tipos já foram adicionados</p>
+                  <p className="text-xs text-gray-400 mb-3 italic">{t('modal.selecione')}</p>
                 )}
 
                 {/* Input "Outro" */}
@@ -1846,7 +1853,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   />
                 )}
                 <textarea
-                  placeholder="Relato"
+                  placeholder={t('denuncia.semRelato')}
                   value={relato}
                   onChange={(e) => setRelato(e.target.value)}
                   className="w-full p-3 border rounded-lg mb-4 h-32 text-black"
@@ -1856,13 +1863,13 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                   onClick={() => setMostrarPlaca(!mostrarPlaca)}
                   className="text-sm text-gray-600 hover:text-black mb-4 underline"
                 >
-                  ~ pegou a placa? ~
+                  {t('modal.placa')}
                 </button>
                 {mostrarPlaca && (
                   <input
                     ref={inputPlacaRef}
                     type="text"
-                    placeholder="Placa"
+                    placeholder={t('modal.placa')}
                     value={placa}
                     onChange={(e) => setPlaca(e.target.value.toUpperCase())}
                     className={`w-full p-3 border rounded-lg mb-4 text-black ${errorModal && placa && placa.length !== 7 ? 'border-red-500' : ''}`}
@@ -1874,7 +1881,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     onClick={salvarDenunciaModal}
                     className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700"
                   >
-                    Enviar
+                    {t('modal.enviar')}
                   </button>
                   <button
                     onClick={() => {
@@ -1889,7 +1896,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     }}
                     className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-bold hover:bg-gray-700"
                   >
-                    Cancelar
+                    {t('cancel', { ns: 'translation' })}
                   </button>
                 </div>
               </>
@@ -1897,7 +1904,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
               <>
                 <div className="text-center">
                   <div className="text-6xl mb-4">✅</div>
-                  <h2 className="text-2xl font-bold mb-2 text-black">Denúncia Registrada!</h2>
+                  <h2 className="text-2xl font-bold mb-2 text-black">{t('modal.sucesso')}</h2>
                   <p className="text-gray-600 mb-6">Sua denúncia foi registrada com sucesso.</p>
                   <button
                     onClick={() => {
@@ -1913,7 +1920,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
                     }}
                     className="w-full px-4 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-800"
                   >
-                    Fechar
+                    {t('close', { ns: 'translation' })}
                   </button>
                 </div>
               </>

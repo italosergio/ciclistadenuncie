@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Situacao } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft, ArrowLeft, Plus, X } from "lucide-react";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
@@ -10,7 +12,11 @@ import { TILE_LAYERS } from "../config/API_ENDPOINTS";
 import { useAuth } from "../lib/AuthContext";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Registrar Denúncia - Ciclista Denuncie" }];
+  let title = "Registrar Denúncia - Ciclista Denuncie";
+  try {
+    title = i18n.t('title', { ns: 'denunciar', defaultValue: "Registrar Denúncia" }) + " - Ciclista Denuncie";
+  } catch {}
+  return [{ title }];
 }
 
 export async function loader() {
@@ -19,6 +25,7 @@ export async function loader() {
 }
 
 export default function Denunciar({ loaderData }: Route.ComponentProps) {
+  const { t } = useTranslation('denunciar');
   const [etapaAtual, setEtapaAtual] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('denuncia_etapa');
@@ -108,9 +115,9 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   const proximaEtapa = () => {
     if (etapaAtual === 0) {
       const newErrors: {situacoes?: string; descricaoOutro?: string} = {};
-      if (situacoes.length === 0) newErrors.situacoes = "Selecione pelo menos uma situação";
+      if (situacoes.length === 0) newErrors.situacoes = t('erro.minTipo');
       const outroSituacao = situacoes.find(s => s.tipo === "outro");
-      if (outroSituacao && !outroSituacao.relato?.trim()) newErrors.descricaoOutro = "Descreva o tipo";
+      if (outroSituacao && !outroSituacao.relato?.trim()) newErrors.descricaoOutro = t('erro.required');
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return;
@@ -134,7 +141,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
 
   const handleFinalSubmit = async () => {
     if (!location) {
-      setErrors({ localizacao: "Por favor, marque a localização no mapa ou permita o acesso à sua localização" });
+      setErrors({ localizacao: t('erro.localizacao') });
       return;
     }
     
@@ -169,7 +176,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
       navigate("/sucesso", { state: { location, situacoes: situacoesData, endereco: enderecoAtual, placa: mostrarPlaca ? placa : undefined } });
     } catch (error) {
       console.error('Erro completo:', error);
-      setErrors({ localizacao: "Erro ao registrar denúncia. Tente novamente." });
+      setErrors({ localizacao: t('erro.registro') });
     } finally {
       setLoading(false);
     }
@@ -259,21 +266,21 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   }
 
   const tipos = [
-    { value: "fina", label: "Fina", icon: Wind },
-    { value: "ameaca", label: "Ameaça", icon: Megaphone },
-    { value: "assedio", label: "Assédio", icon: Hand },
-    { value: "agressao-verbal", label: "Agressão Verbal", icon: MessageSquareWarning },
-    { value: "agressao-fisica", label: "Atropelamento", icon: Car },
-    { value: "invasao-ciclovia", label: "Invasão de Ciclovia/Ciclofaixa", icon: Construction },
-    { value: "buraco-via", label: "Buraco na Via", icon: AlertTriangle },
-    { value: "falta-sinalizacao", label: "Falta de Sinalização", icon: CircleSlash },
-    { value: "trecho-perigoso", label: "Trecho Perigoso", icon: AlertTriangle },
-    { value: "ciclovia-obstruida", label: "Ciclovia Obstruída", icon: Construction },
-    { value: "falta-iluminacao", label: "Falta de Iluminação", icon: Lightbulb },
-    { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car },
-    { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench },
-    { value: "falta-ciclovia", label: "Falta de Ciclovia", icon: Bike },
-    { value: "outro", label: "Outro", icon: MoreHorizontal },
+    { value: "fina", label: t('tipos.fina'), icon: Wind },
+    { value: "ameaca", label: t('tipos.ameaca'), icon: Megaphone },
+    { value: "assedio", label: t('tipos.assedio'), icon: Hand },
+    { value: "agressao-verbal", label: t('tipos.agressaoVerbal'), icon: MessageSquareWarning },
+    { value: "agressao-fisica", label: t('tipos.atropelamento'), icon: Car },
+    { value: "invasao-ciclovia", label: t('tipos.invasaoCiclovia'), icon: Construction },
+    { value: "buraco-via", label: t('tipos.buracoVia'), icon: AlertTriangle },
+    { value: "falta-sinalizacao", label: t('tipos.faltaSinalizacao'), icon: CircleSlash },
+    { value: "trecho-perigoso", label: t('tipos.trechoPerigoso'), icon: AlertTriangle },
+    { value: "ciclovia-obstruida", label: t('tipos.cicloviaObstruida'), icon: Construction },
+    { value: "falta-iluminacao", label: t('tipos.faltaIluminacao'), icon: Lightbulb },
+    { value: "veiculo-estacionado", label: t('tipos.veiculoEstacionado'), icon: Car },
+    { value: "ma-conservacao", label: t('tipos.maConservacao'), icon: Wrench },
+    { value: "falta-ciclovia", label: t('tipos.faltaCiclovia'), icon: Bike },
+    { value: "outro", label: t('tipos.outro'), icon: MoreHorizontal },
   ];
 
   function adicionarSituacao(tipoValue: string) {
@@ -301,9 +308,9 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   const tiposDisponiveis = tipos.filter(t => !situacoes.some(s => s.tipo === t.value));
 
   const etapas = [
-    { numero: 1, titulo: "Tipo" },
-    { numero: 2, titulo: "Relato" },
-    { numero: 3, titulo: "Localização" },
+    { numero: 1, titulo: t('step.tipo') },
+    { numero: 2, titulo: t('step.relato') },
+    { numero: 3, titulo: t('step.local') },
   ];
 
   return (
@@ -312,10 +319,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
         onClick={() => navigate('/')}
         className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm underline flex items-center gap-1"
       >
-        <ArrowLeft size={14} /> voltar
+        <ArrowLeft size={14} /> {t('back', { ns: 'translation' })}
       </button>
       <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">Registrar Denúncia</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">{t('title')}</h1>
 
         {/* Indicador de Etapas */}
         <div className="flex items-center justify-center mb-8 gap-2">
@@ -353,8 +360,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           {/* Etapa 1: Tipo */}
           {etapaAtual === 0 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-2">Quais situações aconteceram?</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Selecione uma ou mais situações que ocorreram</p>
+              <h2 className="text-2xl font-bold mb-2">{t('tipo.title')}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('tipo.multipla')}</p>
 
               {/* Chips já selecionados */}
               {situacoes.length > 0 && (
@@ -391,7 +398,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                   className="w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-colors"
                 >
                   <Plus size={18} />
-                  Adicionar situação
+                  {t('tipo.select')}
                 </button>
 
                 {showAddSituacao && tiposDisponiveis.length > 0 && (
@@ -412,7 +419,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
 
                 {showAddSituacao && tiposDisponiveis.length === 0 && (
                   <div className="absolute z-10 w-full bg-white dark:bg-gray-900 border rounded-lg mt-1 shadow-lg p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    Todos os tipos já foram adicionados
+                    {t('tipo.todosAdicionados')}
                   </div>
                 )}
               </div>
@@ -420,13 +427,13 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               {/* Input "Outro" se adicionado */}
               {situacoes.some(s => s.tipo === "outro") && (
                 <div className="mt-4">
-                  <label className="block mb-2 font-semibold">Descreva o outro tipo *</label>
+                  <label className="block mb-2 font-semibold">{t('tipo.outroLabel')}</label>
                   <input
                     ref={descricaoOutroRef}
                     type="text"
                     value={situacoes.find(s => s.tipo === "outro")?.relato || ""}
                     onChange={(e) => atualizarOutroRelato(e.target.value)}
-                    placeholder="Ex: Buraco na ciclovia, falta de sinalização..."
+                    placeholder={t('tipo.outroPlaceholder')}
                     className={`w-full p-3 border rounded-lg dark:bg-gray-900 ${errors.descricaoOutro ? 'border-red-500' : ''}`}
                   />
                   {errors.descricaoOutro && <p className="text-red-500 text-sm mt-1">{errors.descricaoOutro}</p>}
@@ -436,7 +443,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
               {errors.situacoes && <p className="text-red-500 text-sm mt-2">{errors.situacoes}</p>}
 
               <div className="mt-4 text-xs text-gray-400 dark:text-gray-500">
-                {situacoes.length === 0 ? "Nenhuma situação selecionada" : `${situacoes.length} situação(s) selecionada(s)`}
+                {situacoes.length === 0 ? t('tipo.nenhumaSelecionada') : t('tipo.selecionadas', { count: situacoes.length })}
               </div>
             </div>
           )}
@@ -444,8 +451,8 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           {/* Etapa 2: Relato */}
           {etapaAtual === 1 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-2">Conte o que aconteceu (opcional)</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Seu relato ajuda a dar mais contexto e força à denúncia</p>
+              <h2 className="text-2xl font-bold mb-2">{t('relato.title')}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{t('relato.ajuda')}</p>
               
               <textarea
                 value={relato}
@@ -454,7 +461,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                   localStorage.setItem('denuncia_relato', e.target.value);
                 }}
                 rows={6}
-                placeholder="Descreva o que aconteceu..."
+                placeholder={t('relato.placeholder')}
                 className="w-full p-3 border rounded-lg dark:bg-gray-900"
               />
 
@@ -464,14 +471,14 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                   onClick={() => setMostrarPlaca(!mostrarPlaca)}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
                 >
-                  ~ pegou a placa? ~
+                  {t('relato.placa')}
                 </button>
                 <button
                   type="button"
                   onClick={proximaEtapa}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
                 >
-                  ~ pular ~
+                  {t('relato.pular')}
                 </button>
               </div>
               
@@ -485,7 +492,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                       setPlaca(e.target.value.toUpperCase());
                       localStorage.setItem('denuncia_placa', e.target.value.toUpperCase());
                     }}
-                    placeholder="Placa"
+                    placeholder={t('relato.placaPlaceholder')}
                     maxLength={7}
                     className="w-full p-3 border rounded-lg dark:bg-gray-900 uppercase"
                   />
@@ -497,14 +504,14 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
           {/* Etapa 3: Localização */}
           {etapaAtual === 2 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-6">Confirme o endereço</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('local.title')}</h2>
               
               {enderecoAtual && (
                 <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div className="flex items-start gap-3">
                     <MapPin className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" size={20} />
                     <div className="flex-1">
-                      <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">Localização Atual</p>
+                      <p className="font-semibold text-blue-900 dark:text-blue-100 text-sm">{t('local.localizacaoAtual')}</p>
                       <p className="text-sm text-blue-700 dark:text-blue-300">{enderecoAtual}</p>
                     </div>
                   </div>
@@ -523,13 +530,13 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 className="w-full p-3 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
               >
                 <MapPin size={20} />
-                {showMiniMap ? 'Fechar Mapa' : 'Ajustar Localização no Mapa'}
+                {showMiniMap ? t('local.fecharMapa') : t('local.mapa')}
               </button>
               {showMiniMap && MiniMapComponent && (
                 <div className="mt-4 border rounded-lg overflow-hidden">
                   <MiniMapComponent />
                   <p className="text-xs text-gray-600 dark:text-gray-400 p-2 bg-gray-50 dark:bg-gray-900">
-                    Mova o mapa para ajustar o ponto central da denúncia
+                    {t('local.movaMapa')}
                   </p>
                 </div>
               )}
@@ -545,7 +552,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 className="flex-1 bg-gray-200 dark:bg-gray-700 text-black dark:text-white py-4 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
               >
                 <ChevronLeft size={20} />
-                Voltar
+                {t('back', { ns: 'translation' })}
               </button>
             )}
             {etapaAtual < 2 ? (
@@ -554,7 +561,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 onClick={proximaEtapa}
                 className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
               >
-                Próximo
+                {t('submit.proximo')}
                 <ChevronRight size={20} />
               </button>
             ) : (
@@ -564,7 +571,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                 disabled={loading}
                 className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
               >
-                {loading ? "Enviando..." : "Enviar Denúncia"}
+                {loading ? t('submit.enviando') : t('submit.enviar')}
               </button>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { loginUser, registerUser, resetPassword } from "../lib/auth";
 import { useAuth } from "../lib/AuthContext";
 import { Eye, EyeOff, AlertTriangle, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
@@ -37,6 +38,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useTranslation('login');
 
   const errorMessages: Record<string, string> = {
     'auth/invalid-email': 'E-mail inválido',
@@ -154,14 +156,13 @@ export default function Login() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700 text-center space-y-4">
           <div className="text-5xl">🚴‍♂️</div>
-          <h1 className="text-2xl font-bold text-white">Bem-vindo à resistência, {regUsername}!</h1>
+          <h1 className="text-2xl font-bold text-white">{t('cadastro.bemVindo.title', { username: regUsername })}</h1>
           <p className="text-gray-400 text-sm">
-            Sua voz agora faz parte de um mapa vivo de luta por ruas mais seguras.<br />
-            Cada denúncia sua é um dado real que pode mudar políticas públicas.
+            {t('cadastro.bemVindo.desc1')}
           </p>
-          <p className="text-gray-500 text-xs">Faça login para começar a denunciar.</p>
+          <p className="text-gray-500 text-xs">{t('cadastro.bemVindo.desc2')}</p>
           <button onClick={resetRegister} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium">
-            Fazer Login
+            {t('cadastro.bemVindo.button')}
           </button>
         </div>
       </div>
@@ -173,26 +174,26 @@ export default function Login() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Link to="/" className="absolute top-4 left-4 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition">
-          <ArrowLeft size={16} /> Voltar
+          <ArrowLeft size={16} /> {t('back', { ns: 'translation' })}
         </Link>
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
           <button onClick={() => { setShowForgot(false); setForgotSent(false); setError(""); }} className="flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-6">
-            <ArrowLeft size={16} /> Voltar ao login
+            <ArrowLeft size={16} /> {t('backToLogin', { ns: 'translation' })}
           </button>
-          <h1 className="text-2xl font-bold text-white mb-2">Recuperar senha</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('mudarSenha.title')}</h1>
           {forgotSent ? (
             <div className="text-center space-y-3">
               <div className="text-4xl">📬</div>
-              <p className="text-gray-300 text-sm">E-mail enviado! Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
+              <p className="text-gray-300 text-sm">{t('sucesso.emailEnviado')}</p>
             </div>
           ) : (
             <form onSubmit={handleForgot} className="space-y-4">
-              <p className="text-gray-400 text-sm">Informe o e-mail cadastrado e enviaremos um link para redefinir sua senha.</p>
-              <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="seu@email.com" required
+              <p className="text-gray-400 text-sm">{t('mudarSenha.instrucao')}</p>
+              <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder={t('email.placeholder')} required
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
-                {loading ? "Enviando..." : "Enviar link"}
+                {loading ? t('mudarSenha.loading') : t('mudarSenha.enviarLink')}
               </button>
             </form>
           )}
@@ -203,11 +204,11 @@ export default function Login() {
 
   // Cadastro multi-step
   if (isRegister) {
-    const steps = ["Identificação", "Senha", "Termos"];
+    const steps = [t('cadastro.step1'), t('cadastro.step2'), t('cadastro.step3')];
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Link to="/" className="absolute top-4 left-4 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition">
-          <ArrowLeft size={16} /> Voltar
+          <ArrowLeft size={16} /> {t('back', { ns: 'translation' })}
         </Link>
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
           {/* Progress */}
@@ -228,18 +229,18 @@ export default function Login() {
           {step === 1 && (
             <form onSubmit={nextStep} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Usuário</label>
-                <input type="text" value={regUsername} onChange={e => setRegUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t('cadastro.nome')}</label>
+                <input type="text" value={regUsername} onChange={e => setRegUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={t('cadastro.nomePlaceholder')}
                   className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
-                <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} required autoComplete="email"
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t('email.label')}</label>
+                <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} required autoComplete="email" placeholder={t('email.placeholder')}
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-2">
-                Próximo <ChevronRight size={16} />
+                {t('next', { ns: 'translation' })} <ChevronRight size={16} />
               </button>
             </form>
           )}
@@ -247,7 +248,7 @@ export default function Login() {
           {step === 2 && (
             <form onSubmit={nextStep} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t('cadastro.senha')}</label>
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} value={regPassword} onChange={e => setRegPassword(e.target.value)}
                     onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required minLength={6} autoComplete="new-password"
@@ -258,19 +259,19 @@ export default function Login() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Confirmar Senha</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t('cadastro.confirmarSenha')}</label>
                 <input type={showPassword ? "text" : "password"} value={regConfirm} onChange={e => setRegConfirm(e.target.value)}
                   onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required minLength={6} autoComplete="new-password"
                   className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               </div>
-              {capsLockOn && <div className="flex items-center gap-1 text-yellow-400 text-xs"><AlertTriangle size={13} /> Caps Lock ativado</div>}
+              {capsLockOn && <div className="flex items-center gap-1 text-yellow-400 text-xs"><AlertTriangle size={13} /> {t('capsLock.on', { ns: 'translation' })}</div>}
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-2">
                 <button type="button" onClick={() => { setStep(1); setError(""); }} className="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg hover:bg-gray-600 font-medium flex items-center justify-center gap-1">
-                  <ChevronLeft size={16} /> Voltar
+                  <ChevronLeft size={16} /> {t('back', { ns: 'translation' })}
                 </button>
                 <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium flex items-center justify-center gap-1">
-                  Próximo <ChevronRight size={16} />
+                  {t('next', { ns: 'translation' })} <ChevronRight size={16} />
                 </button>
               </div>
             </form>
@@ -293,17 +294,17 @@ export default function Login() {
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-2 pt-1">
                 <button type="button" onClick={() => { setStep(2); setError(""); }} className="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg hover:bg-gray-600 font-medium flex items-center justify-center gap-1">
-                  <ChevronLeft size={16} /> Voltar
+                  <ChevronLeft size={16} /> {t('back', { ns: 'translation' })}
                 </button>
                 <button type="submit" disabled={loading} className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
-                  {loading ? "Cadastrando..." : "Cadastrar"}
+                  {loading ? t('cadastro.loading') : t('cadastro.button')}
                 </button>
               </div>
             </form>
           )}
 
           <button onClick={resetRegister} className="w-full mt-4 text-blue-400 hover:underline text-sm">
-            Já tem conta? Fazer login
+            {t('toggle.login')}
           </button>
         </div>
       </div>
@@ -314,39 +315,39 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-4 left-4 text-gray-400 hover:text-white flex items-center gap-1 text-sm transition">
-        <ArrowLeft size={16} /> Voltar
+        <ArrowLeft size={16} /> {t('back', { ns: 'translation' })}
       </Link>
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
-        <h1 className="text-3xl font-bold text-center mb-6 text-white">Login</h1>
+        <h1 className="text-3xl font-bold text-center mb-6 text-white">{t('title')}</h1>
 
         <form onSubmit={handleLogin} className="space-y-4" autoComplete={rememberMe ? "on" : "off"}>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Usuário</label>
-            <input type="text" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t('email.label')}</label>
+            <input type="text" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={t('email.placeholder')}
               className={`w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Senha</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t('senha.label')}</label>
             <div className="relative">
               <input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-                onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required autoComplete="current-password"
+                onKeyUp={e => setCapsLockOn(e.getModifierState("CapsLock"))} required autoComplete="current-password" placeholder={t('senha.placeholder')}
                 className={`w-full px-4 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 ${legibleCredentialInputClass}`} />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {capsLockOn && <div className="flex items-center gap-1 mt-1 text-yellow-400 text-xs"><AlertTriangle size={14} /> Caps Lock ativado</div>}
+            {capsLockOn && <div className="flex items-center gap-1 mt-1 text-yellow-400 text-xs"><AlertTriangle size={14} /> {t('capsLock.on', { ns: 'translation' })}</div>}
           </div>
 
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
               <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)}
                 className="w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" />
-              Lembrar-me
+              {t('user.rememberMe', { ns: 'translation' })}
             </label>
             {loginAttempted && (
               <button type="button" onClick={() => setShowForgot(true)} className="text-blue-400 hover:underline text-xs">
-                Esqueci minha senha
+                {t('user.forgotPassword', { ns: 'translation' })}
               </button>
             )}
           </div>
@@ -354,12 +355,12 @@ export default function Login() {
           {error && <div className="bg-red-900/50 text-red-300 p-3 rounded-lg text-sm border border-red-800">{error}</div>}
 
           <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
-            {loading ? "Aguarde..." : "Entrar"}
+            {loading ? t('login.loading') : t('login.button')}
           </button>
         </form>
 
         <button onClick={() => { setIsRegister(true); setError(""); }} className="w-full mt-4 text-blue-400 hover:underline text-sm">
-          Criar nova conta
+          {t('user.register', { ns: 'translation' })}
         </button>
       </div>
     </div>
