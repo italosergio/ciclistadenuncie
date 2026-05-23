@@ -23,18 +23,20 @@ export default function TeardropBikeIcon({
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Teardrop shape — rotated rounded square (diamond/lozenge) */}
+      {/* Teardrop shape — border-radius: 50% 50% 50% 0 + rotate -45deg
+          Same technique as the cluster marker. Three arcs (top-right, bottom-right,
+          bottom-left) for roundness, then a straight L to the start for the point. */}
       <g transform="rotate(-45, 14, 14)">
-        <rect
-          x="2"
-          y="2"
-          width="24"
-          height="24"
-          rx="12"
-          ry="12"
+        <path
+          d="M 14,2
+             A 12,12 0 0,1 26,14
+             A 12,12 0 0,1 14,26
+             L 2,26
+             Z"
           fill="#1a1a2e"
           stroke="#d1d5db"
           strokeWidth="1.2"
+          strokeLinejoin="round"
         />
       </g>
 
