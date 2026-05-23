@@ -59,7 +59,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="font-bungee" suppressHydrationWarning>
         <Suspense fallback={null}>
           <HtmlLang />
-          <div className="fixed top-4 right-4 z-50 flex items-center gap-1">
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-1 max-md:top-12">
             <LanguageSwitcher />
           </div>
           {children}
