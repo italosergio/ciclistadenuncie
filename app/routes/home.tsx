@@ -10,6 +10,7 @@ import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
 import { APOIADORES } from "../data/apoiadores";
 import { useTranslation } from "react-i18next";
 import i18n from "../lib/i18n";
+import WelcomeModal from "../components/WelcomeModal";
 
 interface ApoiadorCarousel {
   nome: string;
@@ -161,6 +162,7 @@ export default function Home() {
 
   return (
     <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => showAnimation && setShowAnimation(false)}>
+      <WelcomeModal />
       {(showAnimation || countUpDone) && <BikeFireAnimation />}
 
       {showEmailBanner && (
