@@ -14,6 +14,7 @@ import type { Route } from "./+types/root";
 import { initConsoleEasterEgg } from "./lib/console-easter-egg";
 import { AuthProvider } from "./lib/AuthContext";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import { trackUnsupportedLocale } from "./lib/localeTracker";
 import "./app.css";
 import "./lib/i18n";
 
@@ -74,6 +75,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   useEffect(() => {
     initConsoleEasterEgg();
+    trackUnsupportedLocale();
   }, []);
 
   return (

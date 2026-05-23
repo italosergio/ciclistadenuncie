@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export function meta() {
-  const { t } = useTranslation('translation');
-  return [{ title: t('planos.title') }];
+  return [{ title: i18n.t('planos.title') }];
 }
 
 export default function Planos() {

@@ -7,10 +7,10 @@ import { ref, set } from "firebase/database";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
 import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export function meta({}: Route.MetaArgs) {
-  const { t } = useTranslation('translation');
-  return [{ title: t('contato.pageTitle') }];
+  return [{ title: i18n.t('contato.pageTitle') }];
 }
 
 export default function Contato() {

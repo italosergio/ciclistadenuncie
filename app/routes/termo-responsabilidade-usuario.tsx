@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/termo-responsabilidade-usuario";
+import i18n from "../lib/i18n";
 
 export function meta({}: Route.MetaArgs) {
-  const { t } = useTranslation('translation');
-  return [{ title: t('termoUsuario.pageTitle') }];
+  return [{ title: i18n.t('termoUsuario.pageTitle') }];
 }
 
 export default function TermoResponsabilidadeUsuario() {

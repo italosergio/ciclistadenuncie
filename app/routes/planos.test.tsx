@@ -10,6 +10,7 @@ vi.mock('react-router', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  initReactI18next: { type: '3rdParty', init: vi.fn() },
 }))
 
 const mockUseAuth = vi.fn()

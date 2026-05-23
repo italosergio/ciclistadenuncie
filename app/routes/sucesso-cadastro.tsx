@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/sucesso-cadastro";
+import i18n from "../lib/i18n";
 
 export function meta({}: Route.MetaArgs) {
-  const { t } = useTranslation('translation');
-  return [{ title: t('sucessoCadastro.pageTitle') }];
+  return [{ title: i18n.t('sucessoCadastro.pageTitle') }];
 }
 
 export default function SucessoCadastro() {

@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/sucesso";
+import i18n from "../lib/i18n";
 import { MapPin, Car, Wind, Megaphone, Hand, MessageSquareWarning, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Construction, MoreHorizontal } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -21,8 +22,7 @@ const ICON_MAP: Record<string, any> = {
 };
 
 export function meta({}: Route.MetaArgs) {
-  const { t } = useTranslation('translation');
-  return [{ title: t('sucesso.pageTitle') }];
+  return [{ title: i18n.t('sucesso.pageTitle') }];
 }
 
 export default function Sucesso() {

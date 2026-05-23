@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import Contato from './contato'
 
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
-}))
+  initReactI18next: { type: "3rdParty", init: vi.fn() },
+}));
 
 const mockUseAuth = vi.fn()
 vi.mock('../lib/AuthContext', () => ({

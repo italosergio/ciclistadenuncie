@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import Sucesso from './sucesso'
 
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
-}))
+  initReactI18next: { type: "3rdParty", init: vi.fn() },
+}));
 
 const mockUseLocation = vi.fn()
 vi.mock('react-router', () => ({
