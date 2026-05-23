@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/sucesso";
 import { MapPin, Car, Wind, Megaphone, Hand, MessageSquareWarning, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Construction, MoreHorizontal } from "lucide-react";
 
@@ -20,28 +21,30 @@ const ICON_MAP: Record<string, any> = {
 };
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Denúncia Enviada - Ciclista Denuncie" }];
+  const { t } = useTranslation('translation');
+  return [{ title: t('sucesso.pageTitle') }];
 }
 
 export default function Sucesso() {
   const location = useLocation();
   const { location: coords, situacoes, tipo, endereco, placa } = location.state || {};
+  const { t } = useTranslation('translation');
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="text-5xl">✅</div>
 
-        <h1 className="text-3xl font-bold">Denúncia Registrada!</h1>
+        <h1 className="text-3xl font-bold">{t('sucesso.title')}</h1>
 
         <p className="text-gray-600 dark:text-gray-400 text-sm">
-          Obrigado por contribuir com dados reais para a luta por um trânsito mais seguro.
+          {t('sucesso.obrigado')}
         </p>
 
         {(situacoes || tipo || endereco || placa) && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-left space-y-3">
             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              {situacoes ? `Resumo (${situacoes.length} situação${situacoes.length > 1 ? 'ões' : ''})` : 'Resumo da denúncia'}
+              {situacoes ? t('sucesso.resumoContagem', { count: situacoes.length }) : t('sucesso.resumo')}
             </p>
 
             {/* Lista de situações (novo formato) */}
@@ -88,13 +91,13 @@ export default function Sucesso() {
             state={{ center: coords ? [coords.lat, coords.lng] : undefined, zoom: 16 }}
             className="inline-block bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition"
           >
-            Ver no Mapa
+            {t('sucesso.verNoMapa')}
           </Link>
           <Link
             to="/"
             className="inline-block bg-black dark:bg-white text-white dark:text-black px-6 py-3 font-semibold rounded-lg hover:opacity-90 transition"
           >
-            Voltar ao Início
+            {t('backToHome')}
           </Link>
         </div>
 
@@ -102,7 +105,7 @@ export default function Sucesso() {
           to="/denunciar"
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm"
         >
-          Fazer Outra Denúncia
+          {t('sucesso.fazerOutraDenuncia')}
         </Link>
       </div>
     </div>

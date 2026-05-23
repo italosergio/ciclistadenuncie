@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export function meta() {
-  return [{ title: "Planos - Ciclista Denuncie" }];
+  const { t } = useTranslation('translation');
+  return [{ title: t('planos.title') }];
 }
 
 export default function Planos() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('translation');
 
   useEffect(() => {
     if (user) {
@@ -20,7 +23,7 @@ export default function Planos() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <p className="text-sm text-slate-400">Redirecionando...</p>
+      <p className="text-sm text-slate-400">{t('redirecting')}</p>
     </div>
   );
 }

@@ -6,12 +6,15 @@ import { db } from "../lib/firebase";
 import { ref, set } from "firebase/database";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
+import { useTranslation } from "react-i18next";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Contato - Ciclista Denuncie" }];
+  const { t } = useTranslation('translation');
+  return [{ title: t('contato.pageTitle') }];
 }
 
 export default function Contato() {
+  const { t } = useTranslation('translation');
   const { user } = useAuth();
   const [etapaAtual, setEtapaAtual] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -25,23 +28,23 @@ export default function Contato() {
   const navigate = useNavigate();
 
   const tipos = [
-    { value: "sugestao", label: "Sugestão", icon: Lightbulb },
-    { value: "reportar-erro", label: "Reportar Erro", icon: Bug },
-    { value: "duvida", label: "Dúvida", icon: HelpCircle },
-    { value: "feedback", label: "Feedback", icon: MessageCircle },
-    { value: "parceria", label: "Parceria", icon: FileQuestion },
-    { value: "outro", label: "Outro", icon: AlertCircle },
+    { value: "sugestao", label: t('contato.tipo.sugestao'), icon: Lightbulb },
+    { value: "reportar-erro", label: t('contato.tipo.reportarErro'), icon: Bug },
+    { value: "duvida", label: t('contato.tipo.duvida'), icon: HelpCircle },
+    { value: "feedback", label: t('contato.tipo.feedback'), icon: MessageCircle },
+    { value: "parceria", label: t('contato.tipo.parceria'), icon: FileQuestion },
+    { value: "outro", label: t('contato.tipo.outro'), icon: AlertCircle },
   ];
 
   const etapas = [
-    { numero: 1, titulo: "Tipo" },
-    { numero: 2, titulo: "Mensagem" },
+    { numero: 1, titulo: t('contato.step.tipo') },
+    { numero: 2, titulo: t('contato.step.mensagem') },
   ];
 
   const proximaEtapa = () => {
     if (etapaAtual === 0) {
       const newErrors: {tipoContato?: string} = {};
-      if (!tipoContato) newErrors.tipoContato = "Selecione o tipo";
+      if (!tipoContato) newErrors.tipoContato = t('contato.erroSelecioneTipo');
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         return;
@@ -59,7 +62,7 @@ export default function Contato() {
 
   const handleFinalSubmit = async () => {
     if (!mensagem.trim()) {
-      setErrors({ mensagem: "Digite uma mensagem" });
+      setErrors({ mensagem: t('contato.erroDigiteMensagem') });
       return;
     }
 
@@ -92,7 +95,7 @@ export default function Contato() {
       navigate("/sucesso-contato");
     } catch (error) {
       console.error('Erro ao enviar contato:', error);
-      alert("Erro ao enviar mensagem");
+      alert(t('contato.erroEnviar'));
     } finally {
       setLoading(false);
     }
@@ -104,10 +107,10 @@ export default function Contato() {
         onClick={() => navigate('/')}
         className="absolute top-4 left-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm underline flex items-center gap-1"
       >
-        <ArrowLeft size={14} /> voltar
+        <ArrowLeft size={14} /> {t('back')}
       </button>
       <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">Contato</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">{t('contato.title')}</h1>
 
         {/* Indicador de Etapas */}
         <div className="flex items-center justify-center mb-8 gap-2">
@@ -142,7 +145,7 @@ export default function Contato() {
           {/* Etapa 1: Tipo do Contato */}
           {etapaAtual === 0 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-6">Qual o tipo do contato?</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('contato.tipoPergunta')}</h2>
               <div className="relative" ref={tipoRef}>
                 <div
                   tabIndex={0}
@@ -165,7 +168,7 @@ export default function Contato() {
                       })()}
                       {tipos.find(t => t.value === tipoContato)?.label}
                     </>
-                  ) : "Selecione o tipo"}
+                  ) : t('contato.selecioneTipo')}
                 </div>
                 {showTipoDropdown && (
                   <div className="absolute z-10 w-full bg-white dark:bg-gray-900 border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
@@ -193,13 +196,13 @@ export default function Contato() {
           {/* Etapa 2: Mensagem */}
           {etapaAtual === 1 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold mb-6">Sua mensagem</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('contato.suaMensagem')}</h2>
               
               <textarea
                 value={mensagem}
                 onChange={(e) => setMensagem(e.target.value)}
                 rows={6}
-                placeholder="Digite sua mensagem..."
+                placeholder={t('contato.digiteMensagem')}
                 className={`w-full p-3 border rounded-lg dark:bg-gray-900 ${errors.mensagem ? 'border-red-500' : ''}`}
               />
               {errors.mensagem && <p className="text-red-500 text-sm mt-1">{errors.mensagem}</p>}
@@ -210,7 +213,7 @@ export default function Contato() {
                   onClick={() => setMostrarContato(!mostrarContato)}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white underline"
                 >
-                  ~ deixar email ou celular? ~
+                  {t('contato.deixarContato')}
                 </button>
                 {mostrarContato && (
                   <div className="mt-2">
@@ -218,7 +221,7 @@ export default function Contato() {
                       type="text"
                       value={contato}
                       onChange={(e) => setContato(e.target.value)}
-                      placeholder="Email ou celular (opcional)"
+                      placeholder={t('contato.emailOuCelular')}
                       className="w-full p-3 border rounded-lg dark:bg-gray-900"
                     />
                   </div>
@@ -236,7 +239,7 @@ export default function Contato() {
                 className="flex-1 bg-gray-200 dark:bg-gray-700 text-black dark:text-white py-4 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
               >
                 <ChevronLeft size={20} />
-                Voltar
+                {t('back')}
               </button>
             )}
             {etapaAtual < 1 ? (
@@ -245,7 +248,7 @@ export default function Contato() {
                 onClick={proximaEtapa}
                 className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
               >
-                Próximo
+                {t('next')}
                 <ChevronRight size={20} />
               </button>
             ) : (
@@ -255,7 +258,7 @@ export default function Contato() {
                 disabled={loading}
                 className="flex-1 bg-black dark:bg-white text-white dark:text-black py-4 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
               >
-                {loading ? "Enviando..." : "Enviar Mensagem"}
+                {loading ? t('contato.enviando') : t('contato.enviarMensagem')}
               </button>
             )}
           </div>

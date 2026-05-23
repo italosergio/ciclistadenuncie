@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { changePassword } from "../lib/auth";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function MudarSenha() {
+  const { t } = useTranslation('login');
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,12 +22,12 @@ export default function MudarSenha() {
     setError("");
 
     if (newPassword !== confirmPassword) {
-      setError("As senhas não coincidem");
+      setError(t('erro.senhasDiferem'));
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("A nova senha deve ter no mínimo 6 caracteres");
+      setError(t('erro.senhaCurta'));
       return;
     }
 
@@ -33,16 +35,16 @@ export default function MudarSenha() {
 
     try {
       await changePassword(oldPassword, newPassword);
-      alert("Senha alterada com sucesso!");
+      alert(t('sucesso.senhaAlterada'));
       navigate("/admin");
     } catch (err: any) {
       console.log('Erro capturado:', err.code, err.message);
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
-        setError("Senha atual incorreta");
+        setError(t('mudarSenha.erroIncorreta'));
       } else if (err.code === "auth/too-many-requests") {
-        setError("Muitas tentativas. Tente novamente mais tarde");
+        setError(t('erro.muitasTentativas'));
       } else {
-        setError(err.message || "Erro ao alterar senha");
+        setError(err.message || t('mudarSenha.erroAlterar'));
       }
     } finally {
       setLoading(false);
@@ -54,13 +56,13 @@ export default function MudarSenha() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
         <h1 className="text-3xl font-bold text-center mb-6 text-white">
-          Mudar Senha
+          {t('mudarSenha.h1')}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Senha Atual
+              {t('mudarSenha.senhaAtual')}
             </label>
             <div className="relative">
               <input
@@ -82,7 +84,7 @@ export default function MudarSenha() {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Nova Senha
+              {t('mudarSenha.novaSenha')}
             </label>
             <div className="relative">
               <input
@@ -105,7 +107,7 @@ export default function MudarSenha() {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Confirmar Nova Senha
+              {t('mudarSenha.confirmarNovaSenha')}
             </label>
             <div className="relative">
               <input
@@ -137,7 +139,7 @@ export default function MudarSenha() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
-            {loading ? "Aguarde..." : "Alterar Senha"}
+            {loading ? t('mudarSenha.aguarde') : t('mudarSenha.button')}
           </button>
         </form>
 
@@ -145,7 +147,7 @@ export default function MudarSenha() {
           onClick={() => navigate("/admin")}
           className="w-full mt-4 text-blue-400 hover:underline text-sm"
         >
-          Voltar
+          {t('mudarSenha.voltar')}
         </button>
       </div>
       </div>

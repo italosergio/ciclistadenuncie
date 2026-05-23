@@ -1,111 +1,114 @@
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/lgpd";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "LGPD - Ciclista Denuncie" }];
+  const { t } = useTranslation('translation');
+  return [{ title: t('lgpd.pageTitle') }];
 }
 
 export default function LGPD() {
+  const { t } = useTranslation('translation');
   return (
     <div className="min-h-screen px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <Link to="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm mb-8 inline-block">
-          ← Voltar
+          ← {t('back')}
         </Link>
-        
-        <h1 className="text-4xl font-bold mb-8">Lei Geral de Proteção de Dados (LGPD)</h1>
-        
+
+        <h1 className="text-4xl font-bold mb-8">{t('lgpd.title')}</h1>
+
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section>
-            <h2 className="text-2xl font-bold mb-4">Proteção de Dados Pessoais</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.protecaoDados.title')}</h2>
             <p className="mb-4">
-              O Ciclista Denuncie está em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais - LGPD) e respeita a privacidade de todos os usuários da plataforma.
+              {t('lgpd.protecaoDados.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Dados Coletados</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.dadosColetados.title')}</h2>
             <p className="mb-4">
-              Coletamos apenas os dados estritamente necessários para o funcionamento da plataforma:
+              {t('lgpd.dadosColetados.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Localização geográfica das denúncias (coordenadas GPS)</li>
-              <li>Endereço aproximado do incidente</li>
-              <li>Tipo de ocorrência relatada</li>
-              <li>Descrição do incidente (opcional)</li>
-              <li>Placa de veículo (opcional)</li>
-              <li>Data e hora do registro</li>
+              <li>{t('lgpd.dadosColetados.item1')}</li>
+              <li>{t('lgpd.dadosColetados.item2')}</li>
+              <li>{t('lgpd.dadosColetados.item3')}</li>
+              <li>{t('lgpd.dadosColetados.item4')}</li>
+              <li>{t('lgpd.dadosColetados.item5')}</li>
+              <li>{t('lgpd.dadosColetados.item6')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Finalidade do Tratamento</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.finalidade.title')}</h2>
             <p className="mb-4">
-              Os dados coletados são utilizados exclusivamente para:
+              {t('lgpd.finalidade.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Mapeamento de incidentes relacionados à mobilidade urbana por bicicleta</li>
-              <li>Geração de estatísticas públicas sobre segurança viária</li>
-              <li>Conscientização sobre problemas enfrentados por ciclistas</li>
-              <li>Subsídio para políticas públicas de mobilidade urbana</li>
+              <li>{t('lgpd.finalidade.item1')}</li>
+              <li>{t('lgpd.finalidade.item2')}</li>
+              <li>{t('lgpd.finalidade.item3')}</li>
+              <li>{t('lgpd.finalidade.item4')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Base Legal</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.baseLegal.title')}</h2>
             <p className="mb-4">
-              O tratamento de dados pessoais nesta plataforma fundamenta-se no legítimo interesse (Art. 7º, IX da LGPD) para fins de exercício regular de direitos e proteção ao crédito, bem como no consentimento do titular para dados sensíveis.
+              {t('lgpd.baseLegal.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Compartilhamento de Dados</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.compartilhamento.title')}</h2>
             <p className="mb-4">
-              Todas as denúncias registradas são públicas e podem ser visualizadas por qualquer pessoa através do mapa interativo. Não compartilhamos dados pessoais identificáveis com terceiros.
+              {t('lgpd.compartilhamento.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Direitos do Titular</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.direitos.title')}</h2>
             <p className="mb-4">
-              Conforme Art. 18 da LGPD, você tem direito a:
+              {t('lgpd.direitos.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Confirmação da existência de tratamento de dados</li>
-              <li>Acesso aos dados tratados</li>
-              <li>Correção de dados incompletos, inexatos ou desatualizados</li>
-              <li>Anonimização, bloqueio ou eliminação de dados desnecessários</li>
-              <li>Portabilidade dos dados</li>
-              <li>Eliminação dos dados tratados com consentimento</li>
-              <li>Informação sobre compartilhamento de dados</li>
-              <li>Revogação do consentimento</li>
+              <li>{t('lgpd.direitos.item1')}</li>
+              <li>{t('lgpd.direitos.item2')}</li>
+              <li>{t('lgpd.direitos.item3')}</li>
+              <li>{t('lgpd.direitos.item4')}</li>
+              <li>{t('lgpd.direitos.item5')}</li>
+              <li>{t('lgpd.direitos.item6')}</li>
+              <li>{t('lgpd.direitos.item7')}</li>
+              <li>{t('lgpd.direitos.item8')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Segurança</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.seguranca.title')}</h2>
             <p className="mb-4">
-              Adotamos medidas técnicas e organizacionais adequadas para proteger os dados pessoais contra acessos não autorizados, destruição, perda, alteração ou divulgação indevida.
+              {t('lgpd.seguranca.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Retenção de Dados</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.retencao.title')}</h2>
             <p className="mb-4">
-              Os dados são mantidos pelo tempo necessário para cumprir as finalidades descritas, respeitando os prazos legais de retenção e prescrição aplicáveis.
+              {t('lgpd.retencao.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">Contato</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('lgpd.contato.title')}</h2>
             <p className="mb-4">
-              Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados pessoais, entre em contato através do e-mail: <a href="mailto:ciclistadenuncie@email.com" className="text-blue-600 dark:text-blue-400 underline">ciclistadenuncie@email.com</a>
+              {t('lgpd.contato.desc')} <a href="mailto:ciclistadenuncie@email.com" className="text-blue-600 dark:text-blue-400 underline">ciclistadenuncie@email.com</a>
             </p>
           </section>
 
           <section>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-              Última atualização: {new Date().toLocaleDateString('pt-BR')}
+              {t('lgpd.ultimaAtualizacao')}: {new Date().toLocaleDateString('pt-BR')}
             </p>
           </section>
         </div>

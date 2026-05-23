@@ -41,5 +41,13 @@
   "erro.generico": "Error processing request. Please try again",
   "sucesso.contaCriada": "Account created successfully!",
   "sucesso.senhaAlterada": "Password changed successfully!",
-  "sucesso.emailEnviado": "Email sent! Check your inbox and follow the instructions to reset your password."
+  "sucesso.emailEnviado": "Email sent! Check your inbox and follow the instructions to reset your password.",
+  "mudarSenha.h1": "Change Password",
+  "mudarSenha.senhaAtual": "Current Password",
+  "mudarSenha.novaSenha": "New Password",
+  "mudarSenha.confirmarNovaSenha": "Confirm New Password",
+  "mudarSenha.aguarde": "Please wait...",
+  "mudarSenha.erroIncorreta": "Current password is incorrect",
+  "mudarSenha.erroAlterar": "Error changing password",
+  "mudarSenha.voltar": "Back"
 }

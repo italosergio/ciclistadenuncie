@@ -1,105 +1,108 @@
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/termo-responsabilidade-usuario";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Termo de Responsabilidade do Usuário - Ciclista Denuncie" }];
+  const { t } = useTranslation('translation');
+  return [{ title: t('termoUsuario.pageTitle') }];
 }
 
 export default function TermoResponsabilidadeUsuario() {
+  const { t } = useTranslation('translation');
   return (
     <div className="min-h-screen px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <Link to="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm mb-8 inline-block">
-          ← Voltar
+          ← {t('back')}
         </Link>
-        
-        <h1 className="text-4xl font-bold mb-8">Termo de Responsabilidade do Usuário</h1>
-        
+
+        <h1 className="text-4xl font-bold mb-8">{t('termoUsuario.title')}</h1>
+
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border-2 border-yellow-400 dark:border-yellow-600">
-            <p className="font-bold text-lg mb-2">⚠️ DECLARAÇÃO DE CIÊNCIA</p>
+            <p className="font-bold text-lg mb-2">{t('termoUsuario.declaracaoCiencia')}</p>
             <p>
-              Ao utilizar esta plataforma, você declara estar ciente de que:
+              {t('termoUsuario.declaracaoDesc')}
             </p>
             <ul className="list-disc pl-6 space-y-2 mt-2">
-              <li>Forneceu informações verdadeiras</li>
-              <li>Compreende as responsabilidades legais envolvidas</li>
-              <li>Concorda com todos os termos aqui estabelecidos</li>
-              <li>Utilizará a plataforma de forma ética e responsável</li>
+              <li>{t('termoUsuario.declaracaoItem1')}</li>
+              <li>{t('termoUsuario.declaracaoItem2')}</li>
+              <li>{t('termoUsuario.declaracaoItem3')}</li>
+              <li>{t('termoUsuario.declaracaoItem4')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">1. Aceitação dos Termos</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('termoUsuario.section1.title')}</h2>
             <p className="mb-4">
-              Ao utilizar a plataforma Ciclista Denuncie, você concorda com os termos e condições aqui estabelecidos. Se não concordar com qualquer parte destes termos, não utilize a plataforma.
+              {t('termoUsuario.section1.desc')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">2. Veracidade das Informações</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('termoUsuario.section2.title')}</h2>
             <p className="mb-4 font-bold text-red-600 dark:text-red-400">
-              ATENÇÃO: Fornecer informações falsas constitui crime previsto no Art. 299 do Código Penal Brasileiro (falsidade ideológica), punível com reclusão de 1 a 5 anos e multa.
+              {t('termoUsuario.section2.aviso')}
             </p>
             <p className="mb-4">
-              O usuário declara e garante que:
+              {t('termoUsuario.section2.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Todas as informações fornecidas são verdadeiras e precisas</li>
-              <li>Os fatos relatados ocorreram conforme descrito</li>
-              <li>As localizações indicadas correspondem aos locais reais dos incidentes</li>
-              <li>Não utilizará a plataforma para difamação, calúnia ou injúria</li>
-              <li>Não registrará denúncias falsas ou enganosas</li>
+              <li>{t('termoUsuario.section2.item1')}</li>
+              <li>{t('termoUsuario.section2.item2')}</li>
+              <li>{t('termoUsuario.section2.item3')}</li>
+              <li>{t('termoUsuario.section2.item4')}</li>
+              <li>{t('termoUsuario.section2.item5')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">3. Uso Adequado da Plataforma</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('termoUsuario.section3.title')}</h2>
             <p className="mb-4">
-              A plataforma destina-se exclusivamente ao registro de incidentes reais relacionados à mobilidade urbana por bicicleta. O usuário compromete-se a:
+              {t('termoUsuario.section3.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Utilizar a plataforma apenas para fins legítimos</li>
-              <li>Não publicar conteúdo ofensivo, discriminatório ou ilegal</li>
-              <li>Não utilizar a plataforma para perseguição ou assédio</li>
-              <li>Respeitar a privacidade de terceiros</li>
-              <li>Não divulgar dados pessoais sensíveis de outras pessoas sem consentimento</li>
+              <li>{t('termoUsuario.section3.item1')}</li>
+              <li>{t('termoUsuario.section3.item2')}</li>
+              <li>{t('termoUsuario.section3.item3')}</li>
+              <li>{t('termoUsuario.section3.item4')}</li>
+              <li>{t('termoUsuario.section3.item5')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">4. Responsabilidade Civil e Criminal</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('termoUsuario.section4.title')}</h2>
             <p className="mb-4">
-              O usuário é integralmente responsável por:
+              {t('termoUsuario.section4.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Todo conteúdo que publicar na plataforma</li>
-              <li>Danos causados a terceiros por informações falsas ou difamatórias</li>
-              <li>Consequências legais decorrentes do uso indevido da plataforma</li>
-              <li>Violações de direitos de terceiros</li>
+              <li>{t('termoUsuario.section4.item1')}</li>
+              <li>{t('termoUsuario.section4.item2')}</li>
+              <li>{t('termoUsuario.section4.item3')}</li>
+              <li>{t('termoUsuario.section4.item4')}</li>
             </ul>
             <p className="mb-4 mt-4">
-              O usuário concorda em indenizar e isentar a plataforma Ciclista Denuncie de qualquer reclamação, perda ou dano resultante do uso inadequado do serviço.
+              {t('termoUsuario.section4.indenizacao')}
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">5. Crimes Relacionados</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('termoUsuario.section5.title')}</h2>
             <p className="mb-4">
-              Esteja ciente das seguintes tipificações criminais:
+              {t('termoUsuario.section5.desc')}
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Falsidade Ideológica (Art. 299 CP):</strong> Omitir ou inserir declaração falsa em documento - Reclusão de 1 a 5 anos e multa</li>
-              <li><strong>Calúnia (Art. 138 CP):</strong> Imputar falsamente fato definido como crime - Detenção de 6 meses a 2 anos e multa</li>
-              <li><strong>Difamação (Art. 139 CP):</strong> Imputar fato ofensivo à reputação - Detenção de 3 meses a 1 ano e multa</li>
-              <li><strong>Injúria (Art. 140 CP):</strong> Ofender dignidade ou decoro - Detenção de 1 a 6 meses ou multa</li>
-              <li><strong>Denunciação Caluniosa (Art. 339 CP):</strong> Dar causa à instauração de investigação contra alguém inocente - Reclusão de 2 a 8 anos e multa</li>
+              <li>{t('termoUsuario.section5.item1')}</li>
+              <li>{t('termoUsuario.section5.item2')}</li>
+              <li>{t('termoUsuario.section5.item3')}</li>
+              <li>{t('termoUsuario.section5.item4')}</li>
+              <li>{t('termoUsuario.section5.item5')}</li>
             </ul>
           </section>
 
           <section>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-              Última atualização: {new Date().toLocaleDateString('pt-BR')}
+              {t('termoUsuario.ultimaAtualizacao')}: {new Date().toLocaleDateString('pt-BR')}
             </p>
           </section>
         </div>

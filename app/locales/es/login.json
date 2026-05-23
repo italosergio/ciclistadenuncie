@@ -41,5 +41,13 @@
   "erro.generico": "Error al procesar. Intenta de nuevo",
   "sucesso.contaCriada": "¡Cuenta creada con éxito!",
   "sucesso.senhaAlterada": "¡Contraseña cambiada con éxito!",
-  "sucesso.emailEnviado": "¡Correo enviado! Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña."
+  "sucesso.emailEnviado": "¡Correo enviado! Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.",
+  "mudarSenha.h1": "Cambiar Contraseña",
+  "mudarSenha.senhaAtual": "Contraseña Actual",
+  "mudarSenha.novaSenha": "Nueva Contraseña",
+  "mudarSenha.confirmarNovaSenha": "Confirmar Nueva Contraseña",
+  "mudarSenha.aguarde": "Aguarde...",
+  "mudarSenha.erroIncorreta": "La contraseña actual es incorrecta",
+  "mudarSenha.erroAlterar": "Error al cambiar la contraseña",
+  "mudarSenha.voltar": "Volver"
 }

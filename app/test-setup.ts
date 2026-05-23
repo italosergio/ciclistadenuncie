@@ -13,7 +13,7 @@ vi.mock("firebase/database", () => ({
   push: vi.fn(() => Promise.resolve({ key: "mock-key-123" })),
   remove: vi.fn(() => Promise.resolve()),
   onValue: vi.fn((_ref, callback) => {
-    callback({ val: () => null });
+    callback({ val: () => null, exists: () => false, forEach: vi.fn() });
     return vi.fn();
   }),
   update: vi.fn(() => Promise.resolve()),

@@ -54,6 +54,7 @@
   "tipos.veiculoEstacionado": "Vehicle Parked on Bike Lane",
   "tipos.maConservacao": "Poor Road Maintenance",
   "tipos.faltaCiclovia": "Lack of Bike Lane",
+  "tipos.bicicletaBranca": "Ghost Bike",
   "tipos.estacionamento.ciclovia": "Parking on Bike Lane",
   "tipos.abusos.gravida": "Other Abuses",
   "tipos.outro": "Other"
