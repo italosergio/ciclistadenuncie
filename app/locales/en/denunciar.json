@@ -55,6 +55,8 @@
   "tipos.maConservacao": "Poor Road Maintenance",
   "tipos.faltaCiclovia": "Lack of Bike Lane",
   "tipos.bicicletaBranca": "Ghost Bike",
+  "tipos.bicicletaFurtada": "Stolen Bicycle (Unattended)",
+  "tipos.bicicletaRoubada": "Stolen Bicycle (With Threat)",
   "tipos.estacionamento.ciclovia": "Parking on Bike Lane",
   "tipos.abusos.gravida": "Other Abuses",
   "tipos.outro": "Other"

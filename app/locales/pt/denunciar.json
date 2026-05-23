@@ -55,6 +55,8 @@
   "tipos.maConservacao": "Má Conservação da Via",
   "tipos.faltaCiclovia": "Falta de Ciclovia",
   "tipos.bicicletaBranca": "Bicicleta Branca (Ghost Bike)",
+  "tipos.bicicletaFurtada": "Bicicleta Furtada",
+  "tipos.bicicletaRoubada": "Bicicleta Roubada (Com Ameaça)",
   "tipos.estacionamento.ciclovia": "Estacionamento em Ciclovia",
   "tipos.abusos.gravida": "Abusos Diversos",
   "tipos.outro": "Outro"
