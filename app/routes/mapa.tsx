@@ -4,7 +4,7 @@ import { db } from "../lib/firebase";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
 import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield, Globe, Filter, Eye, EyeOff, Heart } from "lucide-react";
-import GhostBikeIcon from "../components/GhostBikeIcon";
+import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link, useLocation } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
@@ -148,7 +148,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car, color: "#dc2626" },
     { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench, color: "#dc2626" },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia', { ns: 'denunciar' }), icon: Bike, color: "#dc2626" },
-    { value: "bicicleta-branca", label: t('tipos.bicicletaBranca', { ns: 'denunciar' }), icon: GhostBikeIcon, color: "#6b7280" },
+    { value: "bicicleta-branca", label: t('tipos.bicicletaBranca', { ns: 'denunciar' }), icon: TeardropBikeIcon, color: "#6b7280" },
     { value: "outro", label: t('tipos.outro', { ns: 'denunciar' }), icon: MoreHorizontal, color: "#dc2626" },
   ];
 

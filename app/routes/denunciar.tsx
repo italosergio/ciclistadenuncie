@@ -6,7 +6,7 @@ import type { Route } from "./+types/denunciar";
 import { useTranslation } from "react-i18next";
 import i18n from "../lib/i18n";
 import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ChevronRight, ChevronLeft, ArrowLeft, Plus, X } from "lucide-react";
-import GhostBikeIcon from "../components/GhostBikeIcon";
+import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
 import { TILE_LAYERS } from "../config/API_ENDPOINTS";
@@ -281,7 +281,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     { value: "veiculo-estacionado", label: t('tipos.veiculoEstacionado'), icon: Car },
     { value: "ma-conservacao", label: t('tipos.maConservacao'), icon: Wrench },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia'), icon: Bike },
-    { value: "bicicleta-branca", label: t('tipos.bicicletaBranca'), icon: GhostBikeIcon },
+    { value: "bicicleta-branca", label: t('tipos.bicicletaBranca'), icon: TeardropBikeIcon },
     { value: "outro", label: t('tipos.outro'), icon: MoreHorizontal },
   ];
 
