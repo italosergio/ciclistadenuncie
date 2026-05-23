@@ -8,7 +8,7 @@ import {
   useLocation,
 } from "react-router";
 import { useEffect, Suspense } from "react";
-import { useTranslation } from "react-i18next";
+import { I18nextProvider, useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import { initConsoleEasterEgg } from "./lib/console-easter-egg";
@@ -16,7 +16,7 @@ import { AuthProvider } from "./lib/AuthContext";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import { trackUnsupportedLocale } from "./lib/localeTracker";
 import "./app.css";
-import "./lib/i18n";
+import i18n from "./lib/i18n";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
@@ -80,7 +80,9 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <Outlet />
+      <I18nextProvider i18n={i18n}>
+        <Outlet />
+      </I18nextProvider>
     </AuthProvider>
   );
 }

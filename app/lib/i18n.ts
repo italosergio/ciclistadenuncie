@@ -82,7 +82,7 @@ if (!i18n.isInitialized) {
     // On server, always start with pt-BR (will be overridden by cookie on client)
     lng: isServer ? "pt-BR" : undefined,
     react: {
-      useSuspense: true,
+      useSuspense: false,
     },
   });
 }
