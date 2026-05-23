@@ -84,7 +84,7 @@ export default function WelcomeModal() {
         {/* CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Link
-            to="/mapa"
+            to="/blog"
             onClick={handleDismiss}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-all active:scale-95"
           >
