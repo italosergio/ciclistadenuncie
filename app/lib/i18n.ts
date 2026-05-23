@@ -53,7 +53,7 @@ const resources = {
 };
 
 const detection = {
-  order: ["localStorage", "cookie"],
+  order: ["localStorage", "cookie", "navigator"],
   caches: ["localStorage", "cookie"],
   lookupLocalStorage: "i18nextLng",
   lookupCookie: "i18nextLng",
@@ -72,6 +72,7 @@ if (!i18n.isInitialized) {
     resources,
     fallbackLng: "pt-BR",
     supportedLngs,
+    nonExplicitSupportedLngs: true,
     defaultNS: "translation",
     fallbackNS: "translation",
     detection: isServer ? undefined : detection,

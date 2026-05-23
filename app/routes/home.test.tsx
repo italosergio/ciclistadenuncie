@@ -3,8 +3,9 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key) => key }),
+  useTranslation: () => ({ t: (key) => key, i18n: { language: "pt-BR" } }),
   initReactI18next: { type: '3rdParty', init: vi.fn() },
+  Trans: ({ children }) => <>{children}</>,
 }));
 
 vi.mock("../lib/i18n", () => ({
@@ -25,6 +26,10 @@ vi.mock("../components/BikeFireAnimation", () => ({
 
 vi.mock("react-countup", () => ({
   default: ({ end }) => <span>{end}</span>,
+}));
+
+vi.mock("../components/WelcomeModal", () => ({
+  default: () => null,
 }));
 
 import { useAuth } from "../lib/AuthContext";

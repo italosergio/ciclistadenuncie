@@ -41,5 +41,10 @@
   "email.banner.adicionar": "Add now",
   "email.banner.recuperar": "to recover your password.",
   "apoiadores.label": "Supporters ({count})",
-  "apoiador.label": "Supporter {number}"
+  "apoiador.label": "Supporter {number}",
+  "welcome.title": "So glad you're here!",
+  "welcome.description": "This is the <1>1st Brazilian Cycling Activism Platform</1> focused on the <3>Urban Cyclist</3>, operating across Latin America and North America.",
+  "welcome.observation": "Note: The data does not automatically generate formal reports. Look for <1>Cycling Activism Initiatives</1> already existing in your area, and strengthen local cycling activism with your experiences! <5>Formal reports: call the police.</5>",
+  "welcome.cta": "Learn more!",
+  "welcome.continuar": "Continue"
 }

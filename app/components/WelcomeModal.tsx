@@ -1,15 +1,42 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router";
 import { X } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
+import { ref, push, set } from "firebase/database";
+import { db } from "../lib/firebase";
+
+const SUPPORTED_LANGS = ["pt-BR", "en", "es"];
 
 export default function WelcomeModal() {
+  const { t, i18n } = useTranslation("home");
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const newLangLogged = useRef(false);
 
   useEffect(() => {
     // Delay showing to let page render first, sempre aparece
     const t = setTimeout(() => setVisible(true), 400);
     return () => clearTimeout(t);
+  }, []);
+
+  // --- Detecta idiomas não suportados e notifica no Firebase ---
+  useEffect(() => {
+    if (newLangLogged.current) return;
+    const detected = navigator.language;
+    // Verifica se o idioma detectado está entre os suportados
+    const isSupported = SUPPORTED_LANGS.some(
+      (lng) => detected === lng || detected.startsWith(lng + "-") || lng.startsWith(detected + "-"),
+    );
+    if (!isSupported) {
+      newLangLogged.current = true;
+      const novosRef = ref(db, "novos_idiomas");
+      const novoRef = push(novosRef);
+      set(novoRef, {
+        language: detected,
+        userAgent: navigator.userAgent,
+        timestamp: Date.now(),
+      });
+    }
   }, []);
 
   const handleDismiss = useCallback(() => {
@@ -33,6 +60,8 @@ export default function WelcomeModal() {
 
   if (dismissed) return null;
 
+  const fecharLabel = t("close", { ns: "translation" });
+
   return (
     <div
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity duration-300 ${
@@ -51,34 +80,40 @@ export default function WelcomeModal() {
         <button
           onClick={handleDismiss}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
-          aria-label="Fechar"
+          aria-label={fecharLabel}
         >
           <X size={20} />
         </button>
 
         {/* Title */}
         <h1 className="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-500">
-          Que bom que você chegou!
+          {t("welcome.title")}
         </h1>
 
         {/* Body */}
         <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-          Esta é a <strong>1° plataforma de estímulo ao Cicloativismo Brasileira</strong> com foco no{" "}
-          <strong>Ciclista Urbano</strong>, funcionando por toda a Latinoamérica e América do Norte.
+          <Trans
+            i18nKey="welcome.description"
+            ns="home"
+            components={[<strong key="s1" />, <strong key="s2" />]}
+          />
         </p>
 
         {/* Observation */}
         <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic">
-          Obs.: Os dados não geram denúncia formal automaticamente, procure as{" "}
-          <Link
-            to="/mapa"
-            className="text-red-600 dark:text-red-500 underline hover:opacity-80 font-medium not-italic"
-            onClick={handleDismiss}
-          >
-            iniciativas de Cicloativismo
-          </Link>{" "}
-          já existentes no seu território, e fortaleça o Cicloativismo local com as suas vivências!{" "}
-          <strong className="not-italic">Denúncias formais: polícia.</strong>
+          <Trans
+            i18nKey="welcome.observation"
+            ns="home"
+            components={[
+              <Link
+                to="/mapa"
+                className="text-red-600 dark:text-red-500 underline hover:opacity-80 font-medium not-italic"
+                onClick={handleDismiss}
+                key="l1"
+              />,
+              <strong className="not-italic" key="s1" />,
+            ]}
+          />
         </p>
 
         {/* CTA */}
@@ -88,13 +123,13 @@ export default function WelcomeModal() {
             onClick={handleDismiss}
             className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-all active:scale-95"
           >
-            Saiba mais!
+            {t("welcome.cta")}
           </Link>
           <button
             onClick={handleDismiss}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm transition"
           >
-            Continuar
+            {t("welcome.continuar")}
           </button>
         </div>
       </div>

@@ -41,5 +41,10 @@
   "email.banner.adicionar": "Adicione agora",
   "email.banner.recuperar": "para poder recuperar sua senha.",
   "apoiadores.label": "Apoiadores ({count})",
-  "apoiador.label": "Apoiador {number}"
+  "apoiador.label": "Apoiador {number}",
+  "welcome.title": "Que bom que você chegou!",
+  "welcome.description": "Esta é a <1>1° plataforma de estímulo ao Cicloativismo Brasileira</1> com foco no <3>Ciclista Urbano</3>, funcionando por toda a Latinoamérica e América do Norte.",
+  "welcome.observation": "Obs.: Os dados não geram denúncia formal automaticamente, procure as <1>iniciativas de Cicloativismo</1> já existentes no seu território, e fortaleça o Cicloativismo local com as suas vivências! <5>Denúncias formais: polícia.</5>",
+  "welcome.cta": "Saiba mais!",
+  "welcome.continuar": "Continuar"
 }
