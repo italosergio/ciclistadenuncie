@@ -37,7 +37,7 @@
   "erro.minRelato": "Describe lo ocurrido",
   "erro.localizacao": "Por favor, marca la ubicación en el mapa o permite el acceso a tu ubicación",
   "erro.registro": "Error al registrar la denuncia. Inténtalo de nuevo.",
-  "tipos.fina": "Multa",
+  "tipos.fina": "Sobrepaso inseguro",
   "tipos.fechada": "Cierre",
   "tipos.ameaca": "Amenaza",
   "tipos.assedio": "Acoso",
