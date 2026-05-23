@@ -63,8 +63,8 @@ export default function WelcomeModal() {
 
         {/* Body */}
         <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-          Esta é a <strong>1° plataforma de estímulo ao Cicloativismo do Brasil</strong> com foco no{" "}
-          <strong>Ciclista Urbano</strong>!
+          Esta é a <strong>1° plataforma de estímulo ao Cicloativismo Brasileira</strong> com foco no{" "}
+          <strong>Ciclista Urbano</strong>, funcionando por toda a Latinoamérica e América do Norte.
         </p>
 
         {/* Observation */}
