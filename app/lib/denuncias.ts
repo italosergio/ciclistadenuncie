@@ -51,16 +51,6 @@ export async function salvarDenuncia(data: DenunciaData) {
     denunciaData.situacoes = situacoes;
     denunciaData.tipo = situacoes[0]?.tipo;
     denunciaData.relato = situacoes.map(s => s.relato).filter(Boolean).join(' | ');
-
-    // Se há situacoes explícitas do formulário novo (com textarea de descrição geral),
-    // combinar com o relato geral se existir
-    if (data.situacoes && data.relato && typeof data.relato === 'string' && data.relato.trim()) {
-      if (denunciaData.relato) {
-        denunciaData.relato = data.relato + ' | ' + denunciaData.relato;
-      } else {
-        denunciaData.relato = data.relato;
-      }
-    }
   }
 
   // Placa é única por denúncia (cluster), não por situação
