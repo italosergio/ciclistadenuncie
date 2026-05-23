@@ -6,6 +6,7 @@ import type { Route } from "./+types/mapa";
 import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield, Globe, Filter, Eye, EyeOff, Heart } from "lucide-react";
 import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { renderToString } from "react-dom/server";
+import React from "react";
 import { useNavigate, Link, useLocation } from "react-router";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas, buscarCidadePorNome } from "../services/geocoding.service";
@@ -448,6 +449,14 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
       });
 
       const createColoredIcon = (color: string, IconComponent: any) => {
+        if (IconComponent === TeardropBikeIcon) {
+          return L.default.divIcon({
+            html: renderToString(<TeardropBikeIcon color="red" size={28} />),
+            className: 'custom-marker',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+          });
+        }
         return L.default.divIcon({
           html: `<div style="background-color: ${color}; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">${renderToString(<IconComponent size={11} color="white" />)}</div>`,
           className: 'custom-marker',

@@ -377,7 +377,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         key={index}
                         className="flex items-center gap-1 px-3 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium"
                       >
-                        <Icon size={16} />
+                        {Icon === TeardropBikeIcon ? <TeardropBikeIcon size={16} color="red" /> : <Icon size={16} />}
                         <span>{label}</span>
                         <button
                           type="button"
@@ -412,7 +412,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         onClick={() => adicionarSituacao(t.value)}
                         className="w-full p-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left flex items-center gap-2"
                       >
-                        <t.icon size={18} />
+                        {t.icon === TeardropBikeIcon ? <TeardropBikeIcon size={18} color="red" /> : <t.icon size={18} />}
                         {t.label}
                       </button>
                     ))}
