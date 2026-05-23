@@ -8,10 +8,7 @@ export default defineConfig({
     environment: "jsdom",
     include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
     setupFiles: ["./app/test-setup.ts"],
-    environmentMatch: {
-      "app/data/**": "node",
-      "app/services/**": "node",
-      "app/lib/**": "node",
-    },
+    // environmentMatch removido — não existe no Vitest 4.x
+    // Usar comentários @vitest-environment node nos arquivos que precisam
   },
 });
