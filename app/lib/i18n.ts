@@ -25,15 +25,18 @@ import esAdmin from "../locales/es/admin.json";
 
 const isServer = typeof window === "undefined";
 
+const PT_RESOURCES = {
+  translation: ptTranslation,
+  home: ptHome,
+  mapa: ptMapa,
+  denunciar: ptDenunciar,
+  login: ptLogin,
+  admin: ptAdmin,
+};
+
 const resources = {
-  "pt-BR": {
-    translation: ptTranslation,
-    home: ptHome,
-    mapa: ptMapa,
-    denunciar: ptDenunciar,
-    login: ptLogin,
-    admin: ptAdmin,
-  },
+  "pt-BR": PT_RESOURCES,
+  pt: PT_RESOURCES,
   en: {
     translation: enTranslation,
     home: enHome,
@@ -59,7 +62,7 @@ const detection = {
   lookupCookie: "i18nextLng",
 };
 
-const supportedLngs = ["pt-BR", "en", "es"];
+const supportedLngs = ["pt-BR", "pt", "en", "es"];
 
 if (!i18n.isInitialized) {
   i18n.use(initReactI18next);
