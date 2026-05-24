@@ -35,6 +35,7 @@ export const links: Route.LinksFunction = () => [
 function HtmlLang() {
   const { i18n } = useTranslation();
   const location = useLocation();
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     document.documentElement.lang = i18n.language;
@@ -44,7 +45,11 @@ function HtmlLang() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  return null;
+  return !isHome ? (
+    <div className="fixed top-4 right-4 z-50 flex items-center gap-1 max-md:left-4 max-md:right-auto max-md:top-12">
+      <LanguageSwitcher />
+    </div>
+  ) : null;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -60,9 +65,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="font-bungee" suppressHydrationWarning>
         <Suspense fallback={null}>
           <HtmlLang />
-          <div className="fixed top-4 right-4 z-50 flex items-center gap-1 max-md:top-12">
-            <LanguageSwitcher />
-          </div>
           {children}
         </Suspense>
         <ScrollRestoration />

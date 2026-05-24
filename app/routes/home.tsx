@@ -7,6 +7,7 @@ import Logo from "../components/Logo";
 import BikeFireAnimation from "../components/BikeFireAnimation";
 import { useAuth } from "../lib/AuthContext";
 import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { APOIADORES } from "../data/apoiadores";
 import { useTranslation } from "react-i18next";
 import i18n from "../lib/i18n";
@@ -172,8 +173,11 @@ export default function Home() {
         </div>
       )}
       
-      {/* Links de autenticação no topo direito */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Links de autenticação e idioma no topo direito */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-3 max-md:top-12">
+        <div className="hidden md:block">
+          <LanguageSwitcher />
+        </div>
         {user ? (
           <div className="relative">
             <button
@@ -230,6 +234,11 @@ export default function Home() {
             </Link>
           </>
         )}
+      </div>
+
+      {/* Mobile: LanguageSwitcher no canto superior esquerdo */}
+      <div className="absolute top-12 left-4 z-50 md:hidden">
+        <LanguageSwitcher />
       </div>
 
       <div className="max-w-6xl text-center space-y-4 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
