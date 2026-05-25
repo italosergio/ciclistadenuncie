@@ -250,6 +250,7 @@ export default function UserContributions() {
     { value: "veiculo-estacionado", label: t('tipos.veiculoEstacionado') },
     { value: "ma-conservacao", label: t('tipos.maConservacao') },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia') },
+    { value: "ausencia-paraciclo", label: t('tipos.ausenciaParaciclo') },
   ];
 
   return (

@@ -281,6 +281,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
     { value: "veiculo-estacionado", label: t('tipos.veiculoEstacionado'), icon: Car },
     { value: "ma-conservacao", label: t('tipos.maConservacao'), icon: Wrench },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia'), icon: Bike },
+    { value: "ausencia-paraciclo", label: t('tipos.ausenciaParaciclo'), icon: Bike },
     { value: "bicicleta-branca", label: t('tipos.bicicletaBranca'), icon: TeardropBikeIcon },
     { value: "bicicleta-furtada", label: t('tipos.bicicletaFurtada'), icon: ShieldOff },
     { value: "bicicleta-roubada", label: t('tipos.bicicletaRoubada'), icon: ShieldAlert },

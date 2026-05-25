@@ -149,6 +149,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia", icon: Car, color: "#dc2626" },
     { value: "ma-conservacao", label: "Má Conservação da Via", icon: Wrench, color: "#dc2626" },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia', { ns: 'denunciar' }), icon: Bike, color: "#dc2626" },
+    { value: "ausencia-paraciclo", label: t('tipos.ausenciaParaciclo', { ns: 'denunciar' }), icon: Bike, color: "#dc2626" },
     { value: "bicicleta-branca", label: t('tipos.bicicletaBranca', { ns: 'denunciar' }), icon: TeardropBikeIcon, color: "#6b7280" },
     { value: "outro", label: t('tipos.outro', { ns: 'denunciar' }), icon: MoreHorizontal, color: "#dc2626" },
   ];

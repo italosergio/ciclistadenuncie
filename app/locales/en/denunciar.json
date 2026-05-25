@@ -54,6 +54,7 @@
   "tipos.veiculoEstacionado": "Vehicle Parked on Bike Lane",
   "tipos.maConservacao": "Poor Road Maintenance",
   "tipos.faltaCiclovia": "Lack of Bike Lane",
+  "tipos.ausenciaParaciclo": "No Bike Rack",
   "tipos.bicicletaBranca": "Ghost Bike",
   "tipos.bicicletaFurtada": "Stolen Bicycle (Unattended)",
   "tipos.bicicletaRoubada": "Stolen Bicycle (With Threat)",

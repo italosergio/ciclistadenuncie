@@ -622,8 +622,32 @@ git push
 6. \`app/routes/admin-iniciativas.tsx\` e \`app/routes/admin-apoiadores.tsx\`, se necessário.
 7. Typecheck/build.
 8. Revisão visual local com Ítalo.
-9. Só depois da aprovação: commit/push, se solicitado.
 `;
+
+const planG = `# Plano G — Servidor de Imagens (Firebase Storage)
+
+**Goal:** Adicionar upload de fotos às denúncias do Ciclista Denuncie usando Firebase Storage, com exibição das imagens no mapa, na página de detalhes e no painel admin.
+
+**Arquitetura:** As imagens são enviadas para o Firebase Storage (já configurado no projeto — \`VITE_FIREBASE_STORAGE_BUCKET\` existe no .env), e a URL gerada é salva junto com os dados da denúncia no Realtime Database.
+
+**Tech Stack:** React 19, React Router 7, TypeScript, Tailwind CSS v4, Firebase v12 (Storage + Database), lucide-react, react-leaflet.
+
+## Funcionalidades
+
+1. **Upload no formulário** — seletor de fotos no denunciar.tsx (até 3, jpg/png/webp, 5MB max), preview, remoção, barra de progresso
+2. **Salvamento** — upload para Storage path \`denuncias/{id}/imagem-{n}.jpg\`, salva URLs em \`denuncias/{id}/imagens[]\`
+3. **Exibição** — mini-galeria no popup do mapa, coluna com thumbnail no admin, galeria no perfil do usuário
+
+## Arquivos
+- Novo: \`app/lib/storage.ts\` (serviço de upload)
+- Modificados: \`firebase.ts\`, \`denuncias.ts\`, \`denunciar.tsx\`, \`mapa.tsx\`, \`admin.tsx\`, \`usuario.$username.tsx\`
+
+## Regras Firebase Storage
+\`\`\`
+allow read: if true;
+allow write: if request.resource.size < 5 * 1024 * 1024
+              && request.resource.contentType.matches('image/.*');
+\`\`\``;
 
 export const PLANOS: Plano[] = [
   {
@@ -664,6 +688,14 @@ export const PLANOS: Plano[] = [
     data: "2026-05-21",
     resumo: "Modernizar o painel /admin com cards menores, tipologia mais legível, sidebar compacta, tabelas e filtros mais intuitivos, sem subir para main antes de aprovação.",
     conteudo: planE,
+    categoria: "pagina",
+  },
+  {
+    id: "plan-g-firebase-storage",
+    titulo: "Plano G — Servidor de Imagens (Firebase Storage)",
+    data: "2026-05-25",
+    resumo: "Adicionar upload de fotos às denúncias usando Firebase Storage, com seleção de até 3 imagens no formulário, exibição no mapa, admin e perfil do usuário.",
+    conteudo: planG,
     categoria: "pagina",
   },
 ];

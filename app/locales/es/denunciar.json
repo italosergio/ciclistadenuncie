@@ -54,6 +54,7 @@
   "tipos.veiculoEstacionado": "Vehículo Estacionado en la Ciclovía",
   "tipos.maConservacao": "Mal Mantenimiento de la Vía",
   "tipos.faltaCiclovia": "Falta de Ciclovía",
+  "tipos.ausenciaParaciclo": "Ausencia de Estacionamiento para Bicicletas",
   "tipos.bicicletaBranca": "Bicicleta Blanca (Ghost Bike)",
   "tipos.bicicletaFurtada": "Bicicleta Hurtada",
   "tipos.bicicletaRoubada": "Bicicleta Robada (Con Amenaza)",
