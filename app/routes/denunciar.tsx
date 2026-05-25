@@ -267,7 +267,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   }
 
   const tipos = [
-    { value: "fina", label: t('tipos.fina'), icon: Wind, desc: t('tipos.fina.desc') },
+    { value: "fina", label: t('tipos.fina'), icon: Wind, desc: t('tipos.fina.desc'), punicao: t('tipos.fina.punicao') },
     { value: "ameaca", label: t('tipos.ameaca'), icon: Megaphone },
     { value: "assedio", label: t('tipos.assedio'), icon: Hand },
     { value: "agressao-verbal", label: t('tipos.agressaoVerbal'), icon: MessageSquareWarning },
@@ -384,6 +384,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         <div>
                           <div className="text-sm">{label}</div>
                           {tipoInfo?.desc && <div className="text-[10px] opacity-60 leading-tight">{tipoInfo.desc}</div>}
+                          {tipoInfo?.punicao && <div className="text-[9px] opacity-40 leading-tight mt-0.5">{tipoInfo.punicao}</div>}
                         </div>
                         <button
                           type="button"
@@ -422,6 +423,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         <div>
                           <div>{t.label}</div>
                           {t.desc && <div className="text-[10px] opacity-60 leading-tight">{t.desc}</div>}
+                          {t.punicao && <div className="text-[9px] opacity-40 leading-tight mt-0.5">{t.punicao}</div>}
                         </div>
                       </button>
                     ))}
