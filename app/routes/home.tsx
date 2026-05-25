@@ -9,7 +9,7 @@ import { useAuth } from "../lib/AuthContext";
 import { ChevronDown, BarChart3, LogOut, User, Shield, X } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { APOIADORES } from "../data/apoiadores";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import i18n from "../lib/i18n";
 import WelcomeModal from "../components/WelcomeModal";
 
@@ -247,7 +247,18 @@ export default function Home() {
         
         <p className="text-xs md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           {t('hero.description')}
-          <br />É hora de dar <Link to="/mapa" className="text-red-600 dark:text-red-500 font-bold underline hover:opacity-80 transition">{t('hero.descriptionLink')}</Link> ao que você vive nas ruas.
+          <br />
+          <Trans
+            i18nKey="hero.secondLine"
+            ns="home"
+            components={[
+              <Link
+                to="/mapa"
+                className="text-red-600 dark:text-red-500 font-bold underline hover:opacity-80 transition"
+                key="sl"
+              />,
+            ]}
+          />
         </p>
         
         <Link to="/mapa" className="block py-3 md:py-3 hover:opacity-80 transition">
