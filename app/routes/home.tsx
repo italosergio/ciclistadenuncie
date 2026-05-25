@@ -231,7 +231,7 @@ export default function Home() {
             </Link>
           </>
         )}
-        <div className="max-md:fixed max-md:bottom-4 max-md:right-4 max-md:z-50">
+        <div className="md:hidden mt-1">
           <LanguageSwitcher />
         </div>
       </div>
