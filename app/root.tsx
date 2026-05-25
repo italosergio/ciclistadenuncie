@@ -46,7 +46,7 @@ function HtmlLang() {
   }, [location.pathname]);
 
   return !isHome ? (
-    <div className="fixed top-4 right-4 z-50 flex items-center gap-1 max-md:left-4 max-md:right-auto max-md:top-12">
+    <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-1 max-md:fixed max-md:bottom-4 max-md:right-4 max-md:top-auto">
       <LanguageSwitcher />
     </div>
   ) : null;

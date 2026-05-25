@@ -174,10 +174,7 @@ export default function Home() {
       )}
       
       {/* Links de autenticação e idioma no topo direito */}
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-3 max-md:top-12">
-        <div className="hidden md:block">
-          <LanguageSwitcher />
-        </div>
+      <div className="absolute top-4 right-4 z-50 flex flex-col items-end gap-1 max-md:top-12">
         {user ? (
           <div className="relative">
             <button
@@ -234,11 +231,9 @@ export default function Home() {
             </Link>
           </>
         )}
-      </div>
-
-      {/* Mobile: LanguageSwitcher no canto inferior direito, abaixo do login */}
-      <div className="fixed bottom-4 right-4 z-50 md:hidden">
-        <LanguageSwitcher />
+        <div className="max-md:fixed max-md:bottom-4 max-md:right-4 max-md:z-50">
+          <LanguageSwitcher />
+        </div>
       </div>
 
       <div className="max-w-6xl text-center space-y-4 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
