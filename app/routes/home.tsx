@@ -237,7 +237,7 @@ export default function Home() {
       </div>
 
       {/* Mobile: LanguageSwitcher antes do auth no canto direito */}
-      <div className="absolute top-12 right-[72px] z-50 md:hidden">
+      <div className="absolute top-12 right-28 z-50 md:hidden">
         <LanguageSwitcher />
       </div>
 
