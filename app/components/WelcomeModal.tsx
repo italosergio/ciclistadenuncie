@@ -92,11 +92,7 @@ export default function WelcomeModal() {
 
         {/* Body */}
         <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-          <Trans
-            i18nKey="welcome.description"
-            ns="home"
-            components={[<strong key="s1" />, <strong key="s2" />]}
-          />
+          {t("welcome.description")}
         </p>
 
         {/* Observation */}

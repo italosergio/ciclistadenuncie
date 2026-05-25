@@ -32,6 +32,82 @@ export async function resetPassword(email: string) {
   await sendPasswordResetEmail(auth, email);
 }
 
+/**
+ * Busca o email real de um usuário pelo username no banco.
+ * Retorna o email ou null se não encontrar.
+ */
+export async function getUserEmailByUsername(username: string): Promise<{ email: string | null; uid: string | null }> {
+  const usuariosRef = ref(db, 'usuarios');
+  const snapshot = await get(usuariosRef);
+  if (!snapshot.exists()) return { email: null, uid: null };
+
+  let result: { email: string | null; uid: string | null } = { email: null, uid: null };
+  snapshot.forEach((child) => {
+    const data = child.val();
+    if (data.username?.toLowerCase() === username.toLowerCase()) {
+      result = { email: data.email || null, uid: child.key };
+    }
+  });
+  return result;
+}
+
+/**
+ * Para usuários com email placeholder: faz login temporário com o email
+ * atual e senha, atualiza o email no Firebase Auth e envia o reset de senha
+ * para o novo email.
+ * 
+ * Retorna { success: true } se tudo ok.
+ * Lança erro se a senha estiver incorreta.
+ */
+export async function addEmailAndResetPassword(
+  username: string,
+  currentPassword: string,
+  newEmail: string
+): Promise<{ success: boolean }> {
+  const { email: placeholderEmail } = await getUserEmailByUsername(username);
+  if (!placeholderEmail) {
+    throw new Error('Usuário não encontrado');
+  }
+
+  // Faz login temporário com o email placeholder
+  const { signInWithEmailAndPassword } = await import('firebase/auth');
+  const userCredential = await signInWithEmailAndPassword(auth, placeholderEmail, currentPassword);
+  const user = userCredential.user;
+
+  try {
+    // Reautentica (já está logado, mas pra garantir)
+    const { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail } = await import('firebase/auth');
+    const credential = EmailAuthProvider.credential(user.email!, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // Atualiza email no Auth (envia verificação)
+    await verifyBeforeUpdateEmail(user, newEmail);
+
+    // Atualiza no banco
+    const { update } = await import('firebase/database');
+    const userRef = ref(db, `usuarios/${user.uid}`);
+    await update(userRef, { email: newEmail });
+
+    // Envia reset de senha para o novo email
+    await sendPasswordResetEmail(auth, newEmail);
+
+    // Registra evento
+    const userSnap = await get(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.val();
+      await registrarEvento({
+        tipo: 'adicionar_email',
+        usuario: userData.username,
+      });
+    }
+  } finally {
+    // Desloga independente de erro
+    await signOut(auth);
+  }
+
+  return { success: true };
+}
+
 export async function loginUser(username: string, password: string) {
   // Busca email real pelo username
   const usuariosRef = ref(db, 'usuarios');

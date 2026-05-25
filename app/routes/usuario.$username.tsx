@@ -7,9 +7,11 @@ import type { Route } from "./+types/usuario.$username";
 import { useAuth } from "../lib/AuthContext";
 import { editarDenuncia, excluirDenuncia } from "../lib/denuncias";
 import { registrarEvento } from "../lib/historico";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export function meta({ params }: Route.MetaArgs) {
-  return [{ title: `Contribuições de ${params.username} - Ciclista Denuncie` }];
+  return [{ title: i18n.t('usuario.username.title', { username: params.username }) }];
 }
 
 interface Denuncia {
@@ -27,6 +29,7 @@ export default function UserContributions() {
   const { username } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('translation');
   const [abaAtiva, setAbaAtiva] = useState<'denuncias' | 'contatos'>('denuncias');
   const [denuncias, setDenuncias] = useState<[string, Denuncia][]>([]);
   const [contatos, setContatos] = useState<any[]>([]);
@@ -50,7 +53,7 @@ export default function UserContributions() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-400">Carregando...</p>
+        <p className="text-gray-600 dark:text-gray-400">{t('loading')}</p>
       </div>
     );
   }
@@ -77,27 +80,19 @@ export default function UserContributions() {
     const contatosRef = ref(db, "contatos");
     const unsubscribe = onValue(contatosRef, (snapshot) => {
       const data = snapshot.val();
-      console.log('Snapshot existe?', snapshot.exists());
-      console.log('Dados brutos:', data);
-      console.log('Username procurado:', username);
       
       if (!data) {
-        console.log('Nenhum dado retornado do Firebase');
         setContatos([]);
         return;
       }
       
       const userContatos = Object.entries(data)
         .filter(([id, c]: [string, any]) => {
-          console.log(`Contato ${id}:`, c);
-          console.log(`  c.usuario: "${c.usuario}" === username: "${username}" = ${c.usuario === username}`);
           return c.usuario === username;
         })
         .map(([id, c]: [string, any]) => ({ id, ...c }))
         .sort((a, b) => b.id.localeCompare(a.id));
       
-      console.log('Total de contatos encontrados:', userContatos.length);
-      console.log('Contatos:', userContatos);
       setContatos(userContatos);
     }, (error) => {
       console.error('Erro ao ler contatos:', error);
@@ -119,14 +114,14 @@ export default function UserContributions() {
       setEditandoId(null);
       setNovoRelato("");
     } catch (error) {
-      alert("Erro ao editar denúncia");
+      alert(t('usuario.erroEditarDenuncia'));
     }
   };
 
   const handleExcluir = async (id: string) => {
     if (!user?.username) return;
     if (!motivoExclusao.trim()) {
-      alert("O motivo da exclusão é obrigatório");
+      alert(t('usuario.erroMotivoObrigatorio'));
       return;
     }
     try {
@@ -134,7 +129,7 @@ export default function UserContributions() {
       setExcluindoId(null);
       setMotivoExclusao("");
     } catch (error) {
-      alert("Erro ao excluir denúncia");
+      alert(t('usuario.erroExcluirDenuncia'));
     }
   };
 
@@ -175,7 +170,7 @@ export default function UserContributions() {
       setRespondendoId(null);
       setRespostaTexto("");
     } catch (error) {
-      alert("Erro ao enviar resposta");
+      alert(t('usuario.erroEnviarResposta'));
     }
   };
 
@@ -185,7 +180,7 @@ export default function UserContributions() {
       const contato = contatos.find(c => c.id === contatoId);
       const mensagensRef = ref(db, `contatos/${contatoId}/mensagens`);
       await push(mensagensRef, {
-        texto: "[Sistema] Contato marcado como resolvido",
+        texto: t('usuario.sistemaMarcadoResolvido'),
         autor: user.username,
         timestamp: new Date().toISOString(),
         tipo: 'sistema'
@@ -204,13 +199,13 @@ export default function UserContributions() {
         },
       });
     } catch (error) {
-      alert("Erro ao marcar como resolvido");
+      alert(t('usuario.erroMarcarResolvido'));
     }
   };
 
   const getStatusContato = (contato: any) => {
-    if (contato.resolvido) return { label: 'Resolvido', color: 'bg-green-500' };
-    if (contato.aguardandoResposta) return { label: 'Pendente', color: 'bg-yellow-500' };
+    if (contato.resolvido) return { label: t('usuario.statusResolvido'), color: 'bg-green-500' };
+    if (contato.aguardandoResposta) return { label: t('usuario.statusPendente'), color: 'bg-yellow-500' };
     
     const timestamp = contato.data || contato.id;
     const dataContato = new Date(timestamp);
@@ -220,11 +215,11 @@ export default function UserContributions() {
     const temMensagens = contato.mensagens && Object.keys(contato.mensagens).length > 0;
     
     if (diferencaMinutos > 5 && !temMensagens) {
-      return { label: 'Sem Resposta', color: 'bg-yellow-500' };
+      return { label: t('usuario.statusSemResposta'), color: 'bg-yellow-500' };
     }
     
-    if (contato.lida) return { label: 'Lida', color: 'bg-blue-500' };
-    return { label: 'Não Lida', color: 'bg-gray-500' };
+    if (contato.lida) return { label: t('usuario.statusLida'), color: 'bg-blue-500' };
+    return { label: t('usuario.statusNaoLida'), color: 'bg-gray-500' };
   };
 
   const getRelatoAtual = (relato: string | Array<{ texto: string; editadoEm: string }> | Array<string>): string => {
@@ -241,20 +236,20 @@ export default function UserContributions() {
   };
 
   const tipos = [
-    { value: "fina", label: "Fina" },
-    { value: "ameaca", label: "Ameaça" },
-    { value: "assedio", label: "Assédio" },
-    { value: "agressao-verbal", label: "Agressão Verbal" },
-    { value: "agressao-fisica", label: "Atropelamento" },
-    { value: "invasao-ciclovia", label: "Invasão de Ciclovia/Ciclofaixa" },
-    { value: "buraco-via", label: "Buraco na Via" },
-    { value: "falta-sinalizacao", label: "Falta de Sinalização" },
-    { value: "trecho-perigoso", label: "Trecho Perigoso" },
-    { value: "ciclovia-obstruida", label: "Ciclovia Obstruída" },
-    { value: "falta-iluminacao", label: "Falta de Iluminação" },
-    { value: "veiculo-estacionado", label: "Veículo Estacionado na Ciclovia" },
-    { value: "ma-conservacao", label: "Má Conservação da Via" },
-    { value: "falta-ciclovia", label: "Falta de Ciclovia" },
+    { value: "fina", label: t('tipos.fina') },
+    { value: "ameaca", label: t('tipos.ameaca') },
+    { value: "assedio", label: t('tipos.assedio') },
+    { value: "agressao-verbal", label: t('tipos.agressaoVerbal') },
+    { value: "agressao-fisica", label: t('tipos.atropelamento') },
+    { value: "invasao-ciclovia", label: t('tipos.invasaoCiclovia') },
+    { value: "buraco-via", label: t('tipos.buracoVia') },
+    { value: "falta-sinalizacao", label: t('tipos.faltaSinalizacao') },
+    { value: "trecho-perigoso", label: t('tipos.trechoPerigoso') },
+    { value: "ciclovia-obstruida", label: t('tipos.cicloviaObstruida') },
+    { value: "falta-iluminacao", label: t('tipos.faltaIluminacao') },
+    { value: "veiculo-estacionado", label: t('tipos.veiculoEstacionado') },
+    { value: "ma-conservacao", label: t('tipos.maConservacao') },
+    { value: "falta-ciclovia", label: t('tipos.faltaCiclovia') },
   ];
 
   return (
@@ -264,14 +259,16 @@ export default function UserContributions() {
           to="/"
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-sm mb-4 inline-flex items-center gap-1"
         >
-          <ArrowLeft size={14} /> voltar
+          <ArrowLeft size={14} /> {t('back')}
         </Link>
 
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Minhas Contribuições
+          {t('user.contributions')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {abaAtiva === 'denuncias' ? 'Denúncias' : 'Contatos'} de {username}
+          {abaAtiva === 'denuncias'
+            ? t('usuario.denunciasDe', { username })
+            : t('usuario.contatosDe', { username })}
         </p>
 
         <div className="flex gap-2 mb-6">
@@ -281,7 +278,7 @@ export default function UserContributions() {
               abaAtiva === 'denuncias' ? 'bg-red-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            Denúncias ({denuncias.length})
+            {t('usuario.tabDenuncias', { count: denuncias.length })}
           </button>
           <button
             onClick={() => setAbaAtiva('contatos')}
@@ -289,29 +286,29 @@ export default function UserContributions() {
               abaAtiva === 'contatos' ? 'bg-red-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            Contatos ({contatos.length})
+            {t('usuario.tabContatos', { count: contatos.length })}
           </button>
         </div>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-400">Carregando...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('loading')}</p>
         ) : abaAtiva === 'denuncias' ? (
           denuncias.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
               <p className="text-gray-600 dark:text-gray-400">
-                Nenhuma denúncia registrada ainda.
+                {t('usuario.nenhumaDenuncia')}
               </p>
               <Link
                 to="/denunciar"
                 className="inline-block mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
               >
-                Registrar Primeira Denúncia
+                {t('usuario.registrarPrimeiraDenuncia')}
               </Link>
             </div>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total: {denuncias.length} {denuncias.length === 1 ? "denúncia" : "denúncias"}
+                {t('usuario.totalDenuncias', { count: denuncias.length })}
               </p>
               {denuncias.map(([id, denuncia]) => (
                 <div
@@ -329,7 +326,7 @@ export default function UserContributions() {
                           minute: "2-digit",
                         })}
                         {foiEditado(denuncia.relato) && (
-                          <span className="ml-2 text-gray-400 dark:text-gray-500">~editado</span>
+                          <span className="ml-2 text-gray-400 dark:text-gray-500">{t('usuario.editado')}</span>
                         )}
                       </div>
                       {denuncia.tipo && (
@@ -344,7 +341,7 @@ export default function UserContributions() {
                           to="/mapa"
                           state={{ center: [denuncia.localizacao.lat, denuncia.localizacao.lng], zoom: 16 }}
                           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                          title="Ver no mapa"
+                          title={t('usuario.verNoMapa')}
                         >
                           <MapPin size={20} />
                         </Link>
@@ -354,14 +351,14 @@ export default function UserContributions() {
                           <button
                             onClick={() => handleEditar(id, getRelatoAtual(denuncia.relato))}
                             className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                            title="Editar"
+                            title={t('edit')}
                           >
                             <Edit2 size={18} />
                           </button>
                           <button
                             onClick={() => setExcluindoId(excluindoId === id ? null : id)}
                             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                            title="Excluir"
+                            title={t('delete')}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -371,7 +368,7 @@ export default function UserContributions() {
                   </div>
 
                   <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                    <strong>Local:</strong> {denuncia.endereco}
+                    <strong>{t('usuario.local')}:</strong> {denuncia.endereco}
                   </div>
 
                   {editandoId === id ? (
@@ -387,7 +384,7 @@ export default function UserContributions() {
                           onClick={() => handleSalvarEdicao(id)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                         >
-                          Salvar
+                          {t('save')}
                         </button>
                         <button
                           onClick={() => {
@@ -396,7 +393,7 @@ export default function UserContributions() {
                           }}
                           className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                         >
-                          Cancelar
+                          {t('cancel')}
                         </button>
                       </div>
                     </div>
@@ -410,16 +407,16 @@ export default function UserContributions() {
 
                   {denuncia.placa && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                      Placa: {denuncia.placa}
+                      {t('usuario.placa')}: {denuncia.placa}
                     </div>
                   )}
 
                   {excluindoId === id && (
                     <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <p className="text-sm font-semibold text-red-700 dark:text-red-400 mb-3">Tem certeza que deseja excluir esta denúncia?</p>
-                      <label className="block text-xs font-semibold text-red-600 dark:text-red-400 mb-1">Motivo da exclusão *</label>
+                      <p className="text-sm font-semibold text-red-700 dark:text-red-400 mb-3">{t('usuario.confirmarExclusao')}</p>
+                      <label className="block text-xs font-semibold text-red-600 dark:text-red-400 mb-1">{t('usuario.motivoExclusao')}</label>
                       <textarea
-                        placeholder="Informe o motivo da exclusão (obrigatório)"
+                        placeholder={t('usuario.motivoExclusaoPlaceholder')}
                         value={motivoExclusao}
                         onChange={(e) => setMotivoExclusao(e.target.value)}
                         required
@@ -432,7 +429,7 @@ export default function UserContributions() {
                           disabled={!motivoExclusao.trim()}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Confirmar Exclusão
+                          {t('usuario.confirmarExclusaoBtn')}
                         </button>
                         <button
                           onClick={() => {
@@ -441,7 +438,7 @@ export default function UserContributions() {
                           }}
                           className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                         >
-                          Cancelar
+                          {t('cancel')}
                         </button>
                       </div>
                     </div>
@@ -454,7 +451,7 @@ export default function UserContributions() {
           contatos.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
               <p className="text-gray-600 dark:text-gray-400">
-                Nenhum contato enviado ainda.
+                {t('usuario.nenhumContato')}
               </p>
             </div>
           ) : (
@@ -525,7 +522,7 @@ export default function UserContributions() {
                           <textarea
                             value={respostaTexto}
                             onChange={(e) => setRespostaTexto(e.target.value)}
-                            placeholder="Digite sua resposta..."
+                            placeholder={t('usuario.digiteResposta')}
                             className="w-full p-3 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600"
                             rows={3}
                           />
@@ -534,7 +531,7 @@ export default function UserContributions() {
                               onClick={() => handleResponder(contato.id)}
                               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                             >
-                              Enviar
+                              {t('submit')}
                             </button>
                             <button
                               onClick={() => {
@@ -543,7 +540,7 @@ export default function UserContributions() {
                               }}
                               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                             >
-                              Cancelar
+                              {t('cancel')}
                             </button>
                           </div>
                         </div>
@@ -553,13 +550,13 @@ export default function UserContributions() {
                             onClick={() => setRespondendoId(contato.id)}
                             className="text-blue-600 dark:text-blue-400 text-sm hover:underline flex items-center gap-1"
                           >
-                            <MessageSquare size={16} /> Responder
+                            <MessageSquare size={16} /> {t('usuario.responder')}
                           </button>
                           <button
                             onClick={() => handleMarcarResolvido(contato.id)}
                             className="text-green-600 dark:text-green-400 text-sm hover:underline flex items-center gap-1"
                           >
-                            <CheckCircle size={16} /> Marcar como Resolvido
+                            <CheckCircle size={16} /> {t('usuario.marcarResolvido')}
                           </button>
                         </div>
                       )

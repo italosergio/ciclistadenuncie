@@ -13,6 +13,7 @@ import UsuariosTab from "./admin-usuarios";
 import IniciativasTab from "./admin-iniciativas";
 import ApoiadoresTab from "./admin-apoiadores";
 import { PLANOS, type Plano } from "../data/planos";
+import { useTranslation } from "react-i18next";
 
 // --- Admin visual constants ---
 const adminShellClass = "min-h-screen flex bg-slate-950 text-slate-100 font-raleway";
@@ -30,6 +31,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Admin() {
+  const { t } = useTranslation('admin');
   const { user, logout, isAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,7 +48,7 @@ export default function Admin() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <p className="text-gray-400">Carregando...</p>
+        <p className="text-gray-400">{t('admin.carregando')}</p>
       </div>
     );
   }
@@ -86,14 +88,14 @@ export default function Admin() {
               onClick={() => navigate("/")}
               className="text-blue-400 hover:text-blue-300 text-xs mb-3 flex items-center gap-1 font-medium tracking-wide"
             >
-              ← Página Inicial
+              {t('admin.paginaInicial')}
             </button>
-            <h1 className="text-lg font-bungee tracking-wide text-white">Painel Admin</h1>
+            <h1 className="text-lg font-bungee tracking-wide text-white">{t('admin.painelAdmin')}</h1>
             <p className="text-xs text-slate-400 mt-1 font-raleway">{user?.username}</p>
             <span className={`inline-block mt-2 text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full ${
               user?.role === "administrador" ? "bg-purple-500/15 text-purple-200 border border-purple-400/20" : "bg-slate-700/60 text-slate-200 border border-white/10"
             }`}>
-              {user?.role === "administrador" ? "Administrador" : user?.role === "moderador" ? "Moderador" : "Usuário"}
+              {user?.role === "administrador" ? t('role.administrador') : user?.role === "moderador" ? t('role.moderador') : t('role.usuario')}
             </span>
           </div>
 
@@ -103,7 +105,7 @@ export default function Admin() {
               className={`${navButtonBaseClass} ${tab === "atividade" ? navButtonActiveClass : navButtonIdleClass}`}
             >
               <History size={16} className="flex-shrink-0" />
-              <span>Atividade</span>
+              <span>{t('sidebar.atividade')}</span>
             </button>
 
             {user?.role === "administrador" && (
@@ -112,7 +114,7 @@ export default function Admin() {
                 className={`${navButtonBaseClass} ${tab === "usuarios" ? navButtonActiveClass : navButtonIdleClass}`}
               >
                 <Users size={16} className="flex-shrink-0" />
-                <span>Usuários</span>
+                <span>{t('sidebar.usuarios')}</span>
               </button>
             )}
 
@@ -122,7 +124,7 @@ export default function Admin() {
                 className={`${navButtonBaseClass} ${tab === "iniciativas" ? navButtonActiveClass : navButtonIdleClass}`}
               >
                 <Globe size={16} className="flex-shrink-0" />
-                <span>Iniciativas</span>
+                <span>{t('sidebar.iniciativas')}</span>
               </button>
             )}
 
@@ -132,7 +134,7 @@ export default function Admin() {
                 className={`${navButtonBaseClass} ${tab === "apoiadores" ? navButtonActiveClass : navButtonIdleClass}`}
               >
                 <Heart size={16} className="flex-shrink-0" />
-                <span>Apoiadores</span>
+                <span>{t('sidebar.apoiadores')}</span>
               </button>
             )}
 
@@ -141,7 +143,7 @@ export default function Admin() {
               className={`${navButtonBaseClass} ${tab === "planos" ? navButtonActiveClass : navButtonIdleClass}`}
             >
               <FileText size={16} className="flex-shrink-0" />
-              <span>Planos</span>
+              <span>{t('sidebar.planos')}</span>
             </button>
 
             <button
@@ -149,7 +151,7 @@ export default function Admin() {
               className={`${navButtonBaseClass} ${tab === "denuncias" ? navButtonActiveClass : navButtonIdleClass}`}
             >
               <AlertTriangle size={16} className="flex-shrink-0" />
-              <span>Todas as Denúncias</span>
+              <span>{t('sidebar.todasDenuncias')}</span>
             </button>
 
             <button
@@ -157,7 +159,7 @@ export default function Admin() {
               className={`${navButtonBaseClass} ${tab === "contatos" ? navButtonActiveClass : navButtonIdleClass}`}
             >
               <MessageSquare size={16} className="flex-shrink-0" />
-              <span>Contatos Recebidos</span>
+              <span>{t('sidebar.contatosRecebidos')}</span>
             </button>
           </nav>
 
@@ -167,14 +169,14 @@ export default function Admin() {
               className={`${navButtonBaseClass} ${navButtonIdleClass}`}
             >
               <User size={16} className="flex-shrink-0" />
-              <span>Conta</span>
+              <span>{t('sidebar.conta')}</span>
             </button>
             <button
               onClick={handleLogout}
               className={`${navButtonBaseClass} text-red-400 hover:bg-white/5 hover:text-red-300`}
             >
               <LogOut size={16} className="flex-shrink-0" />
-              <span>Sair</span>
+              <span>{t('sidebar.sair')}</span>
             </button>
           </div>
         </aside>
@@ -202,6 +204,7 @@ export default function Admin() {
 }
 
 function PlanosTab() {
+  const { t } = useTranslation('admin');
   const [modalPlano, setModalPlano] = useState<Plano | null>(null);
   const [copiado, setCopiado] = useState(false);
 
@@ -261,11 +264,11 @@ function PlanosTab() {
     <div className={sectionShellClass}>
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Planos de Implementação</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Acompanhe o roadmap de melhorias e funcionalidades do projeto.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('planos.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('planos.descricao')}</p>
         </div>
-        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{PLANOS.length} {PLANOS.length === 1 ? 'plano' : 'planos'}</span>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('planos.qtdItens', { count: PLANOS.length })}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -310,7 +313,7 @@ function PlanosTab() {
             <div className="p-4 border-t border-white/10 flex justify-end">
               <button onClick={() => handleCopiar(modalPlano.conteudo)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition text-xs font-semibold">
-                {copiado ? <><Check size={14} /> Copiado!</> : <><Clipboard size={14} /> Copiar texto</>}
+                {copiado ? <><Check size={14} /> {t('planos.copiado')}</> : <><Clipboard size={14} /> {t('planos.copiarTexto')}</>}
               </button>
             </div>
           </div>
@@ -321,6 +324,7 @@ function PlanosTab() {
 }
 
 function DenunciasTab() {
+  const { t } = useTranslation('admin');
   const [denuncias, setDenuncias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [motivoExclusao, setMotivoExclusao] = useState("");
@@ -349,7 +353,7 @@ function DenunciasTab() {
 
   async function handleDelete(id: string) {
     if (!motivoExclusao.trim()) {
-      alert("O motivo da exclusão é obrigatório");
+      alert(t('usuarios.erroMotivoObrigatorio'));
       return;
     }
     const denuncia = denuncias.find(d => d.id === id);
@@ -369,7 +373,7 @@ function DenunciasTab() {
     return (
       <div className={sectionShellClass}>
         <div className={panelCardClass}>
-          <p className="text-sm text-slate-400">Carregando denúncias...</p>
+          <p className="text-sm text-slate-400">{t('denuncias.carregando')}</p>
         </div>
       </div>
     );
@@ -379,16 +383,16 @@ function DenunciasTab() {
     <div className={sectionShellClass}>
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Todas as Denúncias</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Revise denúncias registradas e ações sensíveis.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('denuncias.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('denuncias.descricao')}</p>
         </div>
-        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{denuncias.length} itens</span>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('denuncias.qtdItens', { count: denuncias.length })}</span>
       </div>
       
       {denuncias.length === 0 ? (
         <div className={panelCardClass + " text-center py-8"}>
-          <p className="text-sm text-slate-400">Nenhuma denúncia registrada ainda</p>
+          <p className="text-sm text-slate-400">{t('denuncias.vazio')}</p>
         </div>
       ) : (
         <div className={tableShellClass}>
@@ -396,10 +400,10 @@ function DenunciasTab() {
             <table className="w-full">
               <thead className="bg-white/5">
                 <tr>
-                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Data</th>
-                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Tipo</th>
-                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Endereço</th>
-                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Usuário</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('denuncias.table.data')}</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('denuncias.table.tipo')}</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('denuncias.table.local')}</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('denuncias.table.usuario')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
@@ -410,7 +414,7 @@ function DenunciasTab() {
                     </td>
                     <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.tipo}</td>
                     <td className="px-3 py-2.5 text-xs text-slate-300 max-w-xs truncate">{denuncia.endereco}</td>
-                    <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.username || 'Anônimo'}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-300">{denuncia.username || t('denuncias.anonimo')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -424,7 +428,7 @@ function DenunciasTab() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between p-4 border-b border-white/10">
-              <div className="flex-1 min-w-0 pr-4"><h3 className="text-sm font-semibold text-white">Detalhes da Denúncia</h3></div>
+              <div className="flex-1 min-w-0 pr-4"><h3 className="text-sm font-semibold text-white">{t('denuncias.modal.titulo')}</h3></div>
               <div className="flex items-center gap-1">
                 <div className="relative">
                   <button onClick={() => setMenuDenunciaAberto(!menuDenunciaAberto)} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5">
@@ -434,21 +438,21 @@ function DenunciasTab() {
                     <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
                       {confirmandoExclusao ? (
                         <div className="px-3 py-2 space-y-2">
-                          <p className="text-xs text-red-300 font-semibold">Tem certeza?</p>
-                          <textarea placeholder="Motivo (obrigatório)" value={motivoExclusao}
+                          <p className="text-xs text-red-300 font-semibold">{t('denuncias.modal.confirmar')}</p>
+                          <textarea placeholder={t('usuarios.motivoPlaceholder')} value={motivoExclusao}
                             onChange={(e) => setMotivoExclusao(e.target.value)} rows={2}
                             className="w-full rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1 text-xs text-white outline-none transition focus:border-blue-500" />
                           <div className="flex gap-1">
                             <button onClick={() => handleDelete(modalDenuncia.id)} disabled={!motivoExclusao.trim()}
-                              className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">Confirmar</button>
+                              className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">{t('denuncias.confirmar')}</button>
                             <button onClick={() => { setConfirmandoExclusao(false); setMotivoExclusao(""); }}
-                              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">{t('usuarios.cancelar')}</button>
                           </div>
                         </div>
                       ) : (
                         <button onClick={() => setConfirmandoExclusao(true)}
                           className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
-                          <Trash2 size={14} /> Excluir denúncia
+                          <Trash2 size={14} /> {t('denuncias.modal.apagar')}
                         </button>
                       )}
                     </div>
@@ -461,12 +465,12 @@ function DenunciasTab() {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Data</p><p className="text-sm text-white">{new Date(modalDenuncia.createdAt).toLocaleDateString('pt-BR')}</p></div>
-                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Tipo</p><p className="text-sm text-white">{modalDenuncia.tipo}</p></div>
-                <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Endereço</p><p className="text-sm text-white">{modalDenuncia.endereco}</p></div>
-                {modalDenuncia.relato && <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Relato</p><p className="text-sm text-white whitespace-pre-wrap">{modalDenuncia.relato}</p></div>}
-                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Usuário</p><p className="text-sm text-white">{modalDenuncia.username || 'Anônimo'}</p></div>
-                {modalDenuncia.placa && <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Placa</p><p className="text-sm text-white">{modalDenuncia.placa}</p></div>}
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.data')}</p><p className="text-sm text-white">{new Date(modalDenuncia.createdAt).toLocaleDateString('pt-BR')}</p></div>
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.tipo')}</p><p className="text-sm text-white">{modalDenuncia.tipo}</p></div>
+                <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.local')}</p><p className="text-sm text-white">{modalDenuncia.endereco}</p></div>
+                {modalDenuncia.relato && <div className="col-span-2"><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.relato')}</p><p className="text-sm text-white whitespace-pre-wrap">{modalDenuncia.relato}</p></div>}
+                <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.usuario')}</p><p className="text-sm text-white">{modalDenuncia.username || t('denuncias.anonimo')}</p></div>
+                {modalDenuncia.placa && <div><p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('denuncias.table.placa')}</p><p className="text-sm text-white">{modalDenuncia.placa}</p></div>}
               </div>
             </div>
           </div>
@@ -477,6 +481,7 @@ function DenunciasTab() {
 }
 
 function ContatosTab() {
+  const { t } = useTranslation('admin');
   const [contatos, setContatos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
@@ -542,7 +547,7 @@ function ContatosTab() {
         usuario: user.username,
         detalhes: { contatoId, usuarioContato: contato?.usuario, tipo: contato?.tipo },
       });
-    } catch (error) { alert("Erro ao excluir contato"); }
+    } catch (error) { alert(t('contatos.erroExcluir')); }
   };
 
   const contatosFiltrados = useMemo(() => {
@@ -612,7 +617,7 @@ function ContatosTab() {
       setRespondendoId(null);
       setRespostaTexto("");
     } catch (error) {
-      alert("Erro ao enviar resposta");
+      alert(t('contatos.erroResponder'));
     }
   };
 
@@ -641,7 +646,7 @@ function ContatosTab() {
         },
       });
     } catch (error) {
-      alert("Erro ao marcar como resolvido");
+      alert(t('contatos.erroResolver'));
     }
   };
 
@@ -670,7 +675,7 @@ function ContatosTab() {
         },
       });
     } catch (error) {
-      alert("Erro ao marcar como pendente");
+      alert(t('contatos.erroPendente'));
     }
   };
 
@@ -678,7 +683,7 @@ function ContatosTab() {
     return (
       <div className={sectionShellClass}>
         <div className={panelCardClass}>
-          <p className="text-sm text-slate-400">Carregando contatos...</p>
+          <p className="text-sm text-slate-400">{t('contatos.carregando')}</p>
         </div>
       </div>
     );
@@ -688,11 +693,11 @@ function ContatosTab() {
     <div className={sectionShellClass}>
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Contatos Recebidos</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Organize mensagens recebidas e pendências.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('contatos.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('contatos.descricao')}</p>
         </div>
-        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{contatosFiltrados.length} itens</span>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('contatos.qtdItens', { count: contatosFiltrados.length })}</span>
       </div>
 
       {/* Filtros */}
@@ -703,7 +708,7 @@ function ContatosTab() {
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar em usuário ou mensagem..."
+            placeholder={t('contatos.buscaPlaceholder')}
             className={fieldClass + " pl-9 pr-9"}
           />
           {busca && (
@@ -715,22 +720,22 @@ function ContatosTab() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Status</label>
+            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('denuncias.filtroStatus')}</label>
             <select
               value={filtroLida}
               onChange={(e) => setFiltroLida(e.target.value as any)}
               className={fieldClass}
             >
-              <option value="todas">Todas</option>
-              <option value="lidas">Lidas</option>
-              <option value="nao-lidas">Não Lidas</option>
-              <option value="pendentes">Pendentes</option>
-              <option value="resolvidas">Resolvidas</option>
+              <option value="todas">{t('contatos.filtro.todas')}</option>
+              <option value="lidas">{t('contatos.filtro.lidas')}</option>
+              <option value="nao-lidas">{t('contatos.filtro.naoLidas')}</option>
+              <option value="pendentes">{t('contatos.filtro.pendentes')}</option>
+              <option value="resolvidas">{t('contatos.filtro.resolvidas')}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Tipo</label>
+            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('denuncias.filtroTipo')}</label>
             <select
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value)}
@@ -743,7 +748,7 @@ function ContatosTab() {
           </div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Início</label>
+            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('historico.dataInicio')}</label>
             <input
               type="date"
               value={dataInicio}
@@ -753,7 +758,7 @@ function ContatosTab() {
           </div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Fim</label>
+            <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('historico.dataFim')}</label>
             <input
               type="date"
               value={dataFim}
@@ -768,7 +773,7 @@ function ContatosTab() {
             onClick={() => { setBusca(""); setFiltroLida("todas"); setFiltroTipo("todos"); setDataInicio(""); setDataFim(""); }}
             className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
           >
-            <X size={14} /> Limpar filtros
+            <X size={14} /> {t('contatos.limparFiltros')}
           </button>
         )}
       </div>
@@ -776,7 +781,7 @@ function ContatosTab() {
       {contatosFiltrados.length === 0 ? (
         <div className={panelCardClass + " text-center py-8"}>
           <p className="text-sm text-slate-400">
-            {contatos.length === 0 ? "Nenhum contato recebido ainda" : "Nenhum contato encontrado com os filtros aplicados"}
+            {contatos.length === 0 ? t('contatos.vazio') : t('contatos.vazioFiltros')}
           </p>
         </div>
       ) : (
@@ -805,26 +810,26 @@ function ContatosTab() {
                       await update(ref(db, `contatos/${contato.id}`), { pinada: !contato.pinada });
                     }}
                     className="text-slate-400 hover:text-yellow-500 transition-colors"
-                    title={contato.pinada ? "Desafixar" : "Fixar"}
+                    title={contato.pinada ? t('contatos.desafixar') : t('contatos.fixar')}
                   >
                     <Pin size={16} className={contato.pinada ? 'fill-yellow-500 text-yellow-500' : ''} />
                   </button>
                   {/* 3 pontinhos */}
                   <div className="relative">
                     <button onClick={(e) => { e.stopPropagation(); setMenuContatoAberto(menuContatoAberto === contato.id ? null : contato.id); }}
-                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5" title="Ações">
+                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/5" title={t('contatos.acoes')}>
                       <MoreVertical size={16} />
                     </button>
                     {menuContatoAberto === contato.id && (
                       <div className="absolute left-0 top-full mt-1 w-48 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
                         {confirmandoExclusaoContato === contato.id ? (
                           <div className="px-3 py-2 space-y-2">
-                            <p className="text-xs text-red-300 font-semibold">Excluir contato?</p>
+                            <p className="text-xs text-red-300 font-semibold">{t('contatos.confirmarExclusao')}</p>
                             <div className="flex gap-1">
                               <button onClick={async (e) => { e.stopPropagation(); await excluirContato(contato.id); setConfirmandoExclusaoContato(null); setMenuContatoAberto(null); }}
-                                className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">Sim</button>
+                                className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">{t('historico.detalhes.sim')}</button>
                               <button onClick={(e) => { e.stopPropagation(); setConfirmandoExclusaoContato(null); }}
-                                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Não</button>
+                                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">{t('historico.detalhes.nao')}</button>
                             </div>
                           </div>
                         ) : (
@@ -832,27 +837,27 @@ function ContatosTab() {
                             {!contato.resolvido ? (
                               <button onClick={(e) => { e.stopPropagation(); handleMarcarResolvido(contato.id); setMenuContatoAberto(null); }}
                                 className="w-full text-left px-3 py-2 text-xs text-green-300 hover:bg-white/5 flex items-center gap-2">
-                                <CheckCircle size={14} /> Resolvido
+                                <CheckCircle size={14} /> {t('contatos.status.resolvido')}
                               </button>
                             ) : (
                               <button onClick={(e) => { e.stopPropagation(); handleMarcarPendente(contato.id); setMenuContatoAberto(null); }}
                                 className="w-full text-left px-3 py-2 text-xs text-yellow-300 hover:bg-white/5 flex items-center gap-2">
-                                <AlertTriangle size={14} /> Pendente
+                                <AlertTriangle size={14} /> {t('contatos.marcarPendente')}
                               </button>
                             )}
                             {!expandidos.has(contato.id) && (
                               <button onClick={(e) => { e.stopPropagation(); setExpandidos(new Set(expandidos).add(contato.id)); setMenuContatoAberto(null); if (!contato.lida && user) { update(ref(db, `contatos/${contato.id}`), { lida: true }); } }}
                                 className="w-full text-left px-3 py-2 text-xs text-blue-300 hover:bg-white/5 flex items-center gap-2">
-                                <MessageCircle size={14} /> Ler mensagem
+                                <MessageCircle size={14} /> {t('contatos.lerMensagem')}
                               </button>
                             )}
                             <button onClick={(e) => { e.stopPropagation(); setRespondendoId(contato.id); setMenuContatoAberto(null); }}
                               className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center gap-2">
-                              <MessageSquare size={14} /> Responder
+                              <MessageSquare size={14} /> {t('contatos.responder')}
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); setConfirmandoExclusaoContato(contato.id); }}
                               className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
-                              <Trash2 size={14} /> Excluir
+                              <Trash2 size={14} /> {t('contatos.excluir')}
                             </button>
                           </>
                         )}
@@ -871,7 +876,7 @@ function ContatosTab() {
                       ? 'border-blue-400/30 bg-blue-500/10 text-blue-300' 
                       : 'border-white/10 bg-white/5 text-slate-300'
                   }`}>
-                    {contato.resolvido ? 'Resolvido' : contato.aguardandoResposta ? 'Pendente' : contato.lida ? 'Lida' : 'Não Lida'}
+                    {contato.resolvido ? t('contatos.status.resolvido') : contato.aguardandoResposta ? t('contatos.status.pendente') : contato.lida ? t('contatos.status.lida') : t('contatos.status.naoLida')}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-slate-400">
@@ -883,13 +888,13 @@ function ContatosTab() {
 
               <div className="flex items-center gap-2 mb-2">
                 <User size={16} className="text-slate-400" />
-                <h3 className="text-sm md:text-base font-bold text-white break-words">Contato de {highlightText(contato.usuario)}</h3>
+                <h3 className="text-sm md:text-base font-bold text-white break-words">{t('contatos.label.contatoDe', { usuario: highlightText(contato.usuario) })}</h3>
               </div>
 
               <div className="flex items-center gap-2 mb-2">
                 <Tag size={14} className="text-slate-400" />
                 <span className="text-xs font-semibold text-slate-300 capitalize">
-                  {contato.tipo?.replace('-', ' ') || 'N/A'}
+                  {contato.tipo?.replace('-', ' ') || t('historico.detalhes.na')}
                 </span>
               </div>
 
@@ -949,7 +954,7 @@ function ContatosTab() {
                     <textarea
                       value={respostaTexto}
                       onChange={(e) => setRespostaTexto(e.target.value)}
-                      placeholder="Digite sua resposta..."
+                      placeholder={t('contatos.respostaPlaceholder')}
                       className={fieldClass}
                       rows={3}
                     />
@@ -958,13 +963,13 @@ function ContatosTab() {
                         onClick={() => handleResponder(contato.id)}
                         className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
                       >
-                        Enviar
+                        {t('contatos.enviar')}
                       </button>
                       <button
                         onClick={() => { setRespondendoId(null); setRespostaTexto(""); }}
                         className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
                       >
-                        Cancelar
+                        {t('contatos.cancelar')}
                       </button>
                     </div>
                   </div>
@@ -974,7 +979,7 @@ function ContatosTab() {
                       onClick={() => setRespondendoId(contato.id)}
                       className="text-blue-400 text-xs font-semibold hover:text-blue-300 transition-colors flex items-center gap-1"
                     >
-                      <MessageSquare size={14} /> Responder
+                      <MessageSquare size={14} /> {t('contatos.responder')}
                     </button>
                     {user?.role === 'administrador' || user?.role === 'moderador' ? (
                       <>
@@ -983,14 +988,14 @@ function ContatosTab() {
                           onClick={() => handleMarcarResolvido(contato.id)}
                           className="text-green-400 text-xs font-semibold hover:text-green-300 transition-colors flex items-center gap-1"
                         >
-                          <CheckCircle size={14} /> Resolvido
+                          <CheckCircle size={14} /> {t('contatos.status.resolvido')}
                         </button>
                         <span className="text-slate-600 text-xs">|</span>
                         <button
                           onClick={() => handleMarcarPendente(contato.id)}
                           className="text-yellow-400 text-xs font-semibold hover:text-yellow-300 transition-colors flex items-center gap-1"
                         >
-                          <AlertTriangle size={14} /> Pendente
+                          <AlertTriangle size={14} /> {t('contatos.marcarPendente')}
                         </button>
                       </>
                     ) : (
@@ -999,7 +1004,7 @@ function ContatosTab() {
                           onClick={() => handleMarcarResolvido(contato.id)}
                           className="text-green-400 text-xs font-semibold hover:text-green-300 transition-colors flex items-center gap-1"
                         >
-                          <CheckCircle size={14} /> Marcar como Resolvido
+                          <CheckCircle size={14} /> {t('contatos.marcarResolvido')}
                         </button>
                       )
                     )}

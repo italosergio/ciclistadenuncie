@@ -4,8 +4,11 @@ import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
 import { MoreVertical, X, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export default function UsuariosTab() {
+  const { t } = useTranslation('admin');
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,7 +52,7 @@ export default function UsuariosTab() {
           }
         });
       } else {
-        setError('Nenhum usuário encontrado no banco');
+        setError(t('usuarios.erroNenhumEncontrado'));
       }
       setLoading(false);
     }, (err) => {
@@ -62,10 +65,10 @@ export default function UsuariosTab() {
 
   const getRoleDisplay = (role: string) => {
     switch(role) {
-      case 'administrador': return 'Adm';
-      case 'moderador': return 'Mod';
-      case 'usuario': return 'Usu';
-      default: return 'Usu';
+      case 'administrador': return t('usuarios.roleAdm');
+      case 'moderador': return t('usuarios.roleMod');
+      case 'usuario': return t('usuarios.roleUsu');
+      default: return t('usuarios.roleUsu');
     }
   };
 
@@ -114,7 +117,7 @@ export default function UsuariosTab() {
 
       setBanindoUid(null);
     } catch (err: any) {
-      alert("Erro ao banir usuário: " + err.message);
+      alert(t('usuarios.erroBanir', { message: err.message }));
     }
   }
 
@@ -133,13 +136,13 @@ export default function UsuariosTab() {
         });
       }
     } catch (err: any) {
-      alert("Erro ao desbanir usuário: " + err.message);
+      alert(t('usuarios.erroDesbanir', { message: err.message }));
     }
   }
 
   async function handleExcluirUsuario(uid: string, username: string) {
     if (!motivoExclusao.trim()) {
-      alert("O motivo da exclusão é obrigatório");
+      alert(t('usuarios.erroMotivoObrigatorio'));
       return;
     }
 
@@ -185,7 +188,7 @@ export default function UsuariosTab() {
       setMotivoExclusao("");
       setManterDenuncias(false);
     } catch (err: any) {
-      alert("Erro ao excluir usuário: " + err.message);
+      alert(t('usuarios.erroExcluir', { message: err.message }));
     }
   }
 
@@ -193,7 +196,7 @@ export default function UsuariosTab() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-5">
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
-          <p className="text-sm text-slate-400">Carregando usuários...</p>
+          <p className="text-sm text-slate-400">{t('usuarios.carregando')}</p>
         </div>
       </div>
     );
@@ -203,8 +206,8 @@ export default function UsuariosTab() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-5">
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white mb-4">Gerenciar Usuários</h2>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white mb-4">{t('usuarios.titulo')}</h2>
           <div className="rounded-xl border border-red-500/30 bg-red-950/30 p-4">
             <p className="text-xs text-red-300">Erro: {error}</p>
           </div>
@@ -218,14 +221,14 @@ export default function UsuariosTab() {
       <div className="p-4 md:p-6 lg:p-8 space-y-5">
         <div className="flex items-end justify-between mb-2">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-            <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Gerenciar Usuários</h2>
-            <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie permissões, status e contas cadastradas.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+            <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('usuarios.titulo')}</h2>
+            <p className="mt-1 text-xs md:text-sm text-slate-400">{t('usuarios.descricao')}</p>
           </div>
-          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">0 itens</span>
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('usuarios.zeroItens')}</span>
         </div>
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur text-center py-8">
-          <p className="text-sm text-slate-400">Nenhum usuário cadastrado ainda.</p>
+          <p className="text-sm text-slate-400">{t('usuarios.vazio')}</p>
         </div>
       </div>
     );
@@ -235,21 +238,21 @@ export default function UsuariosTab() {
     <div className="p-4 md:p-6 lg:p-8 space-y-5">
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Gerenciar Usuários</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie permissões, status e contas cadastradas.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('usuarios.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('usuarios.descricao')}</p>
         </div>
-        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{usuarios.length} itens</span>
+        <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('usuarios.qtdItens', { count: usuarios.length })}</span>
       </div>
       
       <div className="rounded-2xl border border-white/10 bg-slate-900/80 shadow-xl shadow-black/20 overflow-hidden">
         <table className="w-full">
           <thead className="bg-white/5">
             <tr>
-              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Usuário</th>
-              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Tipo</th>
-              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Status</th>
-              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">Criado em</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('usuarios.table.nome')}</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('usuarios.table.tipo')}</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('usuarios.table.status')}</th>
+              <th className="px-3 md:px-4 py-2.5 text-left text-[11px] uppercase tracking-wide font-semibold text-slate-400">{t('usuarios.table.criadoEm')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10">
@@ -257,7 +260,7 @@ export default function UsuariosTab() {
               <tr key={user.uid} className="hover:bg-white/[0.04] cursor-pointer" onClick={() => { setModalUsuario(user); setMenuAberto(false); setConfirmandoBanimento(false); setConfirmandoExclusaoModal(false); setMotivoExclusao(""); }}>
                 <td className="px-3 md:px-4 py-2.5">
                   <span className="text-xs text-slate-200">{user.username}</span>
-                  {user.banido && <span className="ml-2 text-[10px] bg-red-500/15 text-red-200 border border-red-400/20 px-1.5 py-0.5 rounded-full">BANIDO</span>}
+                  {user.banido && <span className="ml-2 text-[10px] bg-red-500/15 text-red-200 border border-red-400/20 px-1.5 py-0.5 rounded-full">{t('usuarios.banido')}</span>}
                 </td>
                 <td className="px-3 md:px-4 py-2.5">
                   {user.role === 'administrador' || user.uid === currentUser?.uid ? (
@@ -278,9 +281,9 @@ export default function UsuariosTab() {
                         'bg-green-500/15 text-green-200 border-green-400/20'
                       }`}
                     >
-                      <option value="usuario">Usu</option>
-                      <option value="moderador">Mod</option>
-                      <option value="administrador">Adm</option>
+                      <option value="usuario">{t('usuarios.roleUsu')}</option>
+                      <option value="moderador">{t('usuarios.roleMod')}</option>
+                      <option value="administrador">{t('usuarios.roleAdm')}</option>
                     </select>
                   )}
                 </td>
@@ -288,11 +291,11 @@ export default function UsuariosTab() {
                   <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
                     user.banido ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-green-400/30 bg-green-500/10 text-green-300'
                   }`}>
-                    {user.banido ? 'Banido' : 'Ativo'}
+                    {user.banido ? t('usuarios.status.banido') : t('usuarios.status.ativo')}
                   </span>
                 </td>
                 <td className="px-3 md:px-4 py-2.5 text-xs text-slate-400">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : t('usuarios.na')}
                 </td>
               </tr>
             ))}
@@ -320,40 +323,40 @@ export default function UsuariosTab() {
                       <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
                         {confirmandoBanimento && !modalUsuario.banido ? (
                           <div className="px-3 py-2 space-y-2">
-                            <p className="text-xs text-yellow-300 font-semibold">Banir {modalUsuario.username}?</p>
+                            <p className="text-xs text-yellow-300 font-semibold">{t('usuarios.confirmarBanimento', { username: modalUsuario.username })}</p>
                             <div className="flex gap-1">
-                              <button onClick={() => { handleBanirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">Sim</button>
-                              <button onClick={() => setConfirmandoBanimento(false)} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                              <button onClick={() => { handleBanirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">{t('usuarios.sim')}</button>
+                              <button onClick={() => setConfirmandoBanimento(false)} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">{t('usuarios.cancelar')}</button>
                             </div>
                           </div>
                         ) : confirmandoExclusaoModal ? (
                           <div className="px-3 py-2 space-y-2">
-                            <p className="text-xs text-red-300 font-semibold">Excluir {modalUsuario.username}?</p>
+                            <p className="text-xs text-red-300 font-semibold">{t('usuarios.confirmarExclusao', { username: modalUsuario.username })}</p>
                             <textarea
-                              placeholder="Motivo (obrigatório)"
+                              placeholder={t('usuarios.motivoPlaceholder')}
                               value={motivoExclusao}
                               onChange={(e) => setMotivoExclusao(e.target.value)}
                               rows={2}
                               className="w-full rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1 text-xs text-white outline-none transition focus:border-blue-500"
                             />
                             <div className="flex gap-1">
-                              <button onClick={() => { setManterDenuncias(true); handleExcluirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} disabled={!motivoExclusao.trim()} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">Excluir</button>
-                              <button onClick={() => { setConfirmandoExclusaoModal(false); setMotivoExclusao(""); }} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">Cancelar</button>
+                              <button onClick={() => { setManterDenuncias(true); handleExcluirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} disabled={!motivoExclusao.trim()} className="flex-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50">{t('usuarios.excluir')}</button>
+                              <button onClick={() => { setConfirmandoExclusaoModal(false); setMotivoExclusao(""); }} className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-slate-300 hover:bg-white/10">{t('usuarios.cancelar')}</button>
                             </div>
                           </div>
                         ) : (
                           <>
                             {modalUsuario.banido ? (
                               <button onClick={() => { handleDesbanirUsuario(modalUsuario.uid, modalUsuario.username); setModalUsuario(null); }} className="w-full text-left px-3 py-2 text-xs text-green-300 hover:bg-white/5 flex items-center gap-2">
-                                Desbanir usuário
+                                {t('usuarios.desbanir')}
                               </button>
                             ) : (
                               <button onClick={() => setConfirmandoBanimento(true)} className="w-full text-left px-3 py-2 text-xs text-yellow-300 hover:bg-white/5 flex items-center gap-2">
-                                Banir usuário
+                                {t('usuarios.banir')}
                               </button>
                             )}
                             <button onClick={() => setConfirmandoExclusaoModal(true)} className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
-                              Excluir conta
+                              {t('usuarios.excluirConta')}
                             </button>
                           </>
                         )}
@@ -369,11 +372,11 @@ export default function UsuariosTab() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Username</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('usuarios.modal.username')}</p>
                   <p className="text-sm text-white">{modalUsuario.username}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Role</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('usuarios.modal.role')}</p>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                     modalUsuario.role === 'administrador' ? 'bg-purple-500/15 text-purple-200 border-purple-400/20' :
                     modalUsuario.role === 'moderador' ? 'bg-blue-500/15 text-blue-200 border-blue-400/20' :
@@ -383,35 +386,35 @@ export default function UsuariosTab() {
                   </span>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Status</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('usuarios.modal.status')}</p>
                   <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
                     modalUsuario.banido ? 'border-red-400/30 bg-red-500/10 text-red-300' : 'border-green-400/30 bg-green-500/10 text-green-300'
                   }`}>
-                    {modalUsuario.banido ? 'Banido' : 'Ativo'}
+                    {modalUsuario.banido ? t('usuarios.status.banido') : t('usuarios.status.ativo')}
                   </span>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Criado em</p>
-                  <p className="text-sm text-white">{modalUsuario.createdAt ? new Date(modalUsuario.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('usuarios.modal.criadoEm')}</p>
+                  <p className="text-sm text-white">{modalUsuario.createdAt ? new Date(modalUsuario.createdAt).toLocaleDateString('pt-BR') : t('usuarios.na')}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Denúncias</p>
-                  <p className="text-sm text-white">{totalDenunciasUsuario[modalUsuario.uid] || 0} denúncias</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{t('usuarios.modal.denuncias')}</p>
+                  <p className="text-sm text-white">{t('usuarios.qtdDenuncias', { count: totalDenunciasUsuario[modalUsuario.uid] || 0 })}</p>
                 </div>
               </div>
               
               {/* Role change (select) para outros usuários */}
               {modalUsuario.uid !== currentUser?.uid && (
                 <div className="pt-3 border-t border-white/10">
-                  <label className="block text-[11px] uppercase tracking-wide font-semibold mb-2 text-slate-400">Alterar Role</label>
+                  <label className="block text-[11px] uppercase tracking-wide font-semibold mb-2 text-slate-400">{t('usuarios.modal.alterarRole')}</label>
                   <select
                     value={modalUsuario.role}
                     onChange={(e) => { handleRoleChange(modalUsuario.uid, e.target.value); setModalUsuario({...modalUsuario, role: e.target.value}); }}
                     className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   >
-                    <option value="usuario">Usuário</option>
-                    <option value="moderador">Moderador</option>
-                    <option value="administrador">Administrador</option>
+                    <option value="usuario">{t('usuarios.roleUsuario')}</option>
+                    <option value="moderador">{t('usuarios.roleModerador')}</option>
+                    <option value="administrador">{t('usuarios.roleAdministrador')}</option>
                   </select>
                 </div>
               )}

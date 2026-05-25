@@ -4,6 +4,8 @@ import { db } from "../lib/firebase";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
 import { Plus, Trash2, ExternalLink, MapPin, Search, Edit3, Heart, GripVertical, MoreVertical, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 interface Apoiador {
   id: string;
@@ -21,6 +23,7 @@ interface Apoiador {
 }
 
 export default function ApoiadoresTab() {
+  const { t } = useTranslation('admin');
   const [apoiadores, setApoiadores] = useState<Apoiador[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -58,7 +61,7 @@ export default function ApoiadoresTab() {
             endereco: value.endereco || "",
             lat: value.lat || undefined,
             lng: value.lng || undefined,
-            criadoPor: value.criadoPor || "Desconhecido",
+            criadoPor: value.criadoPor || t('apoiadores.desconhecido'),
             createdAt: value.createdAt || "",
             ordem: typeof value.ordem === "number" ? value.ordem : 999,
           }))
@@ -193,10 +196,10 @@ export default function ApoiadoresTab() {
         setLat(data[0].lat);
         setLng(data[0].lon);
       } else {
-        alert("Endereço não encontrado. Tente ser mais específico.");
+        alert(t('apoiadores.enderecoNaoEncontrado'));
       }
     } catch {
-      alert("Erro ao buscar endereço. Tente novamente.");
+      alert(t('apoiadores.erroBuscarEndereco'));
     } finally {
       setBuscando(false);
     }
@@ -251,7 +254,7 @@ export default function ApoiadoresTab() {
         },
       });
     } catch (error: any) {
-      alert("Erro ao reordenar: " + error.message);
+      alert(t('apoiadores.erroReordenar', { message: error.message }));
     } finally {
       setReordenando(false);
       dragItem.current = null;
@@ -340,7 +343,7 @@ export default function ApoiadoresTab() {
       setLng("");
       setShowForm(false);
     } catch (error: any) {
-      alert("Erro ao salvar apoiador: " + error.message);
+      alert(t('apoiadores.erroSalvar', { message: error.message }));
     } finally {
       setSalvando(false);
     }
@@ -363,7 +366,7 @@ export default function ApoiadoresTab() {
 
       setExcluindoId(null);
     } catch (error: any) {
-      alert("Erro ao excluir apoiador: " + error.message);
+      alert(t('apoiadores.erroExcluir', { message: error.message }));
     }
   }
 
@@ -371,7 +374,7 @@ export default function ApoiadoresTab() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-5">
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
-          <p className="text-sm text-slate-400">Carregando apoiadores...</p>
+          <p className="text-sm text-slate-400">{t('apoiadores.carregando')}</p>
         </div>
       </div>
     );
@@ -381,18 +384,18 @@ export default function ApoiadoresTab() {
     <div className="p-4 md:p-6 lg:p-8 space-y-5">
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Apoiadores</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Gerencie parceiros, patrocinadores e organizações apoiadoras.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('apoiadores.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('apoiadores.descricao')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{apoiadores.length} itens</span>
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('apoiadores.qtdItens', { count: apoiadores.length })}</span>
           <button
             onClick={() => { if (editandoId) { handleCancelarEdicao(); } else { setShowForm(!showForm); } }}
             className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-700"
           >
             <Plus size={14} />
-            {showForm ? (editandoId ? "Cancelar Edição" : "Cancelar") : "Novo Apoiador"}
+            {showForm ? (editandoId ? t('apoiadores.cancelarEdicao') : t('apoiadores.cancelar')) : t('apoiadores.novoApoiador')}
           </button>
         </div>
       </div>
@@ -400,23 +403,23 @@ export default function ApoiadoresTab() {
       {/* Formulário */}
       {showForm && (
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur mb-5">
-          <h3 className="text-sm font-semibold text-white mb-4">{editandoId ? "Editar Apoiador" : "Novo Apoiador"}</h3>
+          <h3 className="text-sm font-semibold text-white mb-4">{editandoId ? t('apoiadores.editarApoiador') : t('apoiadores.novoApoiadorTitulo')}</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
-                Nome do apoiador *
+                {t('apoiadores.nomeLabel')}
               </label>
               <input
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                placeholder="Ex: Massa Crítica São Paulo"
+                placeholder={t('apoiadores.nomePlaceholder')}
                 className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
               <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
-                URL (Instagram, site...) *
+                {t('apoiadores.urlLabel')}
               </label>
               <input
                 type="url"
@@ -428,7 +431,7 @@ export default function ApoiadoresTab() {
             </div>
             <div>
               <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
-                Caminho da imagem (opcional)
+                {t('apoiadores.imgLabel')}
               </label>
               <input
                 type="text"
@@ -438,31 +441,31 @@ export default function ApoiadoresTab() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
               <p className="text-xs text-slate-500 mt-1">
-                Deixe vazio para definir automaticamente com base no nome
+                {t('apoiadores.imgDica')}
               </p>
             </div>
             <div>
               <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
-                Descrição (opcional)
+                {t('apoiadores.descricaoLabel')}
               </label>
               <textarea
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
-                placeholder="Breve descrição do apoiador..."
+                placeholder={t('apoiadores.descricaoPlaceholder')}
                 rows={3}
                 className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
             <div>
               <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">
-                Endereço / Local (para aparecer no mapa)
+                {t('apoiadores.enderecoLabel')}
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
-                  placeholder="Ex: Porto Alegre, RS"
+                  placeholder={t('apoiadores.enderecoPlaceholder')}
                   className="flex-1 rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
                 <button
@@ -471,13 +474,13 @@ export default function ApoiadoresTab() {
                   className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
                 >
                   <Search size={16} />
-                  {buscando ? "..." : "Buscar"}
+                  {buscando ? t('apoiadores.buscando') : t('apoiadores.buscar')}
                 </button>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Latitude</label>
+                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('apoiadores.latitude')}</label>
                 <input
                   type="number"
                   step="any"
@@ -487,7 +490,7 @@ export default function ApoiadoresTab() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Longitude</label>
+                <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('apoiadores.longitude')}</label>
                 <input
                   type="number"
                   step="any"
@@ -498,8 +501,8 @@ export default function ApoiadoresTab() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Localização no mapa</label>
-              <p className="text-xs text-slate-500 mb-2">Clique no mapa para marcar o ponto ou arraste o marcador para ajustar</p>
+              <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('apoiadores.localizacaoMapa')}</label>
+              <p className="text-xs text-slate-500 mb-2">{t('apoiadores.mapaInstrucao')}</p>
               <div
                 ref={mapRef}
                 className="w-full h-56 rounded-xl border border-white/10 z-0"
@@ -511,7 +514,7 @@ export default function ApoiadoresTab() {
               disabled={!nome.trim() || !url.trim() || salvando}
               className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-green-950/40 transition hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {salvando ? "Salvando..." : (editandoId ? "Atualizar Apoiador" : "Salvar Apoiador")}
+              {salvando ? t('apoiadores.salvando') : (editandoId ? t('apoiadores.atualizarApoiador') : t('apoiadores.salvarApoiador'))}
             </button>
           </div>
         </div>
@@ -521,9 +524,9 @@ export default function ApoiadoresTab() {
       {apoiadores.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-xl shadow-black/20 backdrop-blur text-center">
           <Heart size={36} className="mx-auto text-slate-600 mb-3" />
-          <p className="text-sm text-slate-400">Nenhum apoiador cadastrado ainda</p>
+          <p className="text-sm text-slate-400">{t('apoiadores.listaVazia')}</p>
           <p className="text-xs text-slate-500 mt-2">
-            Clique em "Novo Apoiador" para adicionar o primeiro
+            {t('apoiadores.listaVaziaDica')}
           </p>
         </div>
       ) : (
@@ -544,7 +547,7 @@ export default function ApoiadoresTab() {
                   <div className="flex items-center gap-3 mb-2">
                     <span
                       className="text-gray-500 hover:text-white cursor-grab active:cursor-grabbing flex-shrink-0 inline-flex"
-                      title="Arrastar para reordenar"
+                      title={t('apoiadores.arrastarReordenar')}
                     >
                       <GripVertical size={20} />
                     </span>
@@ -580,10 +583,7 @@ export default function ApoiadoresTab() {
                     </div>
                   )}
                   <div className="mt-2 text-xs text-slate-500">
-                    Adicionado por {apoiador.criadoPor} em{" "}
-                    {apoiador.createdAt
-                      ? new Date(apoiador.createdAt).toLocaleDateString("pt-BR")
-                      : "N/A"}
+                    {t('apoiadores.adicionadoPor', { usuario: apoiador.criadoPor, data: apoiador.createdAt ? new Date(apoiador.createdAt).toLocaleDateString("pt-BR") : "N/A" })}
                   </div>
                 </div>
               </div>
@@ -610,10 +610,10 @@ export default function ApoiadoresTab() {
                   {menuApoiadorAberto && (
                     <div className="absolute right-0 top-full mt-1 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-10">
                       <button onClick={() => { handleEditar(modalApoiador); setModalApoiador(null); }} className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center gap-2">
-                        <Edit3 size={14} /> Editar
+                        <Edit3 size={14} /> {t('apoiadores.editar')}
                       </button>
                       <button onClick={() => { handleExcluir(modalApoiador.id, modalApoiador.nome); setModalApoiador(null); }} className="w-full text-left px-3 py-2 text-xs text-red-300 hover:bg-white/5 flex items-center gap-2">
-                        <Trash2 size={14} /> Excluir
+                        <Trash2 size={14} /> {t('apoiadores.excluir')}
                       </button>
                     </div>
                   )}
@@ -630,37 +630,37 @@ export default function ApoiadoresTab() {
                 </div>
               )}
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Nome</p>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.nome')}</p>
                 <p className="text-sm text-white">{modalApoiador.nome}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">URL</p>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.url')}</p>
                 <a href={modalApoiador.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1">
                   <ExternalLink size={14} /> {modalApoiador.url}
                 </a>
               </div>
               {modalApoiador.descricao && (
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Descrição</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.descricao')}</p>
                   <p className="text-sm text-slate-200">{modalApoiador.descricao}</p>
                 </div>
               )}
               {modalApoiador.endereco && (
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Endereço</p>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.endereco')}</p>
                   <p className="text-sm text-white flex items-center gap-1"><MapPin size={14} className="text-slate-400" /> {modalApoiador.endereco}</p>
                 </div>
               )}
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Ordem</p>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.ordem')}</p>
                 <p className="text-sm text-white">#{modalApoiador.ordem + 1}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Criado por</p>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.criadoPor')}</p>
                 <p className="text-sm text-white">{modalApoiador.criadoPor}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">Data</p>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-1">{t('apoiadores.modal.data')}</p>
                 <p className="text-sm text-white">{modalApoiador.createdAt ? new Date(modalApoiador.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
               </div>
             </div>

@@ -3,8 +3,10 @@ import { ref, onValue } from "firebase/database";
 import { db } from "../lib/firebase";
 import { ChevronDown, UserPlus, LogIn, LogOut, Trash2, Plus, Edit, Settings, AlertTriangle, X, MessageSquare, CheckCircle } from "lucide-react";
 import { useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 
 export default function HistoricoTab() {
+  const { t } = useTranslation('admin');
   const [eventos, setEventos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandido, setExpandido] = useState<string | null>(null);
@@ -184,29 +186,29 @@ export default function HistoricoTab() {
   const getEventoTexto = (evento: any) => {
     switch (evento.tipo) {
       case 'criar_conta':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} criou uma conta</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.criarConta')}</>;
       case 'login':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} fez login</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.login')}</>;
       case 'logout':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} fez logout</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.logout')}</>;
       case 'enviar_contato':
-        return <>{highlightUsername(evento.usuario)} enviou contato - {highlightText((evento.detalhes?.tipo || '').replace('-', ' '))}</>;
+        return <>{highlightUsername(evento.usuario)} {t('historico.evento.enviarContato')} - {highlightText((evento.detalhes?.tipo || '').replace('-', ' '))}</>;
       case 'ler_contato':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} leu contato de {highlightUsername(evento.detalhes?.usuarioContato || '')} - {highlightText(evento.detalhes?.tipo || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.lerContato')} {highlightUsername(evento.detalhes?.usuarioContato || '')} - {highlightText(evento.detalhes?.tipo || '')}</>;
       case 'responder_contato':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} respondeu o contato de {highlightUsername(evento.detalhes?.usuarioContato || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.responderContato')} {highlightUsername(evento.detalhes?.usuarioContato || '')}</>;
       case 'resolver_contato':
         const isProprioContato = evento.usuario === evento.detalhes?.usuarioContato;
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} marcou contato {evento.detalhes?.tipo ? highlightText((evento.detalhes.tipo || '').replace('-', ' ')) : ''} {isProprioContato ? '' : 'de ' + highlightUsername(evento.detalhes?.usuarioContato || '')} como Resolvido</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.resolverContato')} {evento.detalhes?.tipo ? highlightText((evento.detalhes.tipo || '').replace('-', ' ')) : ''} {isProprioContato ? '' : 'de ' + highlightUsername(evento.detalhes?.usuarioContato || '')}</>;
       case 'marcar_pendente_contato':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} marcou {evento.detalhes?.tipo ? highlightText((evento.detalhes.tipo || '').replace('-', ' ')) : 'contato'} de {highlightUsername(evento.detalhes?.usuarioContato || '')} como Pendente</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.marcarPendente')} {evento.detalhes?.tipo ? highlightText((evento.detalhes.tipo || '').replace('-', ' ')) : 'contato'} de {highlightUsername(evento.detalhes?.usuarioContato || '')}</>;
       case 'excluir_denuncia':
         const denunciaExcluida = evento.detalhes?.denuncia;
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} excluiu denúncia - {highlightText(denunciaExcluida?.tipo || '')} em {highlightText(denunciaExcluida?.endereco || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.excluirDenuncia')} - {highlightText(denunciaExcluida?.tipo || '')} em {highlightText(denunciaExcluida?.endereco || '')}</>;
       case 'adicionar_denuncia':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} adicionou denúncia: {highlightText(evento.detalhes?.tipo || '')} em {highlightText(evento.detalhes?.endereco || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.adicionarDenuncia')}: {highlightText(evento.detalhes?.tipo || '')} em {highlightText(evento.detalhes?.endereco || '')}</>;
       case 'editar_denuncia':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} editou denúncia</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.editarDenuncia')}</>;
       case 'modificar_role':
         const roleAnteriorConfig: Record<string, { label: string; color: string }> = {
           administrador: { label: 'ADM', color: 'bg-purple-600' },
@@ -222,14 +224,14 @@ export default function HistoricoTab() {
         const configNova = roleNovaConfig[evento.detalhes?.roleNova || ''];
         return (
           <>
-            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} modificou permissões de {highlightUsername(evento.detalhes?.alvo || '')} de{' '}
+            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.modificarRole')} {highlightUsername(evento.detalhes?.alvo || '')} {' '}
             {configAnterior && (
               <span className={`${configAnterior.color} text-white text-xs px-2 py-0.5 rounded mx-1`}>
                 {configAnterior.label}
               </span>
             )}
             {!configAnterior && highlightText(evento.detalhes?.roleAnterior || '')}
-            {' '}para{' '}
+            {' '}{t('historico.evento.para')}{' '}
             {configNova && (
               <span className={`${configNova.color} text-white text-xs px-2 py-0.5 rounded mx-1`}>
                 {configNova.label}
@@ -239,22 +241,22 @@ export default function HistoricoTab() {
           </>
         );
       case 'alterar_senha':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} alterou a senha</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.alterarSenha')}</>;
       case 'alterar_username':
-        return <>{highlightUsername(evento.detalhes?.usernameAntigo || '')}{getRoleBadge(evento.usuario)} alterou o username para {highlightUsername(evento.detalhes?.usernameNovo || '')}</>;
+        return <>{highlightUsername(evento.detalhes?.usernameAntigo || '')}{getRoleBadge(evento.usuario)} {t('historico.evento.alterarUsername')} {highlightUsername(evento.detalhes?.usernameNovo || '')}</>;
       case 'banir_usuario':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} baniu {highlightUsername(evento.detalhes?.usuarioBanido || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.banir')} {highlightUsername(evento.detalhes?.usuarioBanido || '')}</>;
       case 'desbanir_usuario':
-        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} desbaniu {highlightUsername(evento.detalhes?.usuarioDesbanido || '')}</>;
+        return <>{highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.desbanir')} {highlightUsername(evento.detalhes?.usuarioDesbanido || '')}</>;
       case 'excluir_usuario':
         const manteveDenuncias = evento.detalhes?.manterDenuncias;
         const totalDenunciasExcluidas = evento.detalhes?.denunciasExcluidas || 0;
         return (
           <>
-            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} excluiu o usuário {highlightUsername(evento.detalhes?.usuarioExcluido || '')}
+            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.excluirUsuario')} {highlightUsername(evento.detalhes?.usuarioExcluido || '')}
             {totalDenunciasExcluidas > 0 && (
               <span className="text-gray-400 text-sm">
-                {' '}({manteveDenuncias ? `manteve ${totalDenunciasExcluidas} denúncias` : `excluiu ${totalDenunciasExcluidas} denúncias`})
+                {' '}({manteveDenuncias ? t('historico.evento.manteveDenuncias', { count: totalDenunciasExcluidas }) : t('historico.evento.excluiuDenuncias', { count: totalDenunciasExcluidas })})
               </span>
             )}
           </>
@@ -264,16 +266,16 @@ export default function HistoricoTab() {
         const manteve = evento.detalhes?.manterDenuncias;
         return (
           <>
-            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} excluiu a conta
+            {highlightUsername(evento.usuario)}{getRoleBadge(evento.usuario)} {t('historico.evento.excluirConta')}
             {totalDenuncias > 0 && (
               <span className="text-gray-400 text-sm">
-                {' '}({manteve ? `manteve ${totalDenuncias} denúncias` : `excluiu ${totalDenuncias} denúncias`})
+                {' '}({manteve ? t('historico.evento.manteveDenuncias', { count: totalDenuncias }) : t('historico.evento.excluiuDenuncias', { count: totalDenuncias })})
               </span>
             )}
           </>
         );
       default:
-        return <>Evento: {evento.tipo || 'desconhecido'}</>;
+        return <>{t('historico.evento.desconhecido', { tipo: evento.tipo || 'desconhecido' })}</>;
     }
   };
 
@@ -329,7 +331,7 @@ export default function HistoricoTab() {
     return (
       <div className="p-4 md:p-6 lg:p-8 space-y-5">
         <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur">
-          <p className="text-sm text-slate-400">Carregando histórico...</p>
+          <p className="text-sm text-slate-400">{t('historico.carregando')}</p>
         </div>
       </div>
     );
@@ -339,17 +341,17 @@ export default function HistoricoTab() {
     <div className="p-8">
       <div className="flex items-end justify-between mb-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">Administração</p>
-          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">Histórico de Eventos</h2>
-          <p className="mt-1 text-xs md:text-sm text-slate-400">Acompanhe ações recentes e eventos de moderação.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300/80">{t('title')}</p>
+          <h2 className="font-bungee text-xl md:text-2xl tracking-wide text-white">{t('historico.titulo')}</h2>
+          <p className="mt-1 text-xs md:text-sm text-slate-400">{t('historico.descricao')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{eventosFiltrados.length} itens</span>
+          <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">{t('historico.qtdItens', { count: eventosFiltrados.length })}</span>
           <button
             onClick={() => setMostrarFiltros(!mostrarFiltros)}
             className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/10"
           >
-            ~ filtros ~
+            {t('historico.filtros')}
           </button>
         </div>
       </div>
@@ -363,7 +365,7 @@ export default function HistoricoTab() {
             abaHistorico === 'todos' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
-          Todos
+          {t('historico.aba.todos')}
         </button>
         <button
           onClick={() => setAbaHistorico('moderacao')}
@@ -371,7 +373,7 @@ export default function HistoricoTab() {
             abaHistorico === 'moderacao' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
-          Moderação
+          {t('historico.aba.moderacao')}
         </button>
         <button
           onClick={() => setAbaHistorico('usuarios')}
@@ -379,7 +381,7 @@ export default function HistoricoTab() {
             abaHistorico === 'usuarios' ? 'bg-blue-600 text-white shadow-lg shadow-blue-950/40' : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
-          Usuários
+          {t('historico.aba.usuarios')}
         </button>
       </div>
 
@@ -388,7 +390,7 @@ export default function HistoricoTab() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Buscar por termo..."
+              placeholder={t('historico.buscaPlaceholder')}
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -399,32 +401,32 @@ export default function HistoricoTab() {
             onChange={(e) => setFiltroTipo(e.target.value)}
             className="rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           >
-            <option value="todos">Todos os tipos</option>
-            <option value="criar_conta">Criar conta</option>
-            <option value="login">Login</option>
-            <option value="logout">Logout</option>
-            <option value="adicionar_denuncia">Adicionar denúncia</option>
-            <option value="editar_denuncia">Editar denúncia</option>
-            <option value="excluir_denuncia">Excluir denúncia</option>
-            <option value="modificar_role">Modificar role</option>
-            <option value="enviar_contato">Enviar contato</option>
-            <option value="ler_contato">Ler contato</option>
-            <option value="responder_contato">Responder contato</option>
-            <option value="resolver_contato">Resolver contato</option>
-            <option value="marcar_pendente_contato">Marcar pendente</option>
-            <option value="alterar_senha">Alterar senha</option>
-            <option value="alterar_username">Alterar username</option>
-            <option value="excluir_conta">Excluir conta</option>
-            <option value="banir_usuario">Banir usuário</option>
-            <option value="desbanir_usuario">Desbanir usuário</option>
-            <option value="excluir_usuario">Excluir usuário</option>
+            <option value="todos">{t('historico.filtro.todosTipos')}</option>
+            <option value="criar_conta">{t('historico.filtro.criarConta')}</option>
+            <option value="login">{t('historico.filtro.login')}</option>
+            <option value="logout">{t('historico.filtro.logout')}</option>
+            <option value="adicionar_denuncia">{t('historico.filtro.adicionarDenuncia')}</option>
+            <option value="editar_denuncia">{t('historico.filtro.editarDenuncia')}</option>
+            <option value="excluir_denuncia">{t('historico.filtro.excluirDenuncia')}</option>
+            <option value="modificar_role">{t('historico.filtro.modificarRole')}</option>
+            <option value="enviar_contato">{t('historico.filtro.enviarContato')}</option>
+            <option value="ler_contato">{t('historico.filtro.lerContato')}</option>
+            <option value="responder_contato">{t('historico.filtro.responderContato')}</option>
+            <option value="resolver_contato">{t('historico.filtro.resolverContato')}</option>
+            <option value="marcar_pendente_contato">{t('historico.filtro.marcarPendente')}</option>
+            <option value="alterar_senha">{t('historico.filtro.alterarSenha')}</option>
+            <option value="alterar_username">{t('historico.filtro.alterarUsername')}</option>
+            <option value="excluir_conta">{t('historico.filtro.excluirConta')}</option>
+            <option value="banir_usuario">{t('historico.filtro.banirUsuario')}</option>
+            <option value="desbanir_usuario">{t('historico.filtro.desbanirUsuario')}</option>
+            <option value="excluir_usuario">{t('historico.filtro.excluirUsuario')}</option>
           </select>
         </div>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-xl shadow-black/20 backdrop-blur flex gap-3">
         <div className="flex-1">
-          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Início</label>
+          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('historico.dataInicio')}</label>
           <input
             type="date"
             value={dataInicio}
@@ -433,7 +435,7 @@ export default function HistoricoTab() {
           />
         </div>
         <div className="flex-1">
-          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">Data Fim</label>
+          <label className="block text-[11px] uppercase tracking-wide font-semibold mb-1 text-slate-400">{t('historico.dataFim')}</label>
           <input
             type="date"
             value={dataFim}
@@ -450,7 +452,7 @@ export default function HistoricoTab() {
               onClick={() => setBusca('')}
               className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Busca: "{busca}" <X size={12} />
+              {t('historico.filtroAtivo.busca', { termo: busca })} <X size={12} />
             </button>
           )}
           {filtroTipo !== 'todos' && (
@@ -458,7 +460,7 @@ export default function HistoricoTab() {
               onClick={() => setFiltroTipo('todos')}
               className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Tipo: {filtroTipo.replace('_', ' ')} <X size={12} />
+              {t('historico.filtroAtivo.tipo', { tipo: filtroTipo.replace('_', ' ') })} <X size={12} />
             </button>
           )}
           {dataInicio && (
@@ -466,7 +468,7 @@ export default function HistoricoTab() {
               onClick={() => setDataInicio('')}
               className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              De: {new Date(dataInicio).toLocaleDateString('pt-BR')} <X size={12} />
+              {t('historico.filtroAtivo.de', { data: new Date(dataInicio).toLocaleDateString('pt-BR') })} <X size={12} />
             </button>
           )}
           {dataFim && (
@@ -474,14 +476,14 @@ export default function HistoricoTab() {
               onClick={() => setDataFim('')}
               className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 hover:bg-white/10 flex items-center gap-1"
             >
-              Até: {new Date(dataFim).toLocaleDateString('pt-BR')} <X size={12} />
+              {t('historico.filtroAtivo.ate', { data: new Date(dataFim).toLocaleDateString('pt-BR') })} <X size={12} />
             </button>
           )}
           <button
             onClick={() => { setBusca(''); setFiltroTipo('todos'); setDataInicio(''); setDataFim(''); }}
             className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/20"
           >
-            Limpar todos
+            {t('historico.limparTodos')}
           </button>
         </div>
       )}
@@ -490,7 +492,7 @@ export default function HistoricoTab() {
 
       {eventosFiltrados.length === 0 ? (
         <div className="bg-gray-800 p-8 rounded-xl shadow-lg text-center">
-          <p className="text-gray-400">Nenhum evento encontrado</p>
+          <p className="text-gray-400">{t('historico.vazio')}</p>
         </div>
       ) : (
         <>
@@ -525,24 +527,24 @@ export default function HistoricoTab() {
                   <div className="mt-3 pt-3 border-t border-gray-700">
                     {evento.tipo === 'enviar_contato' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
-                        <div><strong className="text-gray-300">Data do contato:</strong> <span className="text-gray-400">{new Date(evento.detalhes.contatoId).toLocaleString('pt-BR')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.dataContato')}:</strong> <span className="text-gray-400">{new Date(evento.detalhes.contatoId).toLocaleString('pt-BR')}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'ler_contato' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Usuário do contato:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || 'Anônimo')}</span></div>
-                        <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
-                        <div><strong className="text-gray-300">Data do contato:</strong> <span className="text-gray-400">{new Date(evento.detalhes.contatoId).toLocaleString('pt-BR')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usuarioContato')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || t('historico.evento.anonimo'))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.dataContato')}:</strong> <span className="text-gray-400">{new Date(evento.detalhes.contatoId).toLocaleString('pt-BR')}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'responder_contato' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Usuário do contato:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || 'Anônimo')}</span></div>
-                        <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usuarioContato')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || t('historico.evento.anonimo'))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
                         {evento.detalhes.mensagens && evento.detalhes.mensagens.length > 0 && (
                           <div>
-                            <strong className="text-gray-300">Histórico da conversa:</strong>
+                            <strong className="text-gray-300">{t('historico.detalhes.historicoConversa')}:</strong>
                             <div className="mt-2 space-y-2">
                               {evento.detalhes.mensagens.map((msg: any, idx: number) => (
                                 <div key={idx} className={`p-2 rounded text-xs ${
@@ -564,81 +566,81 @@ export default function HistoricoTab() {
                     )}
                     {(evento.tipo === 'resolver_contato' || evento.tipo === 'marcar_pendente_contato') && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Usuário do contato:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || 'Anônimo')}</span></div>
-                        <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usuarioContato')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioContato || t('historico.evento.anonimo'))}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400 capitalize">{highlightText((evento.detalhes.tipo || '').replace('-', ' '))}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'adicionar_denuncia' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.tipo || '')}</span></div>
-                        <div><strong className="text-gray-300">Endereço:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.endereco || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.tipo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.endereco')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.endereco || '')}</span></div>
                         {evento.detalhes.relato && (
-                          <div><strong className="text-gray-300">Relato:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relato)}</span></div>
+                          <div><strong className="text-gray-300">{t('historico.detalhes.relato')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relato)}</span></div>
                         )}
                         {evento.detalhes.placa && (
-                          <div><strong className="text-gray-300">Placa:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.placa)}</span></div>
+                          <div><strong className="text-gray-300">{t('historico.detalhes.placa')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.placa)}</span></div>
                         )}
-                        <div><strong className="text-gray-300">ID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.id}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.id')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.id}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'editar_denuncia' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Relato anterior:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relatoAnterior || '')}</span></div>
-                        <div><strong className="text-gray-300">Relato novo:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relatoNovo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.relatoAnterior')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relatoAnterior || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.relatoNovo')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.relatoNovo || '')}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'excluir_denuncia' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Motivo:</strong> <span className="text-red-400 font-semibold">{highlightText(evento.detalhes.motivo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.motivo')}:</strong> <span className="text-red-400 font-semibold">{highlightText(evento.detalhes.motivo || '')}</span></div>
                         {evento.detalhes.denuncia && (
                           <>
-                            <div><strong className="text-gray-300">Usuário da denúncia:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.username || 'Anônimo')}</span></div>
-                            <div><strong className="text-gray-300">Tipo:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.tipo || '')}</span></div>
-                            <div><strong className="text-gray-300">Endereço:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.endereco || '')}</span></div>
-                            <div><strong className="text-gray-300">Relato:</strong> <span className="text-gray-400">{highlightText(typeof evento.detalhes.denuncia.relato === 'string' ? evento.detalhes.denuncia.relato : (Array.isArray(evento.detalhes.denuncia.relato) && evento.detalhes.denuncia.relato.length > 0 ? (typeof evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1] === 'string' ? evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1] : evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1]?.texto) : ''))}</span></div>
+                            <div><strong className="text-gray-300">{t('historico.detalhes.usuarioDenuncia')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.username || t('historico.evento.anonimo'))}</span></div>
+                            <div><strong className="text-gray-300">{t('historico.detalhes.tipo')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.tipo || '')}</span></div>
+                            <div><strong className="text-gray-300">{t('historico.detalhes.endereco')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.endereco || '')}</span></div>
+                            <div><strong className="text-gray-300">{t('historico.detalhes.relato')}:</strong> <span className="text-gray-400">{highlightText(typeof evento.detalhes.denuncia.relato === 'string' ? evento.detalhes.denuncia.relato : (Array.isArray(evento.detalhes.denuncia.relato) && evento.detalhes.denuncia.relato.length > 0 ? (typeof evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1] === 'string' ? evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1] : evento.detalhes.denuncia.relato[evento.detalhes.denuncia.relato.length - 1]?.texto) : ''))}</span></div>
                             {evento.detalhes.denuncia.placa && (
-                              <div><strong className="text-gray-300">Placa:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.placa)}</span></div>
+                              <div><strong className="text-gray-300">{t('historico.detalhes.placa')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.denuncia.placa)}</span></div>
                             )}
-                            <div><strong className="text-gray-300">Data de criação:</strong> <span className="text-gray-400">{new Date(evento.detalhes.denuncia.createdAt).toLocaleString('pt-BR')}</span></div>
+                            <div><strong className="text-gray-300">{t('historico.detalhes.dataCriacao')}:</strong> <span className="text-gray-400">{new Date(evento.detalhes.denuncia.createdAt).toLocaleString('pt-BR')}</span></div>
                           </>
                         )}
                       </div>
                     )}
                     {evento.tipo === 'alterar_senha' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">UID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.uid')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'alterar_username' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Username anterior:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usernameAntigo || '')}</span></div>
-                        <div><strong className="text-gray-300">Username novo:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usernameNovo || '')}</span></div>
-                        <div><strong className="text-gray-300">UID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usernameAnterior')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usernameAntigo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usernameNovo')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usernameNovo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.uid')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
                       </div>
                     )}
                     {(evento.tipo === 'banir_usuario' || evento.tipo === 'desbanir_usuario') && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Usuário {evento.tipo === 'banir_usuario' ? 'banido' : 'desbanido'}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioBanido || evento.detalhes.usuarioDesbanido || '')}</span></div>
-                        <div><strong className="text-gray-300">UID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
+                        <div><strong className="text-gray-300">{evento.tipo === 'banir_usuario' ? t('historico.detalhes.usuarioBanido') : t('historico.detalhes.usuarioDesbanido')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioBanido || evento.detalhes.usuarioDesbanido || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.uid')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'excluir_usuario' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Usuário excluído:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioExcluido || '')}</span></div>
-                        <div><strong className="text-gray-300">Motivo:</strong> <span className="text-red-400 font-semibold">{highlightText(evento.detalhes.motivo || '')}</span></div>
-                        <div><strong className="text-gray-300">Denúncias {evento.detalhes.manterDenuncias ? 'mantidas' : 'excluídas'}:</strong> <span className="text-gray-400">{evento.detalhes.denunciasExcluidas || 0}</span></div>
-                        <div><strong className="text-gray-300">UID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.usuarioExcluido')}:</strong> <span className="text-gray-400">{highlightText(evento.detalhes.usuarioExcluido || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.motivo')}:</strong> <span className="text-red-400 font-semibold">{highlightText(evento.detalhes.motivo || '')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.denunciasMantidas')}:</strong> <span className="text-gray-400">{evento.detalhes.denunciasExcluidas || 0}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.uid')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
                       </div>
                     )}
                     {evento.tipo === 'excluir_conta' && evento.detalhes && (
                       <div className="space-y-2 text-sm">
-                        <div><strong className="text-gray-300">Email:</strong> <span className="text-gray-400">{evento.detalhes.email || 'N/A'}</span></div>
-                        <div><strong className="text-gray-300">UID:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
-                        <div><strong className="text-gray-300">Manteve denúncias:</strong> <span className="text-gray-400">{evento.detalhes.manterDenuncias ? 'Sim' : 'Não'}</span></div>
-                        <div><strong className="text-gray-300">Total de denúncias:</strong> <span className="text-gray-400">{evento.detalhes.denunciasExcluidas || 0}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.email')}:</strong> <span className="text-gray-400">{evento.detalhes.email || t('historico.detalhes.na')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.uid')}:</strong> <span className="text-gray-400 font-mono text-xs">{evento.detalhes.uid}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.manteveDenuncias')}:</strong> <span className="text-gray-400">{evento.detalhes.manterDenuncias ? t('historico.detalhes.sim') : t('historico.detalhes.nao')}</span></div>
+                        <div><strong className="text-gray-300">{t('historico.detalhes.totalDenuncias')}:</strong> <span className="text-gray-400">{evento.detalhes.denunciasExcluidas || 0}</span></div>
                         {evento.detalhes.manterDenuncias && evento.detalhes.denunciasExcluidas > 0 && evento.detalhes.denunciasIds && (
                           <div>
-                            <strong className="text-gray-300">IDs das denúncias mantidas:</strong>
+                            <strong className="text-gray-300">{t('historico.detalhes.idsDenuncias')}:</strong>
                             <div className="mt-1 space-y-1">
                               {evento.detalhes.denunciasIds.map((id: string, idx: number) => (
                                 <div key={idx} className="text-gray-400 font-mono text-xs bg-gray-700 p-1 rounded">{id}</div>
@@ -664,17 +666,17 @@ export default function HistoricoTab() {
                 disabled={paginaAtual === 1}
                 className="px-3 py-1 bg-gray-700 text-white rounded disabled:opacity-50 text-sm"
               >
-                Anterior
+                {t('historico.paginacao.anterior')}
               </button>
               <span className="text-gray-400 text-sm">
-                Página {paginaAtual} de {totalPaginas}
+                {t('historico.paginacao.pagina', { atual: paginaAtual, total: totalPaginas })}
               </span>
               <button
                 onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))}
                 disabled={paginaAtual === totalPaginas}
                 className="px-3 py-1 bg-gray-700 text-white rounded disabled:opacity-50 text-sm"
               >
-                Próxima
+                {t('historico.paginacao.proxima')}
               </button>
             </div>
           )}

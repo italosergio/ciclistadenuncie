@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { loginUser, registerUser, resetPassword } from "../lib/auth";
+import { loginUser, registerUser, resetPassword, getUserEmailByUsername, addEmailAndResetPassword } from "../lib/auth";
 import { useAuth } from "../lib/AuthContext";
 import { Eye, EyeOff, AlertTriangle, ArrowLeft, ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -16,6 +16,11 @@ export default function Login() {
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  const [showForgotUsername, setShowForgotUsername] = useState(false);
+  const [forgotUsername, setForgotUsername] = useState("");
+  const [forgotLookedUp, setForgotLookedUp] = useState<'idle' | 'found' | 'placeholder' | 'notfound'>('idle');
+  const [forgotNewEmail, setForgotNewEmail] = useState("");
+  const [forgotCurrentPassword, setForgotCurrentPassword] = useState("");
 
   // Cadastro multi-step
   const [isRegister, setIsRegister] = useState(false);
@@ -81,6 +86,51 @@ export default function Login() {
       setForgotSent(true);
     } catch (err: any) {
       setError(errorMessages[err.code] || 'Erro ao enviar e-mail');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleForgotUsername(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const { email, uid } = await getUserEmailByUsername(forgotUsername);
+      if (!email) {
+        setForgotLookedUp('notfound');
+        return;
+      }
+      // Verifica se é email real ou placeholder
+      if (email.endsWith('@ciclistadenuncie.local')) {
+        setForgotLookedUp('placeholder');
+      } else {
+        // Tem email real — preenche no campo de email e manda reset
+        setForgotEmail(email);
+        setShowForgotUsername(false);
+        await resetPassword(email);
+        setForgotSent(true);
+      }
+    } catch (err: any) {
+      setError('Erro ao buscar usuário');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAddEmailAndReset(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await addEmailAndResetPassword(forgotUsername, forgotCurrentPassword, forgotNewEmail);
+      setForgotSent(true);
+    } catch (err: any) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Senha atual incorreta. Tente novamente.');
+      } else {
+        setError(err.message || 'Erro ao adicionar email');
+      }
     } finally {
       setLoading(false);
     }
@@ -177,7 +227,7 @@ export default function Login() {
           <ArrowLeft size={16} /> {t('back', { ns: 'translation' })}
         </Link>
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
-          <button onClick={() => { setShowForgot(false); setForgotSent(false); setError(""); }} className="flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-6">
+          <button onClick={() => { setShowForgot(false); setForgotSent(false); setError(""); setShowForgotUsername(false); setForgotLookedUp('idle'); }} className="flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-6">
             <ArrowLeft size={16} /> {t('backToLogin', { ns: 'translation' })}
           </button>
           <h1 className="text-2xl font-bold text-white mb-2">{t('mudarSenha.title')}</h1>
@@ -186,6 +236,53 @@ export default function Login() {
               <div className="text-4xl">📬</div>
               <p className="text-gray-300 text-sm">{t('sucesso.emailEnviado')}</p>
             </div>
+          ) : showForgotUsername ? (
+            <>
+              {forgotLookedUp === 'idle' && (
+                <form onSubmit={handleForgotUsername} className="space-y-4">
+                  <p className="text-gray-400 text-sm">Digite seu nome de usuário para encontrarmos sua conta.</p>
+                  <input type="text" value={forgotUsername} onChange={e => setForgotUsername(e.target.value)} required autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="Nome de usuário"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 font-mono tracking-wide" />
+                  {error && <p className="text-red-400 text-sm">{error}</p>}
+                  <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
+                    {loading ? 'Buscando...' : 'Buscar conta'}
+                  </button>
+                </form>
+              )}
+              {forgotLookedUp === 'notfound' && (
+                <div className="space-y-4">
+                  <p className="text-yellow-400 text-sm">Usuário não encontrado. Verifique o nome ou tente com o email.</p>
+                  <button onClick={() => { setShowForgotUsername(false); setForgotLookedUp('idle'); setError(""); }} className="w-full bg-gray-700 text-gray-300 py-2 rounded-lg hover:bg-gray-600 font-medium text-sm">
+                    Voltar e usar email
+                  </button>
+                </div>
+              )}
+              {forgotLookedUp === 'placeholder' && (
+                <form onSubmit={handleAddEmailAndReset} className="space-y-4">
+                  <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 mb-2">
+                    <p className="text-yellow-300 text-sm font-medium mb-1">⚠️ Email temporário</p>
+                    <p className="text-gray-300 text-xs">
+                      Sua conta foi criada com um email temporário. Para redefinir sua senha,
+                      adicione seu email real abaixo. Precisamos da sua senha atual para confirmar a identidade.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Novo email</label>
+                    <input type="email" value={forgotNewEmail} onChange={e => setForgotNewEmail(e.target.value)} required autoComplete="email" placeholder="seu@email.com"
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Senha atual</label>
+                    <input type="password" value={forgotCurrentPassword} onChange={e => setForgotCurrentPassword(e.target.value)} required autoComplete="current-password" placeholder="Sua senha atual"
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  {error && <p className="text-red-400 text-sm">{error}</p>}
+                  <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
+                    {loading ? 'Adicionando...' : 'Adicionar email e redefinir senha'}
+                  </button>
+                </form>
+              )}
+            </>
           ) : (
             <form onSubmit={handleForgot} className="space-y-4">
               <p className="text-gray-400 text-sm">{t('mudarSenha.instrucao')}</p>
@@ -194,6 +291,9 @@ export default function Login() {
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium">
                 {loading ? t('mudarSenha.loading') : t('mudarSenha.enviarLink')}
+              </button>
+              <button type="button" onClick={() => { setShowForgotUsername(true); setError(""); }} className="w-full text-blue-400 hover:underline text-sm">
+                Não sei meu email / Não tenho email cadastrado
               </button>
             </form>
           )}
