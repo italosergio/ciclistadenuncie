@@ -267,7 +267,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
   }
 
   const tipos = [
-    { value: "fina", label: t('tipos.fina'), icon: Wind },
+    { value: "fina", label: t('tipos.fina'), icon: Wind, desc: t('tipos.fina.desc') },
     { value: "ameaca", label: t('tipos.ameaca'), icon: Megaphone },
     { value: "assedio", label: t('tipos.assedio'), icon: Hand },
     { value: "agressao-verbal", label: t('tipos.agressaoVerbal'), icon: MessageSquareWarning },
@@ -381,7 +381,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         className="flex items-center gap-1 px-3 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-medium"
                       >
                         {Icon === TeardropBikeIcon ? <TeardropBikeIcon size={16} color="red" /> : <Icon size={16} />}
-                        <span>{label}</span>
+                        <div>
+                          <div className="text-sm">{label}</div>
+                          {tipoInfo?.desc && <div className="text-[10px] opacity-60 leading-tight">{tipoInfo.desc}</div>}
+                        </div>
                         <button
                           type="button"
                           onClick={() => removerSituacao(index)}
@@ -416,7 +419,10 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
                         className="w-full p-3 hover:bg-gray-100 dark:hover:bg-gray-700 text-left flex items-center gap-2"
                       >
                         {t.icon === TeardropBikeIcon ? <TeardropBikeIcon size={18} color="red" /> : <t.icon size={18} />}
-                        {t.label}
+                        <div>
+                          <div>{t.label}</div>
+                          {t.desc && <div className="text-[10px] opacity-60 leading-tight">{t.desc}</div>}
+                        </div>
                       </button>
                     ))}
                   </div>

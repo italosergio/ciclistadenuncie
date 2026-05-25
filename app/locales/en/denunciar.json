@@ -38,6 +38,7 @@
   "erro.localizacao": "Please mark the location on the map or allow access to your location",
   "erro.registro": "Error registering report. Try again.",
   "tipos.fina": "Unsafe pass/close pass",
+  "tipos.fina.desc": "(Driver passed less than 1.5 m away, forcing an overtake)",
   "tipos.fechada": "Cut-off",
   "tipos.ameaca": "Threat",
   "tipos.assedio": "Harassment",
