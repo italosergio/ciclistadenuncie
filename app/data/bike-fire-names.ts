@@ -4,7 +4,7 @@ export const bikeFireNames: string[] = [
   "JANAINA", "STELLA", "OLGA", "ANDERSON", "OTTO",
   "SUJEIRA", "LIMPEZA", "NELSON", "FERNANDO", "ITALO", "DJ PRÉ",
   "ALDENIO", "ZERBINATO", "FALZONI", "LIGIA", "VIOLETTA", "CAMILLO", "VIOLA", "DAMIAO", "JADSON",
-  "JAIDIU", "DIEGO", "JOÃO PAULO", "PEDRO GARCIA", "JADE", "NINA", "CÍNTIA",
+  "JAIDIU", "DIEGO", "JOÃO PAULO", "LÍVIA", "JOAQUIM", "EMMANUEL", "PEDRO GARCIA", "JADE", "NINA", "CÍNTIA", "CAÍQUE", "CAUÊ", "SARA", "JOJÔ",
 ];
 
 /** Nomes que recebem bicicleta branca (em vez de vermelha) */

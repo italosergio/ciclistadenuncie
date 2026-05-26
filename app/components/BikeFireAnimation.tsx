@@ -6,6 +6,9 @@ import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bik
 const pairRiders: string[][] = [
   ["STELLA", "OLGA", "ANDERSON", "OTTO"],
   ["DANIEL", "LIGIA", "VIOLETTA", "CAMILLO"],
+  ["JOÃO PAULO", "LÍVIA", "JOAQUIM", "EMMANUEL"],
+  ["CÍNTIA", "CAÍQUE", "CAUÊ"],
+  ["SARA", "JOJÔ"],
 ];
 
 export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) {
