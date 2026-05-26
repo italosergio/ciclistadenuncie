@@ -14,7 +14,7 @@ export default memo(function BikeFireAnimation() {
   }, []);
 
   // Pré-computa propriedades para cada nome:
-  //   - distribuição uniforme na altura da tela (0-100%)
+  //   - distribuição uniforme na altura da tela (2%-85%)
   //   - direções alternadas (ida e volta, simulando mão dupla)
   //   - pares mantêm mesma velocidade e delay
   const animProps = useMemo(() => {
@@ -25,7 +25,11 @@ export default memo(function BikeFireAnimation() {
     const pairedNames = new Set(pairRiders.flat());
     const singles = names.filter(n => !pairedNames.has(n));
     const totalSlots = singles.length + pairRiders.length;
-    const spacing = 100 / totalSlots;
+    // Faixa segura: 2%-85% para que TODAS caibam na viewport
+    const topMin = 2;
+    const topMax = 85;
+    const range = topMax - topMin;
+    const spacing = range / totalSlots;
 
     const randDelay = () => Math.random() * 3;
     const randDuration = () => 6 + Math.random() * 6;
@@ -38,7 +42,7 @@ export default memo(function BikeFireAnimation() {
       const pair = pairRiders.find(p => p.includes(name));
       if (pair) {
         // Par ocupa 1 slot — todos na mesma altura com leve espaçamento vertical
-        const centerTop = slot * spacing + spacing / 2;
+        const centerTop = topMin + slot * spacing + spacing / 2;
         const delay = randDelay();
         const duration = randDuration();
         pair.forEach((p, pIdx) => {
@@ -46,14 +50,14 @@ export default memo(function BikeFireAnimation() {
           props.set(p, {
             delay,
             duration,
-            top: Math.max(0, Math.min(100, centerTop + offset)),
+            top: Math.max(topMin, Math.min(topMax, centerTop + offset)),
             reverse: false,
           });
           used.add(p);
         });
         slot++;
       } else {
-        const topPct = slot * spacing + spacing / 2;
+        const topPct = topMin + slot * spacing + spacing / 2;
         props.set(name, {
           delay: randDelay(),
           duration: randDuration(),
