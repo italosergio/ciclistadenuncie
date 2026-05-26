@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, memo } from "react";
 import { Bike } from "lucide-react";
 import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bike-fire-names";
 
-/** Pares de pessoas que pedalam juntas (mesma velocidade, lado a lado) */
-const pairRiders: string[][] = [["STELLA", "OLGA"]];
+/** Pares de pessoas que pedalam juntas (mesma velocidade, delay e posição) */
+const pairRiders: string[][] = [["STELLA", "OLGA", "ANDERSON", "OTTO"]];
 
 export default memo(function BikeFireAnimation() {
   const [wave, setWave] = useState(0);
@@ -13,31 +13,55 @@ export default memo(function BikeFireAnimation() {
     return () => clearInterval(interval);
   }, []);
 
-  // Pré-computa propriedades de animação para cada nome,
-  // garantindo que pares tenham mesma velocidade e delay
+  // Pré-computa propriedades para cada nome:
+  //   - distribuição uniforme na altura da tela (0-100%)
+  //   - direções alternadas (ida e volta, simulando mão dupla)
+  //   - pares mantêm mesma velocidade e delay
   const animProps = useMemo(() => {
-    const props = new Map<string, { delay: number; duration: number; top: number }>();
+    const props = new Map<string, { delay: number; duration: number; top: number; reverse: boolean }>();
     const used = new Set<string>();
 
-    const randDelay = () => Math.random() * 2;
-    const randDuration = () => 5 + Math.random() * 8;
+    // Conta slots: cada par ocupa 1 slot, cada nome sem par ocupa 1 slot
+    const pairedNames = new Set(pairRiders.flat());
+    const singles = names.filter(n => !pairedNames.has(n));
+    const totalSlots = singles.length + pairRiders.length;
+    const spacing = 100 / totalSlots;
 
-    names.forEach((name, i) => {
+    const randDelay = () => Math.random() * 3;
+    const randDuration = () => 6 + Math.random() * 6;
+
+    let slot = 0;
+
+    names.forEach(name => {
       if (used.has(name)) return;
 
       const pair = pairRiders.find(p => p.includes(name));
       if (pair) {
-        // Par — mesmo delay e duração, top sequencial
+        // Par ocupa 1 slot — todos na mesma altura com leve espaçamento vertical
+        const centerTop = slot * spacing + spacing / 2;
         const delay = randDelay();
         const duration = randDuration();
         pair.forEach((p, pIdx) => {
-          const topPct = i + pIdx * 1; // ocupa slots consecutivos
-          props.set(p, { delay, duration, top: topPct * 2.9 });
+          const offset = (pIdx - (pair.length - 1) / 2) * 1.5;
+          props.set(p, {
+            delay,
+            duration,
+            top: Math.max(0, Math.min(100, centerTop + offset)),
+            reverse: false,
+          });
           used.add(p);
         });
+        slot++;
       } else {
-        props.set(name, { delay: randDelay(), duration: randDuration(), top: i * 2.9 });
+        const topPct = slot * spacing + spacing / 2;
+        props.set(name, {
+          delay: randDelay(),
+          duration: randDuration(),
+          top: topPct,
+          reverse: slot % 2 === 1,
+        });
         used.add(name);
+        slot++;
       }
     });
 
@@ -46,46 +70,54 @@ export default memo(function BikeFireAnimation() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-80">
-      {names.map((name, i) => {
-        const p = animProps.get(name)!;
-        return (
-          <div
-            key={`${wave}-${i}`}
-            className="absolute animate-bike-ride"
-            style={{
-              top: `${p.top}%`,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-            }}
-          >
-            <div className="flex flex-col items-start">
-              <span className="text-xs text-gray-400 dark:text-gray-500 mb-1">{name}</span>
-              <Bike className={`w-8 h-8 ${whiteBikes.includes(name) ? 'text-white' : 'text-red-500'}`} />
+      <div className="relative w-full h-full">
+        {names.map((name, i) => {
+          const p = animProps.get(name)!;
+          const dirClass = p.reverse ? "animate-bike-ride-reverse" : "animate-bike-ride";
+          return (
+            <div
+              key={`${wave}-${i}`}
+              className={`absolute ${dirClass}`}
+              style={{
+                top: `${p.top}%`,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+              }}
+            >
+              <div className={`flex flex-col ${p.reverse ? "items-end" : "items-start"}`}>
+                <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
+                  {name}
+                </span>
+                <Bike
+                  className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                    whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                  } ${p.reverse ? "scale-x-[-1]" : ""}`}
+                />
+              </div>
             </div>
-          </div>
-        );
-      })}
-      
+          );
+        })}
+      </div>
+
       <style>{`
         @keyframes bike-ride {
-          0% {
-            transform: translateX(-100px);
-            opacity: 0;
-          }
-          5% {
-            opacity: 1;
-          }
-          95% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(calc(100vw + 100px));
-            opacity: 0;
-          }
+          0% { transform: translateX(-80px); opacity: 0; }
+          5%  { opacity: 1; }
+          95% { opacity: 1; }
+          100% { transform: translateX(calc(100vw + 80px)); opacity: 0; }
         }
-        
+        @keyframes bike-ride-reverse {
+          0% { transform: translateX(calc(100vw + 80px)); opacity: 0; }
+          5%  { opacity: 1; }
+          95% { opacity: 1; }
+          100% { transform: translateX(-80px); opacity: 0; }
+        }
         .animate-bike-ride {
           animation: bike-ride linear forwards;
+          opacity: 0;
+        }
+        .animate-bike-ride-reverse {
+          animation: bike-ride-reverse linear forwards;
           opacity: 0;
         }
       `}</style>
