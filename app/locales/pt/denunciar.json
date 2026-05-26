@@ -39,7 +39,7 @@
   "erro.registro": "Erro ao registrar denúncia. Tente novamente.",
   "tipos.fina": "Fina / Ultrapassagem Perigosa",
   "tipos.fina.desc": "(Motorista passou a menos de 1,5 m de distância, forçando ultrapassagem)",
-  "tipos.fina.punicao": "Infração segundo o CTB Art. 201 — Gravíssima | Multa: R$ 2.934,70 | 7 pontos | Suspensão CNH 6 meses a 1 ano",
+  "tipos.fina.punicao": "Infração segundo o CTB Art. 201 — Média | Multa: R$ 130,16 | 4 pontos na CNH",
   "tipos.fechada": "Fechada",
   "tipos.ameaca": "Ameaça",
   "tipos.assedio": "Assédio",
