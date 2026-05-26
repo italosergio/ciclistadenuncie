@@ -3,7 +3,11 @@ import { Bike } from "lucide-react";
 import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bike-fire-names";
 
 /** Pares de pessoas que pedalam juntas (mesma velocidade, delay e posição) */
-const pairRiders: string[][] = [["STELLA", "OLGA", "ANDERSON", "OTTO"]];
+const pairRiders: string[][] = [
+  ["STELLA", "OLGA", "ANDERSON", "OTTO"],
+  ["DANIEL", "LIGIA"],
+  ["VIOLETTA", "CAMILLO"],
+];
 
 export default memo(function BikeFireAnimation() {
   const [wave, setWave] = useState(0);
