@@ -39,7 +39,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
     const pairedNames = new Set(pairRiders.flat());
     const singles = names.filter(n => !pairedNames.has(n));
     const totalSlots = singles.length + pairRiders.length;
-    // Faixa segura: 2%-85% para que TODAS caibam na viewport
+    // Faixa vertical: 2%-85% da viewport
     const topMin = 2;
     const topMax = 85;
     const range = topMax - topMin;
@@ -125,16 +125,16 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
 
       <style>{`
         @keyframes bike-ride {
-          0% { transform: translateX(-80px); opacity: 0; }
+          0% { transform: translateX(-120px); opacity: 0; }
           5%  { opacity: 1; }
           95% { opacity: 1; }
-          100% { transform: translateX(calc(100vw + 80px)); opacity: 0; }
+          100% { transform: translateX(calc(100vw + 120px)); opacity: 0; }
         }
         @keyframes bike-ride-reverse {
-          0% { transform: translateX(calc(100vw + 80px)); opacity: 0; }
+          0% { transform: translateX(calc(100vw + 120px)); opacity: 0; }
           5%  { opacity: 1; }
           95% { opacity: 1; }
-          100% { transform: translateX(-80px); opacity: 0; }
+          100% { transform: translateX(-120px); opacity: 0; }
         }
         .animate-bike-ride {
           animation: bike-ride linear forwards;
