@@ -162,8 +162,25 @@ export default function Home() {
     }
   }, [user]);
 
+  // Listener global de clique para pausar/despausar as firebikes
+  // Ignora cliques em elementos interativos (botões, links, inputs, etc.)
+  // para não conflitar com navegação e formulários
+  useEffect(() => {
+    const animActive = showAnimation || countUpDone;
+    if (!animActive) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('a, button, input, textarea, select, [role="button"]')) return;
+      setAnimationPaused(p => !p);
+    };
+
+    window.addEventListener('click', handleClick, true);
+    return () => window.removeEventListener('click', handleClick, true);
+  }, [showAnimation, countUpDone]);
+
   return (
-    <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => { if (showAnimation || countUpDone) setAnimationPaused(p => !p); }}>
+    <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden">
       <WelcomeModal />
       {(showAnimation || countUpDone) && <BikeFireAnimation paused={animationPaused} />}
 
