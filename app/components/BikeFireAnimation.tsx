@@ -46,7 +46,7 @@ export default memo(function BikeFireAnimation() {
         const delay = randDelay();
         const duration = randDuration();
         pair.forEach((p, pIdx) => {
-          const offset = (pIdx - (pair.length - 1) / 2) * 1.5;
+          const offset = (pIdx - (pair.length - 1) / 2) * 9;
           props.set(p, {
             delay,
             duration,
