@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, memo, useRef } from "react";
 import { Bike } from "lucide-react";
 import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bike-fire-names";
 
@@ -8,9 +8,8 @@ const pairRiders: string[][] = [
   ["DANIEL", "LIGIA", "VIOLETTA", "CAMILLO"],
 ];
 
-export default memo(function BikeFireAnimation() {
+export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) {
   const [wave, setWave] = useState(0);
-  const [paused, setPaused] = useState(false);
   const pausedRef = useRef(paused);
   pausedRef.current = paused;
 
@@ -22,11 +21,6 @@ export default memo(function BikeFireAnimation() {
       setWave(w => w + 1);
     }, 15000);
     return () => clearInterval(interval);
-  }, []);
-
-  const togglePause = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setPaused(p => !p);
   }, []);
 
   // Pré-computa propriedades para cada nome:
@@ -90,8 +84,7 @@ export default memo(function BikeFireAnimation() {
 
   return (
     <div
-      className="fixed inset-0 z-0 overflow-hidden opacity-80 cursor-pointer"
-      onClick={togglePause}
+      className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-80"
     >
       {paused && (
         <div className="absolute inset-0 flex items-center justify-center z-[1]">

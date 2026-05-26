@@ -13,7 +13,7 @@ describe("BikeFireAnimation", () => {
   });
 
   it(`deve renderizar ${bikeFireNames.length} elementos (um para cada nome)`, () => {
-    render(<BikeFireAnimation />);
+    render(<BikeFireAnimation paused={false} />);
 
     bikeFireNames.forEach((name) => {
       expect(screen.getByText(name)).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("BikeFireAnimation", () => {
   });
 
   it("deve renderizar bikes brancas (whiteBikes) com classe text-white", () => {
-    render(<BikeFireAnimation />);
+    render(<BikeFireAnimation paused={false} />);
 
     whiteBikeNames.forEach((name) => {
       const span = screen.getByText(name);
@@ -38,7 +38,7 @@ describe("BikeFireAnimation", () => {
   });
 
   it("deve renderizar bikes não-brancas com classe text-red-500", () => {
-    render(<BikeFireAnimation />);
+    render(<BikeFireAnimation paused={false} />);
 
     // Pega o primeiro nome que NÃO está em whiteBikeNames
     const nonWhite = bikeFireNames.find((n) => !whiteBikeNames.includes(n))!;
@@ -51,7 +51,7 @@ describe("BikeFireAnimation", () => {
   it("deve usar useEffect com setInterval de 15 segundos", () => {
     const setIntervalSpy = vi.spyOn(globalThis, "setInterval");
 
-    render(<BikeFireAnimation />);
+    render(<BikeFireAnimation paused={false} />);
 
     expect(setIntervalSpy).toHaveBeenCalled();
     const calls = setIntervalSpy.mock.calls;
@@ -66,7 +66,7 @@ describe("BikeFireAnimation", () => {
   it("deve limpar o intervalo ao desmontar", () => {
     const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
 
-    const { unmount } = render(<BikeFireAnimation />);
+    const { unmount } = render(<BikeFireAnimation paused={false} />);
     unmount();
 
     expect(clearIntervalSpy).toHaveBeenCalled();
@@ -74,49 +74,46 @@ describe("BikeFireAnimation", () => {
     clearIntervalSpy.mockRestore();
   });
 
-  // ─── Testes de clique-pausa ────────────────────────────────────────
+  // ─── Testes de pausa ────────────────────────────────────────
 
-  it("deve exibir indicador ⏸ ao clicar no container (pausar)", () => {
-    render(<BikeFireAnimation />);
+  it("deve exibir indicador ⏸ quando paused={true}", () => {
+    const { rerender } = render(<BikeFireAnimation paused={false} />);
 
     // Inicialmente sem indicador de pausa
     expect(screen.queryByText("⏸")).not.toBeInTheDocument();
 
-    // Clica no container (o primeiro div com onClick)
-    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
-    fireEvent.click(container);
+    // Rerender com paused=true
+    rerender(<BikeFireAnimation paused={true} />);
 
     // Indicador de pausa aparece
     expect(screen.getByText("⏸")).toBeInTheDocument();
   });
 
-  it("deve alternar pausa ao clicar duas vezes (pausar e retomar)", () => {
-    render(<BikeFireAnimation />);
+  it("deve esconder indicador ⏸ quando paused volta a false", () => {
+    const { rerender } = render(<BikeFireAnimation paused={true} />);
 
-    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
-
-    // Primeiro clique: pausa
-    fireEvent.click(container);
+    // Indicador de pausa aparece
     expect(screen.getByText("⏸")).toBeInTheDocument();
 
-    // Segundo clique: retoma
-    fireEvent.click(container);
+    // Rerender com paused=false
+    rerender(<BikeFireAnimation paused={false} />);
+
+    // Indicador some
     expect(screen.queryByText("⏸")).not.toBeInTheDocument();
   });
 
-  it("deve aplicar animationPlayState 'paused' nas bikes quando pausado", () => {
-    render(<BikeFireAnimation />);
-
-    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
+  it("deve aplicar animationPlayState 'paused' nas bikes quando paused={true}", () => {
+    const { rerender } = render(<BikeFireAnimation paused={false} />);
 
     // Antes de pausar, todas as bikes estão com running
+    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
     const bikeDivsAntes = container.querySelectorAll("[style*='animation-play-state']");
     bikeDivsAntes.forEach((div) => {
       expect((div as HTMLElement).style.animationPlayState).toBe("running");
     });
 
-    // Pausa
-    fireEvent.click(container);
+    // Rerender com paused=true
+    rerender(<BikeFireAnimation paused={true} />);
 
     // Todas as bikes mudam para paused
     const bikeDivs = container.querySelectorAll("[style*='animation-play-state']");
@@ -126,16 +123,12 @@ describe("BikeFireAnimation", () => {
     });
   });
 
-  it("deve retornar animationPlayState para 'running' ao retomar", () => {
-    render(<BikeFireAnimation />);
-
+  it("deve retornar animationPlayState para 'running' ao despausar", () => {
+    const { rerender } = render(<BikeFireAnimation paused={true} />);
     const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
 
-    // Pausa
-    fireEvent.click(container);
-
-    // Retoma
-    fireEvent.click(container);
+    // Rerender com paused=false
+    rerender(<BikeFireAnimation paused={false} />);
 
     // Todas as bikes voltam para running
     const bikeDivs = container.querySelectorAll("[style*='animation-play-state']");
@@ -148,12 +141,9 @@ describe("BikeFireAnimation", () => {
     // O intervalo de 15s incrementa wave apenas se pausedRef.current for false
     // Aqui verificamos que, após pausar, avançar 15s não gera novos ciclos
     // (evidenciado pela key `${wave}-${i}` permanecer a mesma)
-    render(<BikeFireAnimation />);
+    render(<BikeFireAnimation paused={true} />);
 
-    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
-
-    // Pausa
-    fireEvent.click(container);
+    // Indicador de pausa aparece
     expect(screen.getByText("⏸")).toBeInTheDocument();
 
     // Avança 2 ciclos de 15s
@@ -166,29 +156,5 @@ describe("BikeFireAnimation", () => {
     bikeFireNames.forEach((name) => {
       expect(screen.getByText(name)).toBeInTheDocument();
     });
-  });
-
-  it("deve chamar stopPropagation ao clicar (não afeta elementos pai)", () => {
-    // Este teste verifica que o stopPropagation no onClick do container
-    // impede que o clique vaze para elementos pai. Simulamos adicionando
-    // um listener no window e verificando que um clique no container
-    // da animação não chega até ele quando o container tem stopPropagation.
-    const windowClickHandler = vi.fn();
-    window.addEventListener("click", windowClickHandler);
-
-    render(<BikeFireAnimation />);
-
-    const container = screen.getByText(bikeFireNames[0]).closest("div.fixed")!;
-
-    // Clica no container — o stopPropagation deve impedir o bubble até window
-    fireEvent.click(container);
-
-    // O toggle funcionou
-    expect(screen.getByText("⏸")).toBeInTheDocument();
-
-    // O evento NÃO deve ter chegado ao window (stopPropagation funcionou)
-    expect(windowClickHandler).not.toHaveBeenCalled();
-
-    window.removeEventListener("click", windowClickHandler);
   });
 });

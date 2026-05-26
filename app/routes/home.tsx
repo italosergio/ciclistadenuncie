@@ -61,6 +61,7 @@ export default function Home() {
   const [CountUpComponent, setCountUpComponent] = useState<any>(null);
   const [showAnimation, setShowAnimation] = useState(false);
   const [countUpDone, setCountUpDone] = useState(false);
+  const [animationPaused, setAnimationPaused] = useState(false);
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -162,9 +163,9 @@ export default function Home() {
   }, [user]);
 
   return (
-    <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => showAnimation && setShowAnimation(false)}>
+    <div className="h-screen flex items-center justify-center px-4 pt-8 md:pt-0 overflow-hidden" onClick={() => { if (showAnimation || countUpDone) setAnimationPaused(p => !p); }}>
       <WelcomeModal />
-      {(showAnimation || countUpDone) && <BikeFireAnimation />}
+      {(showAnimation || countUpDone) && <BikeFireAnimation paused={animationPaused} />}
 
       {showEmailBanner && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-600 text-black px-4 py-2 flex items-center justify-between text-sm">
@@ -238,7 +239,7 @@ export default function Home() {
 
       <div className="max-w-6xl text-center space-y-4 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center">
-          <Logo onTripleClick={() => setShowAnimation(!showAnimation)} />
+          <Logo onTripleClick={() => { setShowAnimation(s => { const next = !s; if (!next) setAnimationPaused(false); return next; }); }} />
         </div>
         
         <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
