@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import BikeFireAnimation from "./BikeFireAnimation";
+import { bikeFireNames, whiteBikeNames } from "../data/bike-fire-names";
 
 describe("BikeFireAnimation", () => {
   beforeEach(() => {
@@ -11,28 +12,20 @@ describe("BikeFireAnimation", () => {
     vi.useRealTimers();
   });
 
-  it("deve renderizar 32 elementos (um para cada nome)", () => {
+  it(`deve renderizar ${bikeFireNames.length} elementos (um para cada nome)`, () => {
     render(<BikeFireAnimation />);
 
-    const names = [
-      "MARINA", "RAUL", "RENATA", "DANIEL", "NEO", "ADEYLLE", "NAVE", "MAIK",
-      "TARTA", "MAYRA", "VIQUE", "HEBLISA", "MILLENA", "CAROLINA", "JAQUELINE",
-      "JANAINA", "SUJEIRA", "LIMPEZA", "NELSON", "FERNANDO", "ITALO", "DJ PRÉ",
-      "ALDENIO", "ZERBINATO", "FALZONI", "LIGIA", "VIOLA", "DAMIAO", "JADSON",
-      "JAIDIU", "DIEGO", "NINA",
-    ];
-
-    names.forEach((name) => {
+    bikeFireNames.forEach((name) => {
       expect(screen.getByText(name)).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText(/./).filter(el => names.includes(el.textContent || ''))).toHaveLength(32);
+    expect(
+      screen.getAllByText(/./).filter((el) => bikeFireNames.includes(el.textContent || "")),
+    ).toHaveLength(bikeFireNames.length);
   });
 
   it("deve renderizar bikes brancas (whiteBikes) com classe text-white", () => {
     render(<BikeFireAnimation />);
-
-    const whiteBikeNames = ["MARINA", "RAUL", "SUJEIRA", "NELSON", "LIMPEZA"];
 
     whiteBikeNames.forEach((name) => {
       const span = screen.getByText(name);
@@ -47,8 +40,9 @@ describe("BikeFireAnimation", () => {
   it("deve renderizar bikes não-brancas com classe text-red-500", () => {
     render(<BikeFireAnimation />);
 
-    // ITALO não está na lista whiteBikes
-    const span = screen.getByText("ITALO");
+    // Pega o primeiro nome que NÃO está em whiteBikeNames
+    const nonWhite = bikeFireNames.find((n) => !whiteBikeNames.includes(n))!;
+    const span = screen.getByText(nonWhite);
     const bikeSvg = span.nextElementSibling;
     expect(bikeSvg).toBeInTheDocument();
     expect(bikeSvg).toHaveClass("text-red-500");
@@ -62,7 +56,7 @@ describe("BikeFireAnimation", () => {
     expect(setIntervalSpy).toHaveBeenCalled();
     const calls = setIntervalSpy.mock.calls;
     const hasFifteenSecInterval = calls.some(
-      ([_cb, delay]) => delay === 15000
+      ([_cb, delay]) => delay === 15000,
     );
     expect(hasFifteenSecInterval).toBe(true);
 
