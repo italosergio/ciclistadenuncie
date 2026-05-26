@@ -1,20 +1,32 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, memo, useRef, useCallback } from "react";
 import { Bike } from "lucide-react";
 import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bike-fire-names";
 
 /** Pares de pessoas que pedalam juntas (mesma velocidade, delay e posição) */
 const pairRiders: string[][] = [
   ["STELLA", "OLGA", "ANDERSON", "OTTO"],
-  ["DANIEL", "LIGIA"],
-  ["VIOLETTA", "CAMILLO"],
+  ["DANIEL", "LIGIA", "VIOLETTA", "CAMILLO"],
 ];
 
 export default memo(function BikeFireAnimation() {
   const [wave, setWave] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
 
+  // Intervalo sempre roda, mas pula o wave increment quando pausado
+  // Evita race condition de limpar/recriar o setInterval
   useEffect(() => {
-    const interval = setInterval(() => setWave(w => w + 1), 15000);
+    const interval = setInterval(() => {
+      if (pausedRef.current) return;
+      setWave(w => w + 1);
+    }, 15000);
     return () => clearInterval(interval);
+  }, []);
+
+  const togglePause = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPaused(p => !p);
   }, []);
 
   // Pré-computa propriedades para cada nome:
@@ -77,7 +89,15 @@ export default memo(function BikeFireAnimation() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-80">
+    <div
+      className="fixed inset-0 z-0 overflow-hidden opacity-80 cursor-pointer"
+      onClick={togglePause}
+    >
+      {paused && (
+        <div className="absolute inset-0 flex items-center justify-center z-[1]">
+          <span className="text-6xl opacity-30 select-none pointer-events-none">⏸</span>
+        </div>
+      )}
       <div className="relative w-full h-full">
         {names.map((name, i) => {
           const p = animProps.get(name)!;
@@ -90,6 +110,7 @@ export default memo(function BikeFireAnimation() {
                 top: `${p.top}%`,
                 animationDelay: `${p.delay}s`,
                 animationDuration: `${p.duration}s`,
+                animationPlayState: paused ? "paused" : "running",
               }}
             >
               <div className={`flex flex-col ${p.reverse ? "items-end" : "items-start"}`}>
