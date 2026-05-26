@@ -98,35 +98,33 @@ export default memo(function BikeFireAnimation() {
           <span className="text-6xl opacity-30 select-none pointer-events-none">⏸</span>
         </div>
       )}
-      <div className="relative w-full h-full">
-        {names.map((name, i) => {
-          const p = animProps.get(name)!;
-          const dirClass = p.reverse ? "animate-bike-ride-reverse" : "animate-bike-ride";
-          return (
-            <div
-              key={`${wave}-${i}`}
-              className={`absolute ${dirClass}`}
-              style={{
-                top: `${p.top}%`,
-                animationDelay: `${p.delay}s`,
-                animationDuration: `${p.duration}s`,
-                animationPlayState: paused ? "paused" : "running",
-              }}
-            >
-              <div className={`flex flex-col ${p.reverse ? "items-end" : "items-start"}`}>
-                <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
-                  {name}
-                </span>
-                <Bike
-                  className={`w-6 h-6 sm:w-8 sm:h-8 ${
-                    whiteBikes.includes(name) ? "text-white" : "text-red-500"
-                  } ${p.reverse ? "scale-x-[-1]" : ""}`}
-                />
-              </div>
+      {names.map((name, i) => {
+        const p = animProps.get(name)!;
+        const dirClass = p.reverse ? "animate-bike-ride-reverse" : "animate-bike-ride";
+        return (
+          <div
+            key={`${wave}-${i}`}
+            className={`absolute ${dirClass}`}
+            style={{
+              top: `${p.top}%`,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              animationPlayState: paused ? "paused" : "running",
+            }}
+          >
+            <div className={`flex flex-col ${p.reverse ? "items-end" : "items-start"}`}>
+              <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
+                {name}
+              </span>
+              <Bike
+                className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                  whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                } ${p.reverse ? "scale-x-[-1]" : ""}`}
+              />
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
 
       <style>{`
         @keyframes bike-ride {
