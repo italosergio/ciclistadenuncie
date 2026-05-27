@@ -48,7 +48,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
     const spacing = range / totalSlots;
 
     const randDelay = () => Math.random() * 3;
-    const randDuration = (isWhite: boolean) => isWhite ? 6 + Math.random() * 6 : 12 + Math.random() * 12;
+    const randDuration = (isWhite: boolean) => isWhite ? 12 + Math.random() * 12 : 6 + Math.random() * 6;
 
     let slot = 0;
 
@@ -126,7 +126,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                     >
                       <Bike
                         className={`${
-                          whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                          whiteBikes.includes(name) ? "w-9 h-9 sm:w-12 sm:h-12" : "w-6 h-6 sm:w-8 sm:h-8"
                         } ${
                           whiteBikes.includes(name) ? "text-white" : "text-red-500"
                         }`}
@@ -135,7 +135,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                   ) : (
                     <Bike
                       className={`${
-                        whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                        whiteBikes.includes(name) ? "w-9 h-9 sm:w-12 sm:h-12" : "w-6 h-6 sm:w-8 sm:h-8"
                       } ${
                         whiteBikes.includes(name) ? "text-white" : "text-red-500"
                       }`}
@@ -186,7 +186,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                 >
                   <Bike
                     className={`${
-                      whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                      whiteBikes.includes(name) ? "w-9 h-9 sm:w-12 sm:h-12" : "w-6 h-6 sm:w-8 sm:h-8"
                     } ${
                       whiteBikes.includes(name) ? "text-white" : "text-red-500"
                     } ${p.reverse ? "scale-x-[-1]" : ""}`}
@@ -195,7 +195,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
               ) : (
                 <Bike
                   className={`${
-                    whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                    whiteBikes.includes(name) ? "w-9 h-9 sm:w-12 sm:h-12" : "w-6 h-6 sm:w-8 sm:h-8"
                   } ${
                     whiteBikes.includes(name) ? "text-white" : "text-red-500"
                   } ${p.reverse ? "scale-x-[-1]" : ""}`}
