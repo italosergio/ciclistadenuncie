@@ -16,7 +16,7 @@ export default function TermoResponsabilidadeUsuario() {
           ← {t('back')}
         </Link>
 
-        <h1 className="text-4xl font-bold mb-8">{t('termoUsuario.title')}</h1>
+        <h1 className="text-4xl font-bold font-bungee mb-8">{t('termoUsuario.title')}</h1>
 
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border-2 border-yellow-400 dark:border-yellow-600">

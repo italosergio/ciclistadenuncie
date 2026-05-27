@@ -206,7 +206,7 @@ export default function Login() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700 text-center space-y-4">
           <div className="text-5xl">🚴‍♂️</div>
-          <h1 className="text-2xl font-bold text-white">{t('cadastro.bemVindo.title', { username: regUsername })}</h1>
+          <h1 className="text-2xl font-bold font-bungee text-white">{t('cadastro.bemVindo.title', { username: regUsername })}</h1>
           <p className="text-gray-400 text-sm">
             {t('cadastro.bemVindo.desc1')}
           </p>
@@ -230,7 +230,7 @@ export default function Login() {
           <button onClick={() => { setShowForgot(false); setForgotSent(false); setError(""); setShowForgotUsername(false); setForgotLookedUp('idle'); }} className="flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-6">
             <ArrowLeft size={16} /> {t('backToLogin', { ns: 'translation' })}
           </button>
-          <h1 className="text-2xl font-bold text-white mb-2">{t('mudarSenha.title')}</h1>
+          <h1 className="text-2xl font-bold font-bungee text-white mb-2">{t('mudarSenha.title')}</h1>
           {forgotSent ? (
             <div className="text-center space-y-3">
               <div className="text-4xl">📬</div>
@@ -324,7 +324,7 @@ export default function Login() {
             ))}
           </div>
 
-          <h1 className="text-xl font-bold text-white mb-4">{steps[step - 1]}</h1>
+          <h1 className="text-xl font-bold font-bungee text-white mb-4">{steps[step - 1]}</h1>
 
           {step === 1 && (
             <form onSubmit={nextStep} className="space-y-4">
@@ -418,7 +418,7 @@ export default function Login() {
         <ArrowLeft size={16} /> {t('back', { ns: 'translation' })}
       </Link>
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
-        <h1 className="text-3xl font-bold text-center mb-6 text-white">{t('title')}</h1>
+        <h1 className="text-3xl font-bold font-bungee text-center mb-6 text-white">{t('title')}</h1>
 
         <form onSubmit={handleLogin} className="space-y-4" autoComplete={rememberMe ? "on" : "off"}>
           <div>

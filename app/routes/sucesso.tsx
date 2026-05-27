@@ -35,7 +35,7 @@ export default function Sucesso() {
       <div className="max-w-md w-full text-center space-y-6">
         <div className="text-5xl">✅</div>
 
-        <h1 className="text-3xl font-bold">{t('sucesso.title')}</h1>
+        <h1 className="text-3xl font-bold font-bungee">{t('sucesso.title')}</h1>
 
         <p className="text-gray-600 dark:text-gray-400 text-sm">
           {t('sucesso.obrigado')}

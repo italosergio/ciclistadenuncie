@@ -14,7 +14,7 @@ export default function SucessoContato() {
       <div className="max-w-2xl text-center space-y-6">
         <div className="text-6xl">✅</div>
 
-        <h1 className="text-4xl font-bold">
+        <h1 className="text-4xl font-bold font-bungee">
           {t('sucessoContato.title')}
         </h1>
 

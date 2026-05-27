@@ -30,6 +30,10 @@ export const links: Route.LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Bungee&display=swap",
   },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap",
+  },
 ];
 
 function HtmlLang() {
@@ -62,7 +66,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="font-bungee" suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <Suspense fallback={null}>
           <HtmlLang />
           {children}

@@ -55,7 +55,7 @@ export default function MudarSenha() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
-        <h1 className="text-3xl font-bold text-center mb-6 text-white">
+        <h1 className="text-3xl font-bold font-bungee text-center mb-6 text-white">
           {t('mudarSenha.h1')}
         </h1>
 

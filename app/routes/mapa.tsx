@@ -1317,7 +1317,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           <ArrowLeft size={12} /> {t('back', { ns: 'translation' })}
         </button>
         <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-4 py-2 rounded-lg mb-2 relative z-[500]">
-          <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2"><Map /> CICLISTA DENUNCIE - MAPA</h1>
+          <h1 className="text-lg md:text-2xl font-bold font-bungee flex items-center gap-2"><Map /> CICLISTA DENUNCIE - MAPA</h1>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs md:text-sm">
               {denunciasVisiveis !== null ? (
@@ -1495,7 +1495,7 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           <ArrowLeft size={12} /> {t('back', { ns: 'translation' })}
         </button>
         <div className="bg-black/80 dark:bg-white/80 backdrop-blur-sm text-white dark:text-black px-3 py-1.5 rounded-lg relative z-[500]">
-          <h1 className="text-sm font-bold flex items-center gap-1.5"><Map size={16} /> CICLISTA DENUNCIE - MAPA</h1>
+          <h1 className="text-sm font-bold font-bungee flex items-center gap-1.5"><Map size={16} /> CICLISTA DENUNCIE - MAPA</h1>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs">
               {denunciasVisiveis !== null ? (

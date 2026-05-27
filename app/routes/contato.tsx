@@ -110,7 +110,7 @@ export default function Contato() {
         <ArrowLeft size={14} /> {t('back')}
       </button>
       <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center">{t('contato.title')}</h1>
+        <h1 className="text-2xl md:text-4xl font-bold font-bungee mb-8 text-center">{t('contato.title')}</h1>
 
         {/* Indicador de Etapas */}
         <div className="flex items-center justify-center mb-8 gap-2">

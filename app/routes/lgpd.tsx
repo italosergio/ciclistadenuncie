@@ -16,7 +16,7 @@ export default function LGPD() {
           ← {t('back')}
         </Link>
 
-        <h1 className="text-4xl font-bold mb-8">{t('lgpd.title')}</h1>
+        <h1 className="text-4xl font-bold font-bungee mb-8">{t('lgpd.title')}</h1>
 
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section>

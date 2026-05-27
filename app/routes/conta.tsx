@@ -44,7 +44,7 @@ export default function Conta() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-900 py-8 px-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-8">{t('conta.titulo')}</h1>
+          <h1 className="text-3xl font-bold font-bungee text-white mb-8">{t('conta.titulo')}</h1>
           
           <div className="space-y-6">
             <EmailCard />

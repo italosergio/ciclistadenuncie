@@ -249,7 +249,7 @@ export default function Home() {
             </Link>
           </>
         )}
-        <div className="md:hidden mt-1">
+        <div className="mt-1">
           <LanguageSwitcher />
         </div>
       </div>
@@ -259,7 +259,7 @@ export default function Home() {
           <Logo onTripleClick={() => { setShowAnimation(s => { const next = !s; if (!next) setAnimationPaused(false); return next; }); }} />
         </div>
         
-        <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+        <h2 className="text-2xl md:text-4xl font-bold font-bungee tracking-tight">
           {t('hero.heading')}
         </h2>
         

@@ -16,7 +16,7 @@ export default function TermoResponsabilidadePlataforma() {
           ← {t('back')}
         </Link>
 
-        <h1 className="text-4xl font-bold mb-8">{t('termoPlataforma.title')}</h1>
+        <h1 className="text-4xl font-bold font-bungee mb-8">{t('termoPlataforma.title')}</h1>
 
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border-2 border-red-400 dark:border-red-600">
