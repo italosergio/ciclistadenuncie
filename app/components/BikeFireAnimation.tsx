@@ -48,7 +48,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
     const spacing = range / totalSlots;
 
     const randDelay = () => Math.random() * 3;
-    const randDuration = () => 6 + Math.random() * 6;
+    const randDuration = (isWhite: boolean) => isWhite ? 6 + Math.random() * 6 : 12 + Math.random() * 12;
 
     let slot = 0;
 
@@ -60,7 +60,8 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
         // Par ocupa 1 slot — topo central para todo o grupo
         const centerTop = topMin + slot * spacing + spacing / 2;
         const delay = randDelay();
-        const duration = randDuration();
+        const isWhiteGroup = pair.some(p => whiteBikes.includes(p));
+        const duration = randDuration(isWhiteGroup);
         pair.forEach(p => {
           props.set(p, {
             delay,
@@ -75,7 +76,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
         const topPct = topMin + slot * spacing + spacing / 2;
         props.set(name, {
           delay: randDelay(),
-          duration: randDuration(),
+          duration: randDuration(whiteBikes.includes(name)),
           top: topPct,
           reverse: slot % 2 === 1,
         });
@@ -124,14 +125,18 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                       onClick={e => e.stopPropagation()}
                     >
                       <Bike
-                        className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                        className={`${
+                          whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                        } ${
                           whiteBikes.includes(name) ? "text-white" : "text-red-500"
                         }`}
                       />
                     </a>
                   ) : (
                     <Bike
-                      className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                      className={`${
+                        whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                      } ${
                         whiteBikes.includes(name) ? "text-white" : "text-red-500"
                       }`}
                     />
@@ -180,14 +185,18 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                   onClick={e => e.stopPropagation()}
                 >
                   <Bike
-                    className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                    className={`${
+                      whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                    } ${
                       whiteBikes.includes(name) ? "text-white" : "text-red-500"
                     } ${p.reverse ? "scale-x-[-1]" : ""}`}
                   />
                 </a>
               ) : (
                 <Bike
-                  className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                  className={`${
+                    whiteBikes.includes(name) ? "w-6 h-6 sm:w-8 sm:h-8" : "w-9 h-9 sm:w-12 sm:h-12"
+                  } ${
                     whiteBikes.includes(name) ? "text-white" : "text-red-500"
                   } ${p.reverse ? "scale-x-[-1]" : ""}`}
                 />
