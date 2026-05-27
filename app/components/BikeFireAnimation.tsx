@@ -151,7 +151,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
   };
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-80">
+    <div className="fixed inset-0 z-20 pointer-events-none overflow-hidden opacity-80">
       {paused && (
         <div className="absolute inset-0 flex items-center justify-center z-[1]">
           <span className="text-6xl opacity-30 select-none pointer-events-none">⏸</span>
