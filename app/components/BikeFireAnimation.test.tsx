@@ -29,8 +29,8 @@ describe("BikeFireAnimation", () => {
 
     whiteBikeNames.forEach((name) => {
       const span = screen.getByText(name);
-      // O próximo irmão do span é o elemento SVG do icone Bike
-      const bikeSvg = span.nextElementSibling;
+      // O SVG pode estar direto (sem link) ou dentro de <a> (com link)
+      const bikeSvg = span.parentElement?.querySelector("svg");
       expect(bikeSvg).toBeInTheDocument();
       expect(bikeSvg?.tagName).toBe("svg");
       expect(bikeSvg).toHaveClass("text-white");

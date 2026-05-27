@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, memo, useRef } from "react";
 import { Bike } from "lucide-react";
-import { bikeFireNames as names, whiteBikeNames as whiteBikes } from "~/data/bike-fire-names";
+import { bikeFireNames as names, whiteBikeNames as whiteBikes, bikeFireLinks } from "~/data/bike-fire-names";
 
 /** Pares de pessoas que pedalam juntas (mesma velocidade, delay e posição) */
 const pairRiders: string[][] = [
@@ -115,11 +115,27 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
                   <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
                     {name}
                   </span>
-                  <Bike
-                    className={`w-6 h-6 sm:w-8 sm:h-8 ${
-                      whiteBikes.includes(name) ? "text-white" : "text-red-500"
-                    }`}
-                  />
+                  {bikeFireLinks[name] ? (
+                    <a
+                      href={bikeFireLinks[name]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pointer-events-auto"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Bike
+                        className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                          whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                        }`}
+                      />
+                    </a>
+                  ) : (
+                    <Bike
+                      className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                        whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                      }`}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -155,11 +171,27 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
               <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
                 {name}
               </span>
-              <Bike
-                className={`w-6 h-6 sm:w-8 sm:h-8 ${
-                  whiteBikes.includes(name) ? "text-white" : "text-red-500"
-                } ${p.reverse ? "scale-x-[-1]" : ""}`}
-              />
+              {bikeFireLinks[name] ? (
+                <a
+                  href={bikeFireLinks[name]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pointer-events-auto"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <Bike
+                    className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                      whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                    } ${p.reverse ? "scale-x-[-1]" : ""}`}
+                  />
+                </a>
+              ) : (
+                <Bike
+                  className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                    whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                  } ${p.reverse ? "scale-x-[-1]" : ""}`}
+                />
+              )}
             </div>
           </div>
         );

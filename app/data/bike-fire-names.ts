@@ -11,3 +11,12 @@ export const bikeFireNames: string[] = [
 export const whiteBikeNames: string[] = [
   "MARINA", "RAUL", "SUJEIRA", "NELSON", "LIMPEZA",
 ];
+
+/** Links externos para bicicletas específicas (abrem ao clicar na bike) */
+export const bikeFireLinks: Record<string, string> = {
+  "MARINA": "https://pt.wikipedia.org/wiki/Atropelamento_de_Marina_Harkot",
+  "RAUL": "https://www.camara.leg.br/tv/525965-homenagem-ao-ciclista-raul-aragao/",
+  "SUJEIRA": "https://www.ameciclo.org/projetos/por_um_recife_sem_mortes_no_transito",
+  "LIMPEZA": "https://www.ameciclo.org/projetos/por_um_recife_sem_mortes_no_transito",
+  "NELSON": "https://www.ameciclo.org/projetos/por_um_recife_sem_mortes_no_transito",
+};
