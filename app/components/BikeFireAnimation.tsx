@@ -12,6 +12,9 @@ const pairRiders: string[][] = [
   ["BRUNO", "JULIA", "DANIELZINHO"],
 ];
 
+/** Conjunto de nomes que pertencem a alguma família */
+const pairedSet = new Set(pairRiders.flat());
+
 export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) {
   const [wave, setWave] = useState(0);
   const pausedRef = useRef(paused);
@@ -36,8 +39,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
     const used = new Set<string>();
 
     // Conta slots: cada par ocupa 1 slot, cada nome sem par ocupa 1 slot
-    const pairedNames = new Set(pairRiders.flat());
-    const singles = names.filter(n => !pairedNames.has(n));
+    const singles = names.filter(n => !pairedSet.has(n));
     const totalSlots = singles.length + pairRiders.length;
     // Faixa vertical: 2%-85% da viewport
     const topMin = 2;
@@ -55,16 +57,15 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
 
       const pair = pairRiders.find(p => p.includes(name));
       if (pair) {
-        // Par ocupa 1 slot — todos na mesma altura com leve espaçamento vertical
+        // Par ocupa 1 slot — topo central para todo o grupo
         const centerTop = topMin + slot * spacing + spacing / 2;
         const delay = randDelay();
         const duration = randDuration();
-        pair.forEach((p, pIdx) => {
-          const offset = (pIdx - (pair.length - 1) / 2) * 9;
+        pair.forEach(p => {
           props.set(p, {
             delay,
             duration,
-            top: Math.max(topMin, Math.min(topMax, centerTop + offset)),
+            top: centerTop,
             reverse: false,
           });
           used.add(p);
@@ -86,21 +87,62 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
     return props;
   }, []);
 
+  /** Renderiza um grupo familiar em grid 2 colunas */
+  const renderFamily = (group: string[], gi: number) => {
+    const p = animProps.get(group[0])!;
+    const numRows = Math.ceil(group.length / 2);
+    const rows: string[][] = [];
+    for (let r = 0; r < numRows; r++) {
+      rows.push(group.slice(r * 2, r * 2 + 2));
+    }
+
+    return (
+      <div
+        key={`family-${wave}-${gi}`}
+        className="absolute animate-bike-ride"
+        style={{
+          top: `${p.top}%`,
+          animationDelay: `${p.delay}s`,
+          animationDuration: `${p.duration}s`,
+          animationPlayState: paused ? "paused" : "running",
+        }}
+      >
+        <div className="flex flex-col items-center gap-0.5">
+          {rows.map((row, ri) => (
+            <div key={ri} className="flex gap-3 justify-center">
+              {row.map(name => (
+                <div key={name} className="flex flex-col items-center">
+                  <span className="text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 whitespace-nowrap">
+                    {name}
+                  </span>
+                  <Bike
+                    className={`w-6 h-6 sm:w-8 sm:h-8 ${
+                      whiteBikes.includes(name) ? "text-white" : "text-red-500"
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-80"
-    >
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-80">
       {paused && (
         <div className="absolute inset-0 flex items-center justify-center z-[1]">
           <span className="text-6xl opacity-30 select-none pointer-events-none">⏸</span>
         </div>
       )}
-      {names.map((name, i) => {
+      {/* Singles — fora de famílias (pedalam sozinhos, com direção alternada) */}
+      {names.filter(n => !pairedSet.has(n)).map((name, i) => {
         const p = animProps.get(name)!;
         const dirClass = p.reverse ? "animate-bike-ride-reverse" : "animate-bike-ride";
         return (
           <div
-            key={`${wave}-${i}`}
+            key={`${wave}-single-${i}`}
             className={`absolute ${dirClass}`}
             style={{
               top: `${p.top}%`,
@@ -122,6 +164,8 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
           </div>
         );
       })}
+      {/* Famílias — em grid 2 colunas (duas na frente, duas atrás) */}
+      {pairRiders.map((group, gi) => renderFamily(group, gi))}
 
       <style>{`
         @keyframes bike-ride {
