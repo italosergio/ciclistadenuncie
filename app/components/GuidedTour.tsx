@@ -21,17 +21,19 @@ export default function GuidedTour() {
   const [stepIndex, setStepIndex] = useState(0);
   const [showButton, setShowButton] = useState(true);
 
-  // Mostra o tour automaticamente na primeira visita
+  // Mostra o tour após o usuário ler a mensagem de boas-vindas
   useEffect(() => {
     const jaViu = localStorage.getItem(STORAGE_KEY);
-    if (!jaViu && location.pathname === "/") {
-      const timer = setTimeout(() => {
-        setRun(true);
-        setShowButton(false);
-        localStorage.setItem(STORAGE_KEY, "true");
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    if (jaViu || location.pathname !== "/") return;
+
+    const handler = () => {
+      setRun(true);
+      setShowButton(false);
+      localStorage.setItem(STORAGE_KEY, "true");
+    };
+
+    window.addEventListener("tour:start", handler);
+    return () => window.removeEventListener("tour:start", handler);
   }, [location.pathname]);
 
   // Esconde o botão durante o tour

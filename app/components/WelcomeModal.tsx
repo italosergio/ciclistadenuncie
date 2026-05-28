@@ -43,6 +43,8 @@ export default function WelcomeModal() {
     setVisible(false);
     setTimeout(() => {
       setDismissed(true);
+      // Dispara evento para o GuidedTour começar
+      window.dispatchEvent(new CustomEvent("tour:start"));
     }, 300);
   }, []);
 
