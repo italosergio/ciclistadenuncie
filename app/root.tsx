@@ -15,6 +15,7 @@ import { initConsoleEasterEgg } from "./lib/console-easter-egg";
 import { AuthProvider } from "./lib/AuthContext";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import { trackUnsupportedLocale } from "./lib/localeTracker";
+import GuidedTour from "./components/GuidedTour";
 import "./app.css";
 import i18n from "./lib/i18n";
 
@@ -88,6 +89,7 @@ export default function App() {
     <AuthProvider>
       <I18nextProvider i18n={i18n}>
         <Outlet />
+        <GuidedTour />
       </I18nextProvider>
     </AuthProvider>
   );

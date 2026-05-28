@@ -192,7 +192,7 @@ export default function Home() {
       )}
       
       {/* Links de autenticação e idioma no topo direito */}
-      <div className="absolute top-4 right-4 z-50 flex flex-col items-end gap-1 max-md:top-12">
+      <div data-tour="idioma-login" className="absolute top-4 right-4 z-50 flex flex-col items-end gap-1 max-md:top-12">
         {user ? (
           <div className="relative">
             <button
@@ -255,7 +255,7 @@ export default function Home() {
       </div>
 
       <div className="max-w-6xl text-center space-y-4 md:space-y-2 relative z-10" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-center">
+        <div data-tour="logo" className="flex justify-center">
           <Logo onTripleClick={() => { setShowAnimation(s => { const next = !s; if (!next) setAnimationPaused(false); return next; }); }} />
         </div>
         
@@ -279,7 +279,7 @@ export default function Home() {
           />
         </p>
         
-        <Link to="/mapa" className="block py-3 md:py-3 hover:opacity-80 transition">
+        <Link to="/mapa" data-tour="contador" className="block py-3 md:py-3 hover:opacity-80 transition">
           <div className="text-6xl md:text-8xl font-bold text-red-600 dark:text-red-500">
             {CountUpComponent ? (
               <CountUpComponent 
@@ -300,13 +300,14 @@ export default function Home() {
         <div className="pt-1 pb-2 md:pt-1 md:pb-2">
           <Link
             to="/denunciar"
+            data-tour="cta-denunciar"
             className="inline-block bg-black dark:bg-white text-white dark:text-black px-5 py-2.5 text-sm md:text-base font-semibold rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-white active:scale-95 transition-all"
           >
             {t('hero.ctaDenunciar')}
           </Link>
         </div>
         
-        <div className="pt-1 md:pt-1 space-x-4">
+        <div data-tour="navegacao" className="pt-1 md:pt-1 space-x-4">
           <Link
             to="/mapa"
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-xs md:text-sm"
@@ -329,7 +330,7 @@ export default function Home() {
           </Link>
         </div>
         
-        <div className="pt-2 pb-1">
+        <div data-tour="apoiadores" className="pt-2 pb-1">
           <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 mb-2">{t('apoiadores.label', { count: allApoiadores.length })}</p>
           <div
             className="flex flex-col items-center gap-3"
