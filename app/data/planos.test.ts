@@ -6,8 +6,8 @@ describe("PLANOS", () => {
     expect(PLANOS.length).toBeGreaterThan(0);
   });
 
-  it("deve ter exatamente 5 planos (A, B, C, D, E)", () => {
-    expect(PLANOS.length).toBe(5);
+  it("deve ter exatamente 6 planos (A, B, C, D, E, G)", () => {
+    expect(PLANOS.length).toBe(6);
   });
 
   it.each(PLANOS)(

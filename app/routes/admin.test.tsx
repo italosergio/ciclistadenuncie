@@ -65,7 +65,7 @@ describe("Admin", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Carregando...")).toBeInTheDocument();
+    expect(screen.getByText("admin.carregando")).toBeInTheDocument();
   });
 
   it("deve retornar null quando user não for admin nem moderador", async () => {
@@ -101,10 +101,10 @@ describe("Admin", () => {
     );
 
     // O sidebar deve mostrar o título
-    expect(screen.getByText("Painel Admin")).toBeInTheDocument();
+    expect(screen.getByText("admin.painelAdmin")).toBeInTheDocument();
     // O username deve aparecer
     expect(screen.getByText("adminuser")).toBeInTheDocument();
     // A role deve aparecer
-    expect(screen.getByText("Administrador")).toBeInTheDocument();
+    expect(screen.getByText("role.administrador")).toBeInTheDocument();
   });
 });

@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+  initReactI18next: { type: "3rdParty", init: vi.fn() },
 }));
 
 vi.mock("../lib/AuthContext", () => ({
@@ -48,7 +49,7 @@ describe("Usuario.$username", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Carregando...")).toBeInTheDocument();
+    expect(screen.getByText("loading")).toBeInTheDocument();
   });
 
   it("deve redirecionar (retornar null) quando username diferente do user logado", async () => {
@@ -80,7 +81,7 @@ describe("Usuario.$username", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Minhas Contribuições")).toBeInTheDocument();
-    expect(screen.getByText(/testuser/)).toBeInTheDocument();
+    expect(screen.getByText("user.contributions")).toBeInTheDocument();
+    expect(screen.getByText("usuario.denunciasDe")).toBeInTheDocument();
   });
 });

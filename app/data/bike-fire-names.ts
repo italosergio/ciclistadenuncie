@@ -9,7 +9,7 @@ export const bikeFireNames: string[] = [
 
 /** Nomes que recebem bicicleta branca (em vez de vermelha) */
 export const whiteBikeNames: string[] = [
-  "MARINA", "RAUL", "SUJEIRA", "NELSON", "LIMPEZA", "LUCIANA", "GABI", "SOFÍA", "EDIVALDO",
+  "MARINA", "RAUL", "SUJEIRA", "NELSON", "LIMPEZA", "LUCIANA", "GABI", "SOFÍA", "EDIVALDO", "VOVÔ JEFERSON",
 ];
 
 /** Links externos para bicicletas específicas (abrem ao clicar na bike) */
