@@ -12,8 +12,6 @@ import {
 } from "react-joyride";
 import { HelpCircle } from "lucide-react";
 
-const STORAGE_KEY = "ciclistadenuncie_tour_visto";
-
 export default function GuidedTour() {
   const { t } = useTranslation('home');
   const location = useLocation();
@@ -21,15 +19,13 @@ export default function GuidedTour() {
   const [stepIndex, setStepIndex] = useState(0);
   const [showButton, setShowButton] = useState(true);
 
-  // Mostra o tour após o usuário ler a mensagem de boas-vindas
+  // Mostra o tour sempre que o usuário fecha o WelcomeModal
   useEffect(() => {
-    const jaViu = localStorage.getItem(STORAGE_KEY);
-    if (jaViu || location.pathname !== "/") return;
+    if (location.pathname !== "/") return;
 
     const handler = () => {
       setRun(true);
       setShowButton(false);
-      localStorage.setItem(STORAGE_KEY, "true");
     };
 
     window.addEventListener("tour:start", handler);
@@ -160,7 +156,10 @@ export default function GuidedTour() {
             padding: "8px 16px",
           },
           buttonClose: {
-            display: "none",
+            color: "#6b7280",
+            fontSize: "20px",
+            right: "8px",
+            top: "8px",
           },
           tooltipContent: {
             fontSize: "14px",
