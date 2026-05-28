@@ -32,6 +32,7 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
 
   // Pré-computa propriedades para cada nome:
   //   - distribuição uniforme na altura da tela (2%-85%)
+  //   - bicicletas brancas (homenagens) no TOPO, vermelhas abaixo
   //   - direções alternadas (ida e volta, simulando mão dupla)
   //   - pares mantêm mesma velocidade e delay
   const animProps = useMemo(() => {
@@ -52,7 +53,13 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
 
     let slot = 0;
 
-    names.forEach(name => {
+    // Processa bikes brancas PRIMEIRO (topo da tela), depois vermelhas
+    const orderedNames = [
+      ...names.filter(n => whiteBikes.includes(n)),
+      ...names.filter(n => !whiteBikes.includes(n)),
+    ];
+
+    orderedNames.forEach(name => {
       if (used.has(name)) return;
 
       const pair = pairRiders.find(p => p.includes(name));
