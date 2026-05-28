@@ -208,6 +208,20 @@ export default memo(function BikeFireAnimation({ paused }: { paused: boolean }) 
       {/* Famílias — em grid 2 colunas (duas na frente, duas atrás) */}
       {pairRiders.map((group, gi) => renderFamily(group, gi))}
 
+      {/* Tour targets — elementos estáveis para o Tour Guiado */}
+      {/* Bicicletas Brancas (homenagens, lado superior esquerdo) */}
+      <div
+        data-tour="firebikes-brancas"
+        className="absolute pointer-events-auto"
+        style={{ top: "10%", left: "10%", width: 1, height: 1 }}
+      />
+      {/* Bicicletas Vermelhas (famílias, lado central) */}
+      <div
+        data-tour="firebikes-vermelhas"
+        className="absolute pointer-events-auto"
+        style={{ top: "40%", left: "25%", width: 1, height: 1 }}
+      />
+
       <style>{`
         @keyframes bike-ride {
           0% { transform: translateX(-120px); opacity: 0; }

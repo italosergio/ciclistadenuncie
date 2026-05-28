@@ -58,6 +58,18 @@ export default function GuidedTour() {
       content: t("tour.logo.content"),
     },
     {
+      target: '[data-tour="firebikes-brancas"]',
+      placement: "bottom",
+      title: t("tour.firebikes-brancas.title"),
+      content: t("tour.firebikes-brancas.content"),
+    },
+    {
+      target: '[data-tour="firebikes-vermelhas"]',
+      placement: "bottom",
+      title: t("tour.firebikes-vermelhas.title"),
+      content: t("tour.firebikes-vermelhas.content"),
+    },
+    {
       target: '[data-tour="contador"]',
       placement: "bottom",
       title: t("tour.contador.title"),
