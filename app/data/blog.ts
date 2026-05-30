@@ -19,34 +19,46 @@ export interface BlogCategory {
 
 export const ALL_CATEGORIES: BlogCategory[] = [
   {
-    key: "mobilidade",
-    labelKey: "blog.category.mobilidade",
-    placeholderKey: "blog.placeholder.mobilidade",
-    emoji: "🗺️",
-  },
-  {
     key: "ativismo",
     labelKey: "blog.category.ativismo",
     placeholderKey: "blog.placeholder.ativismo",
-    emoji: "⚖️",
+    emoji: "✊",
+  },
+  {
+    key: "mobilidade",
+    labelKey: "blog.category.mobilidade",
+    placeholderKey: "blog.placeholder.mobilidade",
+    emoji: "🚲",
   },
   {
     key: "seguranca",
     labelKey: "blog.category.seguranca",
     placeholderKey: "blog.placeholder.seguranca",
-    emoji: "🚲",
+    emoji: "🛡️",
   },
   {
-    key: "noticias",
-    labelKey: "blog.category.noticias",
-    placeholderKey: "blog.placeholder.noticias",
-    emoji: "📰",
+    key: "criancas",
+    labelKey: "blog.category.criancas",
+    placeholderKey: "blog.placeholder.criancas",
+    emoji: "🧒",
   },
   {
-    key: "dicas",
-    labelKey: "blog.category.dicas",
-    placeholderKey: "blog.placeholder.dicas",
+    key: "luto",
+    labelKey: "blog.category.luto",
+    placeholderKey: "blog.placeholder.luto",
+    emoji: "🖤",
+  },
+  {
+    key: "papoCabeca",
+    labelKey: "blog.category.papoCabeca",
+    placeholderKey: "blog.placeholder.papoCabeca",
     emoji: "💡",
+  },
+  {
+    key: "massaCritica",
+    labelKey: "blog.category.massaCritica",
+    placeholderKey: "blog.placeholder.massaCritica",
+    emoji: "🔥",
   },
 ];
 

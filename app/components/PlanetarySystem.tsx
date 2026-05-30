@@ -11,30 +11,46 @@ const PLANET_CONFIGS: Record<
   string,
   { nucleusClass: string; hexColor: string; symbol: string }
 > = {
-  mobilidade: {
-    nucleusClass: "bg-blue-500",
-    hexColor: "#3b82f6",
-    symbol: "🚲",
-  },
   ativismo: {
     nucleusClass: "bg-red-500",
     hexColor: "#ef4444",
     symbol: "✊",
+  },
+  mobilidade: {
+    nucleusClass: "bg-blue-500",
+    hexColor: "#3b82f6",
+    symbol: "🚲",
   },
   seguranca: {
     nucleusClass: "bg-amber-500",
     hexColor: "#f59e0b",
     symbol: "🛡️",
   },
-  noticias: {
+  criancas: {
     nucleusClass: "bg-purple-500",
     hexColor: "#a855f7",
-    symbol: "📰",
+    symbol: "🧒",
   },
-  dicas: {
+  luto: {
+    nucleusClass: "bg-gray-500",
+    hexColor: "#6b7280",
+    symbol: "🖤",
+  },
+  papoCabeca: {
     nucleusClass: "bg-teal-500",
     hexColor: "#14b8a6",
     symbol: "💡",
+  },
+  massaCritica: {
+    nucleusClass: "bg-orange-500",
+    hexColor: "#f97316",
+    symbol: "🔥",
+  },
+  // Virtual category for the main blog page (all posts)
+  blog: {
+    nucleusClass: "bg-red-500",
+    hexColor: "#ef4444",
+    symbol: "📝",
   },
 };
 

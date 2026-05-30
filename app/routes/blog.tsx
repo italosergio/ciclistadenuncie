@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/blog";
 import i18n from "../lib/i18n";
 import { blogPosts, getCategories, getCategoryByKey } from "../data/blog";
+import type { BlogCategory } from "../data/blog";
 import OrbitalSystem from "../components/OrbitalSystem";
+import PlanetarySystem from "../components/PlanetarySystem";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -29,10 +31,14 @@ const categoryColors: Record<string, string> = {
     "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   seguranca:
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  noticias:
+  criancas:
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  dicas:
+  luto:
+    "bg-gray-100 text-gray-700 dark:bg-gray-800/30 dark:text-gray-400",
+  papoCabeca:
     "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+  massaCritica:
+    "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
 };
 
 export default function Blog() {
@@ -41,6 +47,15 @@ export default function Blog() {
 
   const categories = getCategories();
   const [heroPost, ...restPosts] = blogPosts;
+
+  // Virtual category for the blog page planetary system
+  const blogCategory: BlogCategory = {
+    key: "blog",
+    labelKey: "blog.title",
+    placeholderKey: "blog.comingSoon",
+    emoji: "📝",
+  };
+  const latestPosts = blogPosts.slice(0, 6);
 
   const postCountByCategory = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -70,6 +85,24 @@ export default function Blog() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        {/* Planetary System — Posts mais recentes em órbita */}
+        {latestPosts.length > 0 && (
+          <section className="mb-6">
+            <PlanetarySystem
+              category={blogCategory}
+              posts={latestPosts}
+            />
+          </section>
+        )}
+
+        {/* Separator text — "Sempre aparecerá abaixo" */}
+        <div className="text-center mb-12">
+          <p className="text-gray-400 dark:text-gray-500 text-sm font-medium italic tracking-wide">
+            Sempre aparecerá abaixo
+          </p>
+          <div className="mt-3 w-16 h-0.5 bg-gray-200 dark:bg-gray-700 mx-auto rounded-full" />
+        </div>
+
         {/* Hero Post — Featured */}
         <section className="mb-12">
           <Link

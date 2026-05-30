@@ -39,10 +39,11 @@ describe("Blog — Jornal Digital", () => {
         <Blog />
       </MemoryRouter>
     );
-    const heroLink = screen.getByRole("link", {
+    const heroLinks = screen.getAllByRole("link", {
       name: /blog\.readMore/,
     });
-    expect(heroLink.closest("a")).toHaveAttribute(
+    expect(heroLinks.length).toBeGreaterThanOrEqual(1);
+    expect(heroLinks[0].closest("a")).toHaveAttribute(
       "href",
       "/blog/por-que-o-ciclista-denuncie-existe"
     );
@@ -58,7 +59,7 @@ describe("Blog — Jornal Digital", () => {
     expect(titles.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("deve renderizar todas as 5 categorias no sistema orbital", () => {
+  it("deve renderizar todas as 7 categorias no sistema orbital", () => {
     render(
       <MemoryRouter>
         <Blog />
@@ -67,8 +68,10 @@ describe("Blog — Jornal Digital", () => {
     expect(screen.getAllByText("blog.category.mobilidade").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("blog.category.ativismo").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("blog.category.seguranca").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("blog.category.noticias").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("blog.category.dicas").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.criancas").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.luto").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.papoCabeca").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.massaCritica").length).toBeGreaterThanOrEqual(1);
   });
 
   it("deve renderizar a categoria 'Ativismo e Legislação' (pode aparecer em mais de um lugar)", () => {

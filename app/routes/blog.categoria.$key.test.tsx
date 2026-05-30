@@ -45,7 +45,7 @@ describe("BlogCategory — Página de Categoria do Blog", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("⚖️")).toBeInTheDocument();
+    expect(screen.getByText("✊")).toBeInTheDocument();
   });
 
   it("deve renderizar a contagem de posts da categoria", () => {
@@ -119,8 +119,8 @@ describe("BlogCategory — Página de Categoria do Blog", () => {
       </MemoryRouter>
     );
 
-    // Mobilidade tem emoji 🗺️
-    expect(screen.getByText("🗺️")).toBeInTheDocument();
+    // Mobilidade tem emoji 🚲
+    expect(screen.getByText("🚲")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: "blog.category.mobilidade" })
     ).toBeInTheDocument();
