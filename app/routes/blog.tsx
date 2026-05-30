@@ -72,25 +72,29 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-10 text-center">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 pt-8 md:pt-10 text-center">
           <h1 className="text-3xl md:text-5xl font-bold font-bungee tracking-tight text-red-600 dark:text-red-500">
             {t("blog.title")}
           </h1>
 
+          <p className="mt-3 text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            {t("blog.subtitle")}
+          </p>
+
+          {/* Planetary System — Posts mais recentes em órbita no topo */}
+          {latestPosts.length > 0 && (
+            <div className="mt-2">
+              <PlanetarySystem
+                category={blogCategory}
+                posts={latestPosts}
+              />
+            </div>
+          )}
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-        {/* Planetary System — Posts mais recentes em órbita */}
-        {latestPosts.length > 0 && (
-          <section className="mb-6">
-            <PlanetarySystem
-              category={blogCategory}
-              posts={latestPosts}
-            />
-          </section>
-        )}
 
         {/* Hero Post — Featured */}
         <section className="mb-12">
