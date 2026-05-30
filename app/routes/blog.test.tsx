@@ -12,7 +12,7 @@ beforeAll(() => {
   localStorage.clear();
 });
 
-describe("Blog — Jornal Digital", () => {
+describe("Blog", () => {
   it("deve renderizar o título principal do blog", () => {
     render(
       <MemoryRouter>
@@ -22,15 +22,6 @@ describe("Blog — Jornal Digital", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "blog.title"
     );
-  });
-
-  it("deve renderizar o subtítulo 'Jornal Digital'", () => {
-    render(
-      <MemoryRouter>
-        <Blog />
-      </MemoryRouter>
-    );
-    expect(screen.getByText("blog.subtitle")).toBeInTheDocument();
   });
 
   it("deve renderizar o hero post com link para o post", () => {

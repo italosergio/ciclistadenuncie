@@ -77,9 +77,6 @@ export default function Blog() {
           <h1 className="text-3xl md:text-5xl font-bold font-bungee tracking-tight text-red-600 dark:text-red-500">
             {t("blog.title")}
           </h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">
-            {t("blog.subtitle")}
-          </p>
 
         </div>
       </header>
@@ -94,14 +91,6 @@ export default function Blog() {
             />
           </section>
         )}
-
-        {/* Separator text — "Sempre aparecerá abaixo" */}
-        <div className="text-center mb-12">
-          <p className="text-gray-400 dark:text-gray-500 text-sm font-medium italic tracking-wide">
-            Sempre aparecerá abaixo
-          </p>
-          <div className="mt-3 w-16 h-0.5 bg-gray-200 dark:bg-gray-700 mx-auto rounded-full" />
-        </div>
 
         {/* Hero Post — Featured */}
         <section className="mb-12">
