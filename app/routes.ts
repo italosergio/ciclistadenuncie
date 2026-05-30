@@ -5,6 +5,7 @@ export default [
   route("denunciar", "routes/denunciar.tsx"),
   route("mapa", "routes/mapa.tsx"),
   route("blog", "routes/blog.tsx"),
+  route("blog/:slug", "routes/blog.$slug.tsx"),
   route("contato", "routes/contato.tsx"),
   route("login", "routes/login.tsx"),
   route("mudar-senha", "routes/mudar-senha.tsx"),
