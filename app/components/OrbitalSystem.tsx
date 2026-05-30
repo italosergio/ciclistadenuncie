@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 
 interface AtomConfig {
@@ -12,67 +13,49 @@ interface AtomConfig {
 
 const ATOM_CONFIGS: AtomConfig[] = [
   {
-    key: "ativismo",
-    labelKey: "blog.category.activism",
-    label: "Ativismo",
-    nucleusClass: "bg-red-500",
-    dotClass: "bg-red-400",
-    hexColor: "#ef4444",
-    symbol: "✊",
-  },
-  {
     key: "mobilidade",
-    labelKey: "blog.category.mobility",
-    label: "Mobilidade",
+    labelKey: "blog.category.mobilidade",
+    label: "Mobilidade Urbana",
     nucleusClass: "bg-blue-500",
     dotClass: "bg-blue-400",
     hexColor: "#3b82f6",
     symbol: "🚲",
   },
   {
+    key: "ativismo",
+    labelKey: "blog.category.ativismo",
+    label: "Ativismo e Legislação",
+    nucleusClass: "bg-red-500",
+    dotClass: "bg-red-400",
+    hexColor: "#ef4444",
+    symbol: "✊",
+  },
+  {
     key: "seguranca",
-    labelKey: "blog.category.safety",
-    label: "Segurança",
+    labelKey: "blog.category.seguranca",
+    label: "Segurança no Trânsito",
     nucleusClass: "bg-amber-500",
     dotClass: "bg-amber-400",
     hexColor: "#f59e0b",
     symbol: "🛡️",
   },
   {
-    key: "criancas",
-    labelKey: "blog.category.children",
-    label: "Crianças",
+    key: "noticias",
+    labelKey: "blog.category.noticias",
+    label: "Notícias / Casos",
     nucleusClass: "bg-purple-500",
     dotClass: "bg-purple-400",
     hexColor: "#a855f7",
-    symbol: "🧒",
+    symbol: "📰",
   },
   {
-    key: "luto",
-    labelKey: "blog.category.mourning",
-    label: "Luto",
-    nucleusClass: "bg-gray-500",
-    dotClass: "bg-gray-400",
-    hexColor: "#6b7280",
-    symbol: "🖤",
-  },
-  {
-    key: "papoCabeca",
-    labelKey: "blog.category.insight",
-    label: "Papo Cabeça",
+    key: "dicas",
+    labelKey: "blog.category.dicas",
+    label: "Dicas",
     nucleusClass: "bg-teal-500",
     dotClass: "bg-teal-400",
     hexColor: "#14b8a6",
     symbol: "💡",
-  },
-  {
-    key: "massaCritica",
-    labelKey: "blog.category.criticalMass",
-    label: "Massa Crítica",
-    nucleusClass: "bg-orange-500",
-    dotClass: "bg-orange-400",
-    hexColor: "#f97316",
-    symbol: "🔥",
   },
 ];
 
@@ -220,6 +203,21 @@ export default function OrbitalSystem({
                 >
                   {atom.postCount} {atom.postCount === 1 ? "matéria" : "matérias"}
                 </span>
+              )}
+
+              {/* Link to dedicated category page */}
+              {atom.postCount > 0 && (
+                <Link
+                  to={`/blog/categoria/${atom.key}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`mt-0.5 text-[9px] font-bold uppercase tracking-wider transition-all duration-300 hover:underline ${
+                    isActive
+                      ? "text-red-500 dark:text-red-400"
+                      : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                  }`}
+                >
+                  ver tudo →
+                </Link>
               )}
 
               {/* Empty label */}

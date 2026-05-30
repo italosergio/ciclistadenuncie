@@ -58,24 +58,26 @@ describe("Blog — Jornal Digital", () => {
     expect(titles.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("deve renderizar o sistema orbital de categorias", () => {
+  it("deve renderizar todas as 5 categorias no sistema orbital", () => {
     render(
       <MemoryRouter>
         <Blog />
       </MemoryRouter>
     );
-    // O OrbitalSystem renderiza o nome das categorias
-    const items = screen.getAllByText("blog.category.activism");
-    expect(items.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.mobilidade").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.ativismo").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.seguranca").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.noticias").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("blog.category.dicas").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("deve renderizar a categoria 'Ativismo' (pode aparecer em mais de um lugar)", () => {
+  it("deve renderizar a categoria 'Ativismo e Legislação' (pode aparecer em mais de um lugar)", () => {
     render(
       <MemoryRouter>
         <Blog />
       </MemoryRouter>
     );
-    const items = screen.getAllByText("blog.category.activism");
+    const items = screen.getAllByText("blog.category.ativismo");
     expect(items.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -85,7 +87,6 @@ describe("Blog — Jornal Digital", () => {
         <Blog />
       </MemoryRouter>
     );
-    // The text has " →" appended in the same element, so use a function matcher
     const readMoreLinks = screen.getAllByText((content) =>
       content.includes("blog.readMore")
     );
@@ -125,7 +126,6 @@ describe("Blog — Jornal Digital", () => {
         <Blog />
       </MemoryRouter>
     );
-    // The text has "← " prepended, so use a function matcher
     const homeLinks = screen.getAllByText((content) =>
       content.includes("backToHome")
     );

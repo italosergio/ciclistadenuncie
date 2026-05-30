@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/blog";
 import i18n from "../lib/i18n";
-import { blogPosts, getCategories } from "../data/blog";
+import { blogPosts, getCategories, getCategoryByKey } from "../data/blog";
 import OrbitalSystem from "../components/OrbitalSystem";
 
 export function meta({}: Route.MetaArgs) {
@@ -29,14 +29,10 @@ const categoryColors: Record<string, string> = {
     "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   seguranca:
     "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  criancas:
+  noticias:
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  luto:
-    "bg-gray-200 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300",
-  papoCabeca:
+  dicas:
     "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
-  massaCritica:
-    "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
 };
 
 export default function Blog() {
@@ -66,9 +62,10 @@ export default function Blog() {
           <h1 className="text-3xl md:text-5xl font-bold font-bungee tracking-tight text-red-600 dark:text-red-500">
             {t("blog.title")}
           </h1>
-          <p className="mt-2 text-base md:text-lg text-gray-500 dark:text-gray-400 font-medium tracking-wide uppercase text-sm">
+          <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">
             {t("blog.subtitle")}
           </p>
+
         </div>
       </header>
 
@@ -165,10 +162,29 @@ export default function Blog() {
           ))}
         </div>
 
-        {/* Empty state */}
-        {filteredPosts.length === 0 && (
+        {/* Empty state — placeholder por categoria */}
+        {filteredPosts.length === 0 && activeCategory && (
           <div className="text-center py-16 text-gray-500 dark:text-gray-400">
-            <p className="text-lg">{t("blog.noPostsInCategory")}</p>
+            <p className="text-2xl mb-3">
+              {(() => {
+                const cat = getCategoryByKey(activeCategory);
+                return cat ? cat.emoji : "📝";
+              })()}
+            </p>
+            <p className="text-lg font-medium">
+              {t(
+                getCategoryByKey(activeCategory)?.placeholderKey ??
+                  "blog.noPostsInCategory"
+              )}
+            </p>
+            <p className="text-sm mt-2 text-gray-400 dark:text-gray-500">
+              {t("blog.noPostsInCategory")}
+            </p>
+          </div>
+        )}
+        {filteredPosts.length === 0 && !activeCategory && (
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+            <p className="text-lg">{t("blog.comingSoon")}</p>
           </div>
         )}
       </main>

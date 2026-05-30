@@ -10,6 +10,46 @@ export interface BlogPost {
   categoryKey: string;
 }
 
+export interface BlogCategory {
+  key: string;
+  labelKey: string;
+  placeholderKey: string;
+  emoji: string;
+}
+
+export const ALL_CATEGORIES: BlogCategory[] = [
+  {
+    key: "mobilidade",
+    labelKey: "blog.category.mobilidade",
+    placeholderKey: "blog.placeholder.mobilidade",
+    emoji: "🗺️",
+  },
+  {
+    key: "ativismo",
+    labelKey: "blog.category.ativismo",
+    placeholderKey: "blog.placeholder.ativismo",
+    emoji: "⚖️",
+  },
+  {
+    key: "seguranca",
+    labelKey: "blog.category.seguranca",
+    placeholderKey: "blog.placeholder.seguranca",
+    emoji: "🚲",
+  },
+  {
+    key: "noticias",
+    labelKey: "blog.category.noticias",
+    placeholderKey: "blog.placeholder.noticias",
+    emoji: "📰",
+  },
+  {
+    key: "dicas",
+    labelKey: "blog.category.dicas",
+    placeholderKey: "blog.placeholder.dicas",
+    emoji: "💡",
+  },
+];
+
 export const blogPosts: BlogPost[] = [
   {
     slug: "por-que-o-ciclista-denuncie-existe",
@@ -20,7 +60,7 @@ export const blogPosts: BlogPost[] = [
     date: "2025-05-29",
     image: "/logo-ciclistadenuncie-1.png",
     category: "ativismo",
-    categoryKey: "blog.category.activism",
+    categoryKey: "blog.category.ativismo",
   },
 ];
 
@@ -28,13 +68,10 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
   return blogPosts.find((p) => p.slug === slug);
 }
 
-export function getCategories(): { key: string; labelKey: string }[] {
-  const seen = new Set<string>();
-  return blogPosts
-    .filter((p) => {
-      if (seen.has(p.category)) return false;
-      seen.add(p.category);
-      return true;
-    })
-    .map((p) => ({ key: p.category, labelKey: p.categoryKey }));
+export function getCategories(): BlogCategory[] {
+  return ALL_CATEGORIES;
+}
+
+export function getCategoryByKey(key: string): BlogCategory | undefined {
+  return ALL_CATEGORIES.find((c) => c.key === key);
 }
