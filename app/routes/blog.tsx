@@ -55,7 +55,7 @@ export default function Blog() {
     placeholderKey: "blog.comingSoon",
     emoji: "📝",
   };
-  const latestPosts = restPosts.slice(0, 6);
+  const latestPosts = blogPosts.slice(0, 6);
 
   const postCountByCategory = useMemo(() => {
     const counts: Record<string, number> = {};

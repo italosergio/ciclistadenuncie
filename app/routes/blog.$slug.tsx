@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/blog.$slug";
 import i18n from "../lib/i18n";
-import { getPostBySlug, blogPosts } from "../data/blog";
+import { getPostBySlug, blogPosts, getCategoryByKey } from "../data/blog";
 
 export function meta({ params }: Route.MetaArgs) {
   const post = getPostBySlug(params.slug);
@@ -40,10 +40,13 @@ export default function BlogPost({ params }: Route.ComponentProps) {
     );
   }
 
-  const paragraphs = Array.from(
-    { length: post.paragraphs },
-    (_, i) => i + 1
-  );
+  const paragraphPrefix = post.titleKey.replace(".title", "");
+  const hasContent = post.paragraphs > 0;
+
+  const paragraphs = hasContent
+    ? Array.from({ length: post.paragraphs }, (_, i) => i + 1)
+    : [];
+
   const relatedPosts = blogPosts
     .filter((p) => p.slug !== post.slug && p.category === post.category)
     .slice(0, 2);
@@ -78,13 +81,27 @@ export default function BlogPost({ params }: Route.ComponentProps) {
           {t(post.introKey)}
         </p>
 
-        <div className="prose prose-gray dark:prose-invert max-w-none space-y-5 text-base md:text-lg leading-relaxed">
-          {paragraphs.map((n) => (
-            <p key={n} className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {t(`blog.post1.p${n}`)}
+        {hasContent ? (
+          <div className="prose prose-gray dark:prose-invert max-w-none space-y-5 text-base md:text-lg leading-relaxed">
+            {paragraphs.map((n) => (
+              <p key={n} className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t(`${paragraphPrefix}.p${n}`)}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+            <p className="text-5xl mb-4">
+              {(() => {
+                const cat = getCategoryByKey(post.category);
+                return cat ? cat.emoji : "📝";
+              })()}
             </p>
-          ))}
-        </div>
+            <p className="text-lg font-medium">
+              {t("blog.comingSoonPost")}
+            </p>
+          </div>
+        )}
 
         {/* Share / Navigation */}
         <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
