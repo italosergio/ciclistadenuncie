@@ -136,6 +136,10 @@ export default function PlanetarySystem({
                     alt=""
                     className="w-full h-full object-cover"
                   />
+                  {/* Category emoji overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center text-lg pointer-events-none">
+                    {PLANET_CONFIGS[post.category]?.symbol}
+                  </div>
                   {/* Hover overlay with title */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <span className="text-white text-[10px] font-bold text-center px-1 leading-tight line-clamp-3">
