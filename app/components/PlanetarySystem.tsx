@@ -63,8 +63,6 @@ const PLANET_ANIMS = [
   "animate-[planet-f_24s_linear_infinite]",
 ] as const;
 
-const PLANET_RADII = ["260px", "280px", "300px", "320px", "250px", "290px"];
-
 function formatDate(dateStr: string) {
   const date = new Date(dateStr + "T12:00:00");
   return date.toLocaleDateString("pt-BR", {
@@ -85,74 +83,78 @@ export default function PlanetarySystem({
   if (!config) return null;
 
   return (
-    <section className="relative">
-      {/* Orbital Section — Desktop only */}
+    <section className="planetary-system-wrapper relative">
+      {/* Orbital Section — visible on all screen sizes */}
       {displayPosts.length > 0 && (
-        <div className="hidden md:block relative py-16 overflow-hidden">
+        <div className="block relative py-8 md:py-16 overflow-hidden">
           {/* Background glow */}
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.08] pointer-events-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[600px] md:h-[600px] rounded-full opacity-[0.08] pointer-events-none"
             style={{
               background: `radial-gradient(circle, ${config.hexColor} 0%, transparent 70%)`,
             }}
           />
 
           {/* Orbital rings */}
-          <div className="relative w-[620px] h-[620px] mx-auto flex items-center justify-center">
+          <div className="relative w-[280px] h-[280px] md:w-[620px] md:h-[620px] mx-auto flex items-center justify-center">
             {[0, 1, 2, 3].map((ring) => (
               <div
                 key={ring}
-                className="absolute rounded-full border border-dashed border-gray-200 dark:border-gray-700/50"
+                className={`absolute rounded-full border border-dashed border-gray-200 dark:border-gray-700/50 ${
+                  ring >= 2 ? "hidden md:block" : ""
+                }`}
                 style={{
-                  width: `${260 + ring * 50}px`,
-                  height: `${260 + ring * 50}px`,
+                  width: `calc(var(--ring-base) + ${ring} * var(--ring-step))`,
+                  height: `calc(var(--ring-base) + ${ring} * var(--ring-step))`,
                   transform: "rotateX(65deg)",
                 }}
               />
             ))}
 
             {/* Planets orbiting */}
-            {displayPosts.map((post, i) => (
-              <Link
-                key={post.slug}
-                to={`/blog/${post.slug}`}
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group ${PLANET_ANIMS[i % PLANET_ANIMS.length]}`}
-                style={
-                  {
-                    "--planet-r": PLANET_RADII[i % PLANET_RADII.length],
-                    animationDelay: `${i * 1.5}s`,
-                  } as React.CSSProperties
-                }
-              >
-                <div
-                  className="w-16 h-16 rounded-full overflow-hidden border-2 border-white dark:border-gray-800 shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:z-20 relative"
-                  style={{
-                    borderColor: config.hexColor,
-                    boxShadow: `0 0 12px 2px ${config.hexColor}44`,
-                  }}
+            {displayPosts.map((post, i) => {
+              return (
+                <Link
+                  key={post.slug}
+                  to={`/blog/${post.slug}`}
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group ${PLANET_ANIMS[i % PLANET_ANIMS.length]}`}
+                  style={
+                    {
+                      "--planet-r": `var(--planet-r${i % 6})`,
+                      animationDelay: `${i * 1.5}s`,
+                    } as React.CSSProperties
+                  }
                 >
-                  <img
-                    src={post.image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Category emoji overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center text-lg pointer-events-none">
-                    {PLANET_CONFIGS[post.category]?.symbol}
+                  <div
+                    className="w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white dark:border-gray-800 shadow-lg transition-transform duration-300 group-hover:scale-125 group-hover:z-20 relative"
+                    style={{
+                      borderColor: config.hexColor,
+                      boxShadow: `0 0 12px 2px ${config.hexColor}44`,
+                    }}
+                  >
+                    <img
+                      src={post.image}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Category emoji overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center text-sm md:text-lg pointer-events-none">
+                      {PLANET_CONFIGS[post.category]?.symbol}
+                    </div>
+                    {/* Hover overlay with title */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="text-white text-[9px] md:text-[10px] font-bold text-center px-1 leading-tight line-clamp-3">
+                        {t(post.titleKey)}
+                      </span>
+                    </div>
                   </div>
-                  {/* Hover overlay with title */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <span className="text-white text-[10px] font-bold text-center px-1 leading-tight line-clamp-3">
-                      {t(post.titleKey)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
 
             {/* Nucleus */}
             <div
-              className="relative z-10 w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center text-3xl md:text-4xl font-bold shadow-2xl animate-[nucleus-glow_3s_ease-in-out_infinite]"
+              className="relative z-10 w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-2xl md:text-4xl font-bold shadow-2xl animate-[nucleus-glow_3s_ease-in-out_infinite]"
               style={
                 {
                   "--glow-color": `${config.hexColor}88`,

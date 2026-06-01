@@ -66,6 +66,30 @@
   50% { transform: translateY(-6px); }
 }
 
+/* Responsive Planetary System — radii scale down on mobile */
+.planetary-system-wrapper {
+  --ring-base: 110px;
+  --ring-step: 22px;
+  --planet-r0: 95px;
+  --planet-r1: 110px;
+  --planet-r2: 105px;
+  --planet-r3: 115px;
+  --planet-r4: 100px;
+  --planet-r5: 108px;
+}
+@media (width >= 48rem) {
+  .planetary-system-wrapper {
+    --ring-base: 260px;
+    --ring-step: 50px;
+    --planet-r0: 260px;
+    --planet-r1: 280px;
+    --planet-r2: 300px;
+    --planet-r3: 320px;
+    --planet-r4: 250px;
+    --planet-r5: 290px;
+  }
+}
+
 html,
 body {
   @apply bg-white dark:bg-gray-950 font-sans;
