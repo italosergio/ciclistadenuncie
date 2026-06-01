@@ -94,8 +94,8 @@ const DOT_SIZES = ["w-2.5 h-2.5", "w-2 h-2", "w-2 h-2", "w-2.5 h-2.5"];
 interface OrbitalSystemProps {
   categories: { key: string; labelKey: string }[];
   postCountByCategory: Record<string, number>;
-  activeCategory: string | null;
-  onSelectCategory: (key: string | null) => void;
+  activeCategory?: string | null;
+  onSelectCategory?: (key: string | null) => void;
 }
 
 export default function OrbitalSystem({
@@ -122,13 +122,13 @@ export default function OrbitalSystem({
       <div className="relative z-10 flex flex-wrap justify-center gap-6 md:gap-10 lg:gap-14">
         {atoms.map((atom) => {
           const isActive = activeCategory === atom.key;
-          const isInactive = activeCategory !== null && !isActive;
+          const isInactive = activeCategory !== null && activeCategory !== undefined && !isActive;
           const n = Math.min(atom.postCount, 4);
 
           return (
             <button
               key={atom.key}
-              onClick={() => onSelectCategory(isActive ? null : atom.key)}
+              onClick={() => onSelectCategory?.(isActive ? null : atom.key)}
               className="relative flex flex-col items-center transition-all duration-500 outline-none group cursor-pointer"
               style={{
                 opacity: isInactive ? 0.25 : 1,
