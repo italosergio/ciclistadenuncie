@@ -5,7 +5,7 @@ import type { Situacao } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
 import { useTranslation } from "react-i18next";
 import i18n from "../lib/i18n";
-import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ShieldOff, ShieldAlert, ChevronRight, ChevronLeft, ArrowLeft, Plus, X } from "lucide-react";
+import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ShieldOff, ShieldAlert, ChevronRight, ChevronLeft, ArrowLeft, Plus, X, Smartphone } from "lucide-react";
 import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
@@ -268,6 +268,7 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
 
   const tipos = [
     { value: "fina", label: t('tipos.fina'), icon: Wind, desc: t('tipos.fina.desc'), punicao: t('tipos.fina.punicao') },
+    { value: "motorista-celular", label: t('tipos.motoristaCelular'), icon: Smartphone },
     { value: "ameaca", label: t('tipos.ameaca'), icon: Megaphone },
     { value: "assedio", label: t('tipos.assedio'), icon: Hand },
     { value: "agressao-verbal", label: t('tipos.agressaoVerbal'), icon: MessageSquareWarning },

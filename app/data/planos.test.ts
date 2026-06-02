@@ -6,8 +6,8 @@ describe("PLANOS", () => {
     expect(PLANOS.length).toBeGreaterThan(0);
   });
 
-  it("deve ter exatamente 6 planos (A, B, C, D, E, G)", () => {
-    expect(PLANOS.length).toBe(6);
+  it("deve ter exatamente 7 planos (A, B, C, D, E, G, H)", () => {
+    expect(PLANOS.length).toBe(7);
   });
 
   it.each(PLANOS)(
@@ -38,6 +38,7 @@ describe("PLANOS", () => {
         "placa",
         "boas-praticas",
         "pagina",
+        "ar",
       ] as const;
       expect(categoriasValidas).toContain(plano.categoria);
     }

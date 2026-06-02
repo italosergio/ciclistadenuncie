@@ -4,7 +4,7 @@ export interface Plano {
   data: string;
   resumo: string;
   conteudo: string;
-  categoria: "analytics" | "placa" | "boas-praticas" | "pagina";
+  categoria: "analytics" | "placa" | "boas-praticas" | "pagina" | "ar";
 }
 
 const planA = `# Plano A — Dashboard Analítico de Denúncias
@@ -649,6 +649,112 @@ allow write: if request.resource.size < 5 * 1024 * 1024
               && request.resource.contentType.matches('image/.*');
 \`\`\``;
 
+const planH = `# Plano H — Ghost Bike AR (Realidade Aumentada)
+
+## Objetivo
+Criar uma experiência de Realidade Aumentada (AR) Web para as Ghost Bikes (Bicicletas Brancas), permitindo que visitantes escaneiem um QR code no local de um atropelamento e vejam uma bicicleta branca 3D sobreposta no mundo real, diretamente pelo navegador — sem precisar baixar app.
+
+## Stack
+- \`@google/model-viewer\` (npm) para renderização 3D no navegador
+- Modelo 3D de bicicleta branca (.glb) hospedado no Firebase Storage
+- Geração de QR codes via API (ex: \`api.qrserver.com\` ou similar)
+- React Router para a página de AR (\`/ar/:id\`)
+
+## Novos arquivos
+\`\`\`
+app/routes/ar.$id.tsx          → página AR com model-viewer
+app/data/ghost-bikes-ar.ts      → dados das Ghost Bikes com coordenadas e link do modelo
+public/models/ghost-bike.glb    → modelo 3D da bicicleta branca
+\`\`\`
+
+## Arquivos modificados
+\`\`\`
+app/routes.ts                 → + route("ar/:id", "routes/ar.$id.tsx")
+app/routes/admin.tsx          → + tab de gerenciamento das Ghost Bikes AR
+Firebase RTDB                 → + nó /ghostBikesAR com coordenadas e dados
+\`\`\`
+
+## Fluxo do usuário
+
+### Visitante no local
+1. Escaneia QR code afixado no local do atropelamento
+2. Abre \`/ar/:id\` no navegador
+3. Concede permissão de câmera (uma vez)
+4. Vê bicicleta branca 3D posicionada no mundo real
+5. Pode rotacionar, aproximar, ver informações da vítima
+
+### Admin
+1. Acessa aba \`Ghost Bikes AR\` no painel admin
+2. Cadastra novo ponto: coordenadas, nome da vítima, data, história
+3. Sistema gera QR code automaticamente
+4. QR code pode ser baixado para impressão e afixação no local
+
+## Componentes de AR
+
+### Página pública \`/ar/:id\`
+- Importa \`<model-viewer>\` via script tag ou import map
+- Usa geolocalização para confirmar proximidade (opcional)
+- Botão "Ativar AR" que entra no modo AR Quick Look (iOS) / Scene Viewer (Android)
+- Fallback: visualização 3D no próprio navegador
+- Informações da vítima sobrepostas (nome, data, mensagem)
+
+### Admin Ghost Bikes
+- Mapa Leaflet para posicionar exatamente no local
+- Formulário: nome, data do acidente, história, foto da vítima
+- Preview do modelo 3D
+- Botão "Gerar QR Code" → download da imagem
+- Lista de todas as Ghost Bikes ativas
+
+## Modelo 3D
+- Bicicleta branca simples (low-poly, ~500KB) otimizada para mobile
+- Estilo ghost bike tradicional: pintada de branco, com flor ou cartaz
+- Criar no Blender ou baixar de repositório gratuito (Sketchfab CC)
+- Exportar como .glb com texturas embutidas
+
+## QR Code
+- URL: \`https://ciclistadenuncie.com.br/ar/{id}\`
+- Gerado via API pública (ex: \`https://api.qrserver.com/v1/create-qr-code/\`)
+- Impresso em adesivo resistente a intempéries (recomendação)
+- Tamanho: 3x3cm mín
+
+## Considerações técnicas
+
+### model-viewer
+- Biblioteca web-component da Google para AR/3D no navegador
+- Suporta AR Quick Look (iOS Safari) e AR Core (Android Chrome)
+- CDN: \`<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>\`
+
+### Geolocalização (opcional)
+- Usar \`navigator.geolocation\` para confirmar que o usuário está próximo
+- Raio de tolerância: 100-200m
+- Aviso se estiver longe demais
+
+### Performance
+- Modelo 3D compacto (~500KB)
+- Lazy loading do model-viewer (só carregar se o usuário acessar a página)
+- Cache do modelo via Service Worker
+
+## Próximas etapas (futuras)
+- Múltiplos modelos (diferentes tipos de bicicleta)
+- AR para iniciativas cicloativistas (marcadores verdes em 3D)
+- Compartilhamento: ao visitar, receber notificação push
+- Integração com redes sociais: "Prestei homenagem em [local]"
+
+---
+
+## Riscos e tradeoffs
+- model-viewer depende de WebGL e AR Quick Look/Scene Viewer — celulares muito antigos podem não suportar
+- Geolocalização requer HTTPS e permissão do usuário
+- Adesivos QR code precisam ser resistentes (solução: papel fotográfico + plastificação ou adesivo vinil)
+- Modelo 3D precisa ser criado ou adaptado — custo único de produção
+
+## Validação
+- \`npm run typecheck\` passa
+- \`npm run build\` passa
+- Testar em iOS Safari e Android Chrome com câmera real
+- Verificar fallback sem AR (visualização 3D no navegador)
+`;
+
 export const PLANOS: Plano[] = [
   {
     id: "plan-a-dashboard-analitico",
@@ -697,5 +803,13 @@ export const PLANOS: Plano[] = [
     resumo: "Adicionar upload de fotos às denúncias usando Firebase Storage, com seleção de até 3 imagens no formulário, exibição no mapa, admin e perfil do usuário.",
     conteudo: planG,
     categoria: "pagina",
+  },
+  {
+    id: "plan-h-ghost-bike-ar",
+    titulo: "Plano H — Ghost Bike AR (Realidade Aumentada)",
+    data: "2026-06-02",
+    resumo: "Experiência de Realidade Aumentada Web para Ghost Bikes: QR code no local do atropelamento exibe bicicleta branca 3D sobreposta no mundo real via navegador, sem baixar app.",
+    conteudo: planH,
+    categoria: "ar",
   },
 ];

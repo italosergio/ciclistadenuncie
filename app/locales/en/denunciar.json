@@ -39,6 +39,7 @@
   "erro.registro": "Error registering report. Try again.",
   "tipos.fina": "Unsafe pass/close pass",
   "tipos.fina.desc": "(Driver passed less than 1.5 m away, forcing an overtake)",
+  "tipos.motoristaCelular": "Driver on Cell Phone",
   "tipos.fechada": "Cut-off",
   "tipos.ameaca": "Threat",
   "tipos.assedio": "Harassment",

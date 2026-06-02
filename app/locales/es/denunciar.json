@@ -39,6 +39,7 @@
   "erro.registro": "Error al registrar la denuncia. Inténtalo de nuevo.",
   "tipos.fina": "Sobrepaso inseguro",
   "tipos.fina.desc": "(El conductor pasó a menos de 1,5 m de distancia, forzando el adelantamiento)",
+  "tipos.motoristaCelular": "Conductor Hablando por Celular",
   "tipos.fechada": "Cierre",
   "tipos.ameaca": "Amenaza",
   "tipos.assedio": "Acoso",

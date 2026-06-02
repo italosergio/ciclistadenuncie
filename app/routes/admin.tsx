@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart, FileText, Clipboard, Check, MoreVertical, BarChart3, BookOpen } from "lucide-react";
+import { Users, MessageSquare, LogOut, User, Pin, Clock, Tag, MessageCircle, Search, X, Menu, ChevronLeft, ChevronDown, AlertTriangle, History, UserPlus, LogIn, Trash2, Plus, Edit, Settings, CheckCircle, Globe, Heart, FileText, Clipboard, Check, MoreVertical, BarChart3, BookOpen, Smartphone } from "lucide-react";
 import { db } from "../lib/firebase";
 import { ref, onValue, update, remove, push } from "firebase/database";
 import type { Route } from "./+types/admin";
@@ -258,6 +258,7 @@ function PlanosTab() {
     placa: { icon: Search, color: "text-yellow-400" },
     "boas-praticas": { icon: BookOpen, color: "text-green-400" },
     pagina: { icon: Globe, color: "text-purple-400" },
+    ar: { icon: Smartphone, color: "text-cyan-400" },
   };
 
   return (

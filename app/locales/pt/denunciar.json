@@ -40,6 +40,7 @@
   "tipos.fina": "Fina / Ultrapassagem Perigosa",
   "tipos.fina.desc": "(Motorista passou a menos de 1,5 m de distância, forçando ultrapassagem)",
   "tipos.fina.punicao": "Infração segundo o CTB Art. 201 — Média | Multa: R$ 130,16 | 4 pontos na CNH",
+  "tipos.motoristaCelular": "Motorista Falando no Celular",
   "tipos.fechada": "Fechada",
   "tipos.ameaca": "Ameaça",
   "tipos.assedio": "Assédio",
