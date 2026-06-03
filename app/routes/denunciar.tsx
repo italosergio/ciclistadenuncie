@@ -5,7 +5,7 @@ import type { Situacao } from "../lib/denuncias";
 import type { Route } from "./+types/denunciar";
 import { useTranslation } from "react-i18next";
 import i18n from "../lib/i18n";
-import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ShieldOff, ShieldAlert, ChevronRight, ChevronLeft, ArrowLeft, Plus, X, Smartphone } from "lucide-react";
+import { Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, MapPin, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, ShieldOff, ShieldAlert, ChevronRight, ChevronLeft, ArrowLeft, Plus, X, Smartphone, Gauge, Zap } from "lucide-react";
 import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { buscarCidadesIBGE } from "../services/ibge.service";
 import { buscarEnderecoPorCoordenadas } from "../services/geocoding.service";
@@ -268,12 +268,14 @@ export default function Denunciar({ loaderData }: Route.ComponentProps) {
 
   const tipos = [
     { value: "fina", label: t('tipos.fina'), icon: Wind, desc: t('tipos.fina.desc'), punicao: t('tipos.fina.punicao') },
-    { value: "motorista-celular", label: t('tipos.motoristaCelular'), icon: Smartphone },
+    { value: "motorista-celular", label: t('tipos.motoristaCelular'), icon: Smartphone, desc: t('tipos.motoristaCelular.desc'), punicao: t('tipos.motoristaCelular.punicao') },
+    { value: "motorista-alta-velocidade", label: t('tipos.motoristaAltaVelocidade'), icon: Gauge, desc: t('tipos.motoristaAltaVelocidade.desc'), punicao: t('tipos.motoristaAltaVelocidade.punicao') },
+    { value: "direcao-perigosa", label: t('tipos.direcaoPerigosa'), icon: Zap, desc: t('tipos.direcaoPerigosa.desc'), punicao: t('tipos.direcaoPerigosa.punicao') },
     { value: "ameaca", label: t('tipos.ameaca'), icon: Megaphone },
     { value: "assedio", label: t('tipos.assedio'), icon: Hand },
     { value: "agressao-verbal", label: t('tipos.agressaoVerbal'), icon: MessageSquareWarning },
     { value: "agressao-fisica", label: t('tipos.atropelamento'), icon: Car },
-    { value: "invasao-ciclovia", label: t('tipos.invasaoCiclovia'), icon: Construction },
+    { value: "invasao-ciclovia", label: t('tipos.invasaoCiclovia'), icon: Construction, desc: t('tipos.invasaoCiclovia.desc'), punicao: t('tipos.invasaoCiclovia.punicao') },
     { value: "buraco-via", label: t('tipos.buracoVia'), icon: AlertTriangle },
     { value: "falta-sinalizacao", label: t('tipos.faltaSinalizacao'), icon: CircleSlash },
     { value: "trecho-perigoso", label: t('tipos.trechoPerigoso'), icon: AlertTriangle },

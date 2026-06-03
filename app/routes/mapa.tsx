@@ -3,7 +3,7 @@ import { ref, onValue, set } from "firebase/database";
 import { db } from "../lib/firebase";
 import { salvarDenuncia } from "../lib/denuncias";
 import type { Route } from "./+types/mapa";
-import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield, Globe, Filter, Eye, EyeOff, Heart } from "lucide-react";
+import { Maximize2, MapPin, Map, Satellite, Layers, Moon, Wind, Megaphone, Hand, MessageSquareWarning, Car, Construction, MoreHorizontal, AlertTriangle, Lightbulb, CircleSlash, Wrench, Bike, Snowflake, Calendar, ArrowLeft, ChevronDown, BarChart3, LogOut, Shield, Globe, Filter, Eye, EyeOff, Heart, Gauge, Zap } from "lucide-react";
 import TeardropBikeIcon from "../components/TeardropBikeIcon";
 import { renderToString } from "react-dom/server";
 import React from "react";
@@ -151,6 +151,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia', { ns: 'denunciar' }), icon: Bike, color: "#dc2626" },
     { value: "ausencia-paraciclo", label: t('tipos.ausenciaParaciclo', { ns: 'denunciar' }), icon: Bike, color: "#dc2626" },
     { value: "bicicleta-branca", label: t('tipos.bicicletaBranca', { ns: 'denunciar' }), icon: TeardropBikeIcon, color: "#6b7280" },
+    { value: "motorista-alta-velocidade", label: t('tipos.motoristaAltaVelocidade', { ns: 'denunciar' }), icon: Gauge, color: "#dc2626" },
+    { value: "direcao-perigosa", label: t('tipos.direcaoPerigosa', { ns: 'denunciar' }), icon: Zap, color: "#dc2626" },
     { value: "outro", label: t('tipos.outro', { ns: 'denunciar' }), icon: MoreHorizontal, color: "#dc2626" },
   ];
 
@@ -526,6 +528,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           'ma-conservacao': '🔧',
           'falta-ciclovia': '🚲',
           'bicicleta-branca': '🚲',
+          'motorista-alta-velocidade': '⚡',
+          'direcao-perigosa': '☠',
           outro: '⋯',
         };
         return iconMap[tipo] || '📌';
@@ -539,6 +543,8 @@ export default function Mapa({ loaderData }: Route.ComponentProps) {
           'agressao-fisica': 'rgba(239,68,68,0.15)',
           'invasao-ciclovia': 'rgba(234,179,8,0.15)',
           'buraco-via': 'rgba(59,130,246,0.15)',
+          'motorista-alta-velocidade': 'rgba(220,38,38,0.15)',
+          'direcao-perigosa': 'rgba(249,115,22,0.15)',
         };
         return colorMap[tipo] || 'rgba(100,116,139,0.15)';
       };

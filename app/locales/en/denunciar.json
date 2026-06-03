@@ -62,5 +62,11 @@
   "tipos.bicicletaRoubada": "Stolen Bicycle (With Threat)",
   "tipos.estacionamento.ciclovia": "Parking on Bike Lane",
   "tipos.abusos.gravida": "Other Abuses",
-  "tipos.outro": "Other"
+  "tipos.outro": "Other",
+  "tipos.motoristaCelular.desc": "(Driver using cell phone while driving)",
+  "tipos.motoristaAltaVelocidade": "Driver at High Speed",
+  "tipos.motoristaAltaVelocidade.desc": "(Driver traveling at excessive speed, endangering cyclists)",
+  "tipos.direcaoPerigosa": "Reckless Driving",
+  "tipos.direcaoPerigosa.desc": "(Driver performing dangerous maneuvers: sudden acceleration, zigzagging, street racing)",
+  "tipos.invasaoCiclovia.desc": "(Driver drove on the bike lane/cycle track)"
 }

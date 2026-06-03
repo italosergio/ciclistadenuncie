@@ -251,6 +251,8 @@ export default function UserContributions() {
     { value: "ma-conservacao", label: t('tipos.maConservacao') },
     { value: "falta-ciclovia", label: t('tipos.faltaCiclovia') },
     { value: "ausencia-paraciclo", label: t('tipos.ausenciaParaciclo') },
+    { value: "motorista-alta-velocidade", label: t('tipos.motoristaAltaVelocidade') },
+    { value: "direcao-perigosa", label: t('tipos.direcaoPerigosa') },
   ];
 
   return (

@@ -62,5 +62,11 @@
   "tipos.bicicletaRoubada": "Bicicleta Robada (Con Amenaza)",
   "tipos.estacionamento.ciclovia": "Estacionamiento en Ciclovía",
   "tipos.abusos.gravida": "Abusos Varios",
-  "tipos.outro": "Otro"
+  "tipos.outro": "Otro",
+  "tipos.motoristaCelular.desc": "(Conductor usando el celular al volante)",
+  "tipos.motoristaAltaVelocidade": "Conductor a Alta Velocidad",
+  "tipos.motoristaAltaVelocidade.desc": "(Conductor circulando a velocidad excesiva, poniendo en riesgo a los ciclistas)",
+  "tipos.direcaoPerigosa": "Conducción Peligrosa",
+  "tipos.direcaoPerigosa.desc": "(Conductor realizando maniobras peligrosas: aceleraciones bruscas, zigzag, carreras)",
+  "tipos.invasaoCiclovia.desc": "(El conductor circuló sobre la ciclovía/carril bici)"
 }

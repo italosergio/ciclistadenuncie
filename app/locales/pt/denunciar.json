@@ -63,5 +63,15 @@
   "tipos.bicicletaRoubada": "Bicicleta Roubada (Com Ameaça)",
   "tipos.estacionamento.ciclovia": "Estacionamento em Ciclovia",
   "tipos.abusos.gravida": "Abusos Diversos",
-  "tipos.outro": "Outro"
+  "tipos.outro": "Outro",
+  "tipos.motoristaCelular.desc": "(Motorista utilizando o celular ao volante)",
+  "tipos.motoristaCelular.punicao": "Infração segundo o CTB Art. 252, V + § único — Gravíssima | Multa: R$ 293,47 | 7 pontos na CNH",
+  "tipos.motoristaAltaVelocidade": "Motorista em Alta Velocidade",
+  "tipos.motoristaAltaVelocidade.desc": "(Motorista trafegando em velocidade incompatível com a via, colocando ciclistas em risco)",
+  "tipos.motoristaAltaVelocidade.punicao": "Infração segundo o CTB Art. 218 — Gravíssima (×3 se >50% do limite) | Multa: R$ 293,47 a R$ 880,41 | 7 pontos na CNH",
+  "tipos.direcaoPerigosa": "Direção Perigosa",
+  "tipos.direcaoPerigosa.desc": "(Motorista realizando manobras perigosas: arrancadas bruscas, zigue-zague, racha ou competição)",
+  "tipos.direcaoPerigosa.punicao": "Infração segundo o CTB Art. 175 e 176 — Gravíssima (×10) | Multa: R$ 2.934,70 | 7 pontos na CNH",
+  "tipos.invasaoCiclovia.desc": "(Motorista transitou ou circulou sobre a ciclovia/ciclofaixa)",
+  "tipos.invasaoCiclovia.punicao": "Infração segundo o CTB Art. 193 — Gravíssima (×3) | Multa: R$ 880,41 | 7 pontos na CNH"
 }
