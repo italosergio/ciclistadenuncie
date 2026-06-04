@@ -68,7 +68,7 @@
   "tipos.motoristaCelular.punicao": "Infração segundo o CTB Art. 252, V + § único — Gravíssima | Multa: R$ 293,47 | 7 pontos na CNH",
   "tipos.motoristaAltaVelocidade": "Motorista em Alta Velocidade",
   "tipos.motoristaAltaVelocidade.desc": "(Motorista trafegando em velocidade incompatível com a via, colocando ciclistas em risco)",
-  "tipos.motoristaAltaVelocidade.punicao": "Infração segundo o CTB Art. 218 — Gravíssima (×3 se >50% do limite) | Multa: R$ 293,47 a R$ 880,41 | 7 pontos na CNH",
+  "tipos.motoristaAltaVelocidade.punicao": "Infração segundo o CTB Art. 218:\n• Até 20% acima — Média | Multa: R$ 130,16 | 4 pontos\n• 20% a 50% acima — Grave | Multa: R$ 195,23 | 5 pontos\n• Acima de 50% — Gravíssima (×3) | Multa: R$ 880,41 | 7 pontos",
   "tipos.direcaoPerigosa": "Direção Perigosa",
   "tipos.direcaoPerigosa.desc": "(Motorista realizando manobras perigosas: arrancadas bruscas, zigue-zague, racha ou competição)",
   "tipos.direcaoPerigosa.punicao": "Infração segundo o CTB Art. 175 e 176 — Gravíssima (×10) | Multa: R$ 2.934,70 | 7 pontos na CNH",
