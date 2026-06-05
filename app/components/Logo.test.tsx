@@ -7,7 +7,7 @@ describe("Logo", () => {
     render(<Logo />);
     const img = screen.getByAltText("Ciclista Denuncie");
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute("src", "/logo-ciclistadenuncie.png");
+    expect(img).toHaveAttribute("src", "/logo-ciclistadenuncie-1.png");
   });
 
   it("deve ter o estilo de animação CSS @keyframes shake", () => {

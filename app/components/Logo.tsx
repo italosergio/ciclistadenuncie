@@ -28,7 +28,7 @@ export default function Logo({ onTripleClick }: { onTripleClick?: () => void }) 
       className={`w-20 h-20 md:w-16 md:h-16 overflow-hidden cursor-pointer ${shake ? 'animate-shake' : ''}`}
       onClick={handleClick}
     >
-      <img src="/logo-ciclistadenuncie.png" alt="Ciclista Denuncie" className="w-full h-full object-cover scale-120" />
+      <img src="/logo-ciclistadenuncie-1.png" alt="Ciclista Denuncie" className="w-full h-full object-cover scale-120" />
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }

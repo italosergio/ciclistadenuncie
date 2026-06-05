@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getCurrentUser } from "./auth";
@@ -54,11 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = (userData: { uid: string; username: string; role: string; token: string; email?: string }) => {
+  const login = useCallback((userData: { uid: string; username: string; role: string; token: string; email?: string }) => {
     setUser(userData);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (user) {
       try {
         await registrarEvento({
@@ -71,20 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setUser(null);
     await auth.signOut();
-  };
+  }, [user]);
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    login,
+    logout,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === "administrador",
+    banido,
+  }), [user, loading, login, logout, banido]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        logout,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === "administrador",
-        banido,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {banido && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
           <div className="bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full border border-red-600 text-center">
