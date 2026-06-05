@@ -23,6 +23,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [banido, setBanido] = useState(false);
 
   useEffect(() => {
+    const cleanupFns: (() => void)[] = [];
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -32,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // Monitora se o usuário foi banido
             const userRef = ref(db, `usuarios/${userData.uid}`);
-            onValue(userRef, (snapshot) => {
+            const unsubscribeBan = onValue(userRef, (snapshot) => {
               const data = snapshot.val();
               if (data?.banido) {
                 setBanido(true);
@@ -40,6 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 auth.signOut();
               }
             });
+            // Armazena para cleanup
+            cleanupFns.push(unsubscribeBan);
           }
         } catch (error) {
           console.error('Erro ao buscar dados do usuário:', error);
@@ -51,7 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      cleanupFns.forEach(fn => fn());
+    };
   }, []);
 
   const login = useCallback((userData: { uid: string; username: string; role: string; token: string; email?: string }) => {

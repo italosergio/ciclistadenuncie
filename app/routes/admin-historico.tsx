@@ -128,11 +128,6 @@ export default function HistoricoTab() {
         const encontrouNoUsuario = contemTermo(usuario, termo);
         const encontrouNosDetalhes = contemTermo(detalhes, termo);
         
-        // Auto-expandir se encontrou nos detalhes
-        if (encontrouNosDetalhes && !encontrouNoUsuario) {
-          setExpandido(e.id);
-        }
-        
         return encontrouNoUsuario || encontrouNosDetalhes;
       });
     }
@@ -149,6 +144,23 @@ export default function HistoricoTab() {
   useEffect(() => {
     setPaginaAtual(1);
   }, [abaHistorico, filtroTipo, busca, dataInicio, dataFim]);
+
+  // Auto-expande eventos cuja busca encontrou apenas nos detalhes
+  useEffect(() => {
+    if (!busca) {
+      setExpandido(null);
+      return;
+    }
+    const termo = busca;
+    const primeiroDetalhes = eventos.find(e => {
+      const usuario = e.usuario || '';
+      const detalhes = JSON.stringify(e.detalhes || {});
+      return !contemTermo(usuario, termo) && contemTermo(detalhes, termo);
+    });
+    if (primeiroDetalhes) {
+      setExpandido(primeiroDetalhes.id);
+    }
+  }, [busca, eventos]);
 
   const getRoleBadge = (username: string) => {
     const usuario = usuarios[username];

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import type { Route } from "./+types/contato";
 import { Lightbulb, Bug, MessageCircle, HelpCircle, FileQuestion, AlertCircle, ChevronRight, ChevronLeft, ArrowLeft } from "lucide-react";
 import { db } from "../lib/firebase";
-import { ref, set } from "firebase/database";
+import { ref, push } from "firebase/database";
 import { useAuth } from "../lib/AuthContext";
 import { registrarEvento } from "../lib/historico";
 import { useTranslation } from "react-i18next";
@@ -69,15 +69,12 @@ export default function Contato() {
     setLoading(true);
 
     try {
-      const agora = new Date();
-      const isoTimestamp = agora.toISOString().replace(/[:.]/g, '-');
-      
-      const contatosRef = ref(db, `contatos/${isoTimestamp}`);
-      await set(contatosRef, {
+      const contatosRef = ref(db, `contatos`);
+      const novoContatoRef = await push(contatosRef, {
         tipo: tipoContato,
         mensagem,
         usuario: user?.username || contato.trim() || "Anônimo",
-        data: agora.toISOString(),
+        data: new Date().toISOString(),
         lida: false,
         pinada: false
       });
@@ -87,7 +84,7 @@ export default function Contato() {
         tipo: 'enviar_contato',
         usuario: user?.username || contato.trim() || 'Anônimo',
         detalhes: {
-          contatoId: isoTimestamp,
+          contatoId: novoContatoRef.key,
           tipo: tipoContato,
         },
       });
